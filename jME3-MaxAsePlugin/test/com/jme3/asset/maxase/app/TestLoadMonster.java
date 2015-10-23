@@ -15,6 +15,7 @@ import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
+import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
@@ -56,13 +57,13 @@ public class TestLoadMonster extends SimpleApplication {
 				rootNode.collideWith(ray, results);
 				// 4. Print the results
 				if (results.size() > 0) {
-					Spatial geom = results.getCollision(0).getGeometry()
-							.getParent();
-					String hit = geom.getName();
-					Vector3f tran = geom.getLocalTranslation();
-					Quaternion rot = geom.getLocalRotation();
-					System.out.println(hit + " translation:" + tran
-							+ ", rotation:" + rot);
+					Geometry geom = results.getCollision(0).getGeometry();
+					
+					// Print name & mat
+					System.out.println(geom.getName());
+					Material mat = geom.getMaterial();
+					MatParam param = mat.getParam("DiffuseMap");
+					System.out.println(param);
 				}
 			}
 		}
@@ -114,8 +115,8 @@ public class TestLoadMonster extends SimpleApplication {
 		chaoscara.move(0, 0, 150);
 		rootNode.attachChild(chaoscara);
 		
-		debugSke(death_knight);
-		debugSke(chaoscara);
+//		debugSke(death_knight);
+//		debugSke(chaoscara);
 
 		initAmbient();
 		initKeys();
