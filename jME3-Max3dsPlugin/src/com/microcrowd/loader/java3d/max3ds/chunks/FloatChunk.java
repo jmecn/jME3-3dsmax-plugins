@@ -21,7 +21,7 @@
 
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * These have no subchunks. Only data.
@@ -40,7 +40,7 @@ public class FloatChunk extends Chunk
      * @param chopper the chopper in which the float
      * chunk will be stored by the id of this chunk. 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         chopper.pushData(chopper.getID(), new Float(chopper.getFloat()));
     }

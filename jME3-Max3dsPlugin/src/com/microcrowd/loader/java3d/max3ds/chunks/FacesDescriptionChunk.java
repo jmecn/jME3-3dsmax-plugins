@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.Material;
@@ -34,7 +35,8 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 import com.microcrowd.loader.java3d.max3ds.ChunkMap;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.geometry.NormalGenerator;
@@ -144,7 +146,7 @@ public class FacesDescriptionChunk extends Chunk
      *
      * @param chopper chopper the has the data  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int numFaces = chopper.getUnsignedShort();
         shareMap = new PointMapper(numFaces*3);
@@ -190,7 +192,7 @@ public class FacesDescriptionChunk extends Chunk
      * If there is no material, this will put a default
      * material on the shape.
      */
-    public void initialize(ChunkChopper chopper)
+    public void initialize(Max3dsLoader chopper)
     {
         final String materialName = (String)chopper.popData(ChunkMap.FACES_MATERIAL);
         final int[]  smoothGroups = (int[])chopper.popData(ChunkMap.SMOOTH);

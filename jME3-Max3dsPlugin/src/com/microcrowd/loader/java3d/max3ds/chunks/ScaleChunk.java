@@ -23,8 +23,10 @@ package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.vecmath.Vector3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Extracts scale information from the 3ds file which
@@ -39,7 +41,7 @@ public class ScaleChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int flags = chopper.getUnsignedShort();
         chopper.getLong();

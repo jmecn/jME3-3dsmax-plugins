@@ -22,8 +22,8 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import java.util.HashMap;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
 
+import com.jme3.asset.max3ds.Max3dsLoader;
 /**
  * The base class for all chunks. Chunks are  flyweights and should be managed
  * by  {@link ChunkChopper}  Every chunk should know how many bytes of data(or
@@ -77,9 +77,9 @@ public class Chunk
      * ChunkChopper#popData}
      * The default implementation does nothing.
      *
-     * @param chopper may contain data loaded by subchunks. 
+     * @param max3dsLoader may contain data loaded by subchunks. 
      */
-    public void initialize(ChunkChopper chopper) 
+    public void initialize(Max3dsLoader max3dsLoader) 
     {
     }
 
@@ -89,9 +89,9 @@ public class Chunk
      * used later by superchunks should be stored in
      * the chunk chopper via {@link ChunkChopper#popData}
      * The default implementation does nothing.
-     * @param chopper may contain data loaded by subchunks. 
+     * @param max3dsLoader may contain data loaded by subchunks. 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader max3dsLoader)
     {
     }
 

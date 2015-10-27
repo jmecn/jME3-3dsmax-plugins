@@ -24,7 +24,8 @@ package com.microcrowd.loader.java3d.max3ds.chunks;
 import javax.media.j3d.BoundingBox;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Loads the bounding box for keyframer of mesh. The pivot
@@ -38,7 +39,7 @@ public class BoundingBoxChunk extends Chunk
      * Gets the bounding box and associates it with the current mes.
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         Point3f min = chopper.getPoint();
         Point3f max = chopper.getPoint();

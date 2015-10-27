@@ -23,7 +23,8 @@ package com.microcrowd.loader.java3d.max3ds.chunks;
 
 
 import javax.media.j3d.TransformGroup;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 import com.microcrowd.loader.java3d.max3ds.data.KeyFramer;
 /**
  * This chunk contains the name of the object
@@ -39,7 +40,7 @@ public class FramesDescriptionChunk extends Chunk
      * @param chopper the chopper used to store the transient data
      * for this chunk. 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         KeyFramer keyFramer = chopper.getKeyFramer();
         String objectName = chopper.getString();

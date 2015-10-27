@@ -21,7 +21,7 @@
 
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * A boolean chunk is true if it is present otherwise
@@ -39,7 +39,7 @@ public class BooleanChunk extends Chunk
      * @param chopper the chopper on which the boolean true data is to be set 
      * 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         chopper.pushData(chopper.getID(), new Boolean(true));
     }

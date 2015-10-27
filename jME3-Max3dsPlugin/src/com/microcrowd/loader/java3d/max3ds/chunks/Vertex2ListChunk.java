@@ -22,7 +22,8 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import javax.vecmath.TexCoord2f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Reads a list of x,y points that will be used
@@ -41,7 +42,7 @@ public class Vertex2ListChunk extends Chunk
      * @param chopper the chopper that will parse and store
      * the data using this chunks id as the key. 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int numVertices = chopper.getUnsignedShort();
         TexCoord2f[] points = new TexCoord2f[numVertices];

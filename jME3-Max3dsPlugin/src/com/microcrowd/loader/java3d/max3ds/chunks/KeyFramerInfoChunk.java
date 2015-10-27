@@ -21,7 +21,8 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import javax.media.j3d.Behavior;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * A KeyFramerInfoChunk stores information about things
@@ -56,7 +57,7 @@ public class KeyFramerInfoChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the current state of the parser. 
      */
-    public void initialize(ChunkChopper chopper) 
+    public void initialize(Max3dsLoader chopper) 
     {
         String meshName = (String)chopper.getObjectName();
         Behavior frameBehavior = chopper.getKeyFramer().createBehavior(meshName,

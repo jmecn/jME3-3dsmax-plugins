@@ -27,7 +27,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 import com.microcrowd.loader.java3d.max3ds.ChunkMap;
 
 /**
@@ -49,7 +50,7 @@ public class SpotLightChunk extends Chunk
      *
      * @param chopper the ChunkChopper that will have the light placed in it.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         Point3f target = chopper.getPoint();
         float beam = chopper.getFloat();

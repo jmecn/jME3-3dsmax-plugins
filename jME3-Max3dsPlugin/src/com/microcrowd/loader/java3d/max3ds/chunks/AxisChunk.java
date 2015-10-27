@@ -23,7 +23,8 @@ package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Extracts the local coordinate that will act 
@@ -64,7 +65,7 @@ public class AxisChunk extends Chunk
      *
      * @return the actual number of bytes read.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         Point3f xAxis  = new Point3f();
         xAxis  = chopper.getPoint();

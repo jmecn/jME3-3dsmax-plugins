@@ -22,7 +22,7 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.Max3dsLoader;
 import com.microcrowd.loader.java3d.max3ds.ChunkMap;
 
 
@@ -39,7 +39,7 @@ public class TextureChunk extends Chunk
      *
      * @param chopper  the parser containing the state of parsing
      */
-    public void initialize(ChunkChopper chopper)
+    public void initialize(Max3dsLoader chopper)
     {
         String textureName = (String)chopper.popData(ChunkMap.TEXTURE_NAME);
         chopper.pushData(ChunkMap.TEXTURE, chopper.createTexture(textureName));

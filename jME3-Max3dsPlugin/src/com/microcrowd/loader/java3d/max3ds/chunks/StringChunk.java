@@ -21,7 +21,7 @@
 
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * These have no subchunks. Only String data terminated with a null. For
@@ -38,7 +38,7 @@ public class StringChunk extends Chunk
      *
      * @param chopper the chopper that is doing the parsing.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         byte[] stringArray = chopper.getChunkBytes();
 

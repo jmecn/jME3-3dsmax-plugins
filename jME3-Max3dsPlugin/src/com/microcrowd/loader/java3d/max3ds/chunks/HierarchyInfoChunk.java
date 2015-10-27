@@ -20,7 +20,7 @@
  */
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * A HierarchyInfoChunk stores information about 
@@ -37,7 +37,7 @@ public class HierarchyInfoChunk extends Chunk
     /**
      * Loads a word of data that describes the parent. 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int hierarchyIdentifier = chopper.getShort();
         chopper.getKeyFramer().setID(hierarchyIdentifier);

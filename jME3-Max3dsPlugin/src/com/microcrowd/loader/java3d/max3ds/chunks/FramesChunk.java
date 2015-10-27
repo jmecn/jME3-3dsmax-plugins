@@ -21,7 +21,7 @@
 
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * This chunk specifies the beginning and end frames.
@@ -37,7 +37,7 @@ public class FramesChunk extends Chunk
      * stopping frames.
      * 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         long start = chopper.getUnsignedInt();
         long stop = chopper.getUnsignedInt();

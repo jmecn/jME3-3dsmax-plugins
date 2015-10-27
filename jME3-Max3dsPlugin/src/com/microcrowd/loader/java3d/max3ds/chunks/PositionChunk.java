@@ -22,8 +22,10 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import java.util.ArrayList;
+
 import javax.vecmath.Point3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Loads the position of a mesh as defined in the 3ds file.
@@ -39,7 +41,7 @@ public class PositionChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int flags = chopper.getUnsignedShort();
         chopper.getLong();

@@ -27,7 +27,8 @@ import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.Texture;
 import javax.media.j3d.TransparencyAttributes;
 import javax.vecmath.Color3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 import com.microcrowd.loader.java3d.max3ds.ChunkMap;
 
 
@@ -50,7 +51,7 @@ public class MaterialChunk extends Chunk
      * @param chopper the chopper containing the data
      * needed to set the attributes.
      */
-    public void initialize(ChunkChopper chopper)
+    public void initialize(Max3dsLoader chopper)
     {
         Appearance appearance = new Appearance();
         Material material = new Material();

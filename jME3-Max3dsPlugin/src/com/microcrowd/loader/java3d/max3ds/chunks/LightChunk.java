@@ -27,7 +27,8 @@ import javax.media.j3d.TransformGroup;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 import com.microcrowd.loader.java3d.max3ds.ChunkMap;
 /**
  * Lights to be placed in a scene.
@@ -47,7 +48,7 @@ public class LightChunk extends Chunk
      *
      * @param chopper used to store the position of the light. 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         currentPosition = chopper.getVector();
         TransformGroup group = chopper.getGroup();
@@ -63,7 +64,7 @@ public class LightChunk extends Chunk
      * and creates a light, adding it to the scene as a named object.
      * @param chopper the ChunkChopper containing sub chunk data.
      */
-    public void initialize(ChunkChopper chopper)
+    public void initialize(Max3dsLoader chopper)
     {
         Color3f color = (Color3f)chopper.popData(ChunkMap.COLOR);
         PointLight light = (PointLight)chopper.popData(ChunkMap.SPOTLIGHT);

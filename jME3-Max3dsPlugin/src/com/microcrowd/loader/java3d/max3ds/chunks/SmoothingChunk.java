@@ -21,7 +21,8 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import javax.vecmath.Point3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 import com.microcrowd.loader.java3d.max3ds.ChunkMap;
 
 /**
@@ -39,7 +40,7 @@ public class SmoothingChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         Point3f[] vertices = (Point3f[])chopper.popData(ChunkMap.FACES_DESCRIPTION);
         int[] smoothGroups = new int[vertices.length];

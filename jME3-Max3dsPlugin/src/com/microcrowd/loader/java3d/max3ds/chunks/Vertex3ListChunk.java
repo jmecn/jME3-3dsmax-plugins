@@ -22,7 +22,8 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import javax.vecmath.Point3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Reads and store x,y,z vertex coordinates.
@@ -41,7 +42,7 @@ public class Vertex3ListChunk extends Chunk
      * @param chopper the chopper that will read and
      * store the data. 
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int numVertices = chopper.getUnsignedShort();
         Point3f[] points = new Point3f[numVertices];

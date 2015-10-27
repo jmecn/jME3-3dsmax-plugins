@@ -23,9 +23,11 @@ package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Extracts the rotation information from the 3ds file.
@@ -51,7 +53,7 @@ public class RotationChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int flags = chopper.getUnsignedShort();
         chopper.getLong();
@@ -100,7 +102,7 @@ public class RotationChunk extends Chunk
      * <li> EaseFrom
      * </ol>
      */
-    private void getSplineTerms(final int accelerationData, ChunkChopper chopper)
+    private void getSplineTerms(final int accelerationData, Max3dsLoader chopper)
     {
         int bits = accelerationData;
         for(int i=0; i < 5; i++)

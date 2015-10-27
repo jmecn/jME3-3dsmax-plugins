@@ -22,7 +22,8 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import javax.vecmath.Color3f;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Loads colors from binary data representing them.
@@ -44,7 +45,7 @@ public class ColorChunk extends Chunk
      *
      * @param chopper the chopper that will store the color data.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int colorType = getColorType(chopper);
         if (colorType == BYTE_COLOR) 
@@ -75,7 +76,7 @@ public class ColorChunk extends Chunk
      * @return the color type for the chunk retrieved
      * from the chopper using this chunks id.
      */
-    protected int getColorType(ChunkChopper chopper)
+    protected int getColorType(Max3dsLoader chopper)
     {
         return chopper.getID().intValue();
     }

@@ -25,7 +25,8 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 /**
  * Loads percentage values from binary data representing them.
  */
@@ -39,7 +40,7 @@ public class CameraChunk extends Chunk
      * rotate.  The translated and rotated vector is stored it the
      * chopper as a named object since camera chunks are named. 
      */
-    public void loadData(ChunkChopper chopper) 
+    public void loadData(Max3dsLoader chopper) 
     {
         Vector3d yVector  = new Vector3d(0,1,0);
         Point3d position = new Point3d(chopper.getPoint());

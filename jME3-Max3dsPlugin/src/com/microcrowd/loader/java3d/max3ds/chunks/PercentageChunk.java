@@ -21,7 +21,7 @@
 
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Loads percentage values from binary data representing them.
@@ -41,7 +41,7 @@ public class PercentageChunk extends Chunk
      * the id of the current chunk as the key.
      *
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         int percentageType = chopper.getUnsignedShort();
         int percentageLength = chopper.getUnsignedInt();

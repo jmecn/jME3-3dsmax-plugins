@@ -22,7 +22,8 @@
 package com.microcrowd.loader.java3d.max3ds.chunks;
 
 import javax.media.j3d.TransformGroup;
-import com.microcrowd.loader.java3d.max3ds.ChunkChopper;
+
+import com.jme3.asset.max3ds.Max3dsLoader;
 
 /**
  * Loads information about a named object: Cameras, meshes and lights
@@ -36,7 +37,7 @@ public class NamedObjectChunk extends Chunk
      *
      * @param chopper The chopper containing the state of parsing.  
      */
-    public void loadData(ChunkChopper chopper)
+    public void loadData(Max3dsLoader chopper)
     {
         final String name = chopper.getString();
         TransformGroup transformGroup = new TransformGroup();
