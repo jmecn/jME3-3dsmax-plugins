@@ -57,7 +57,7 @@ public class Max3dsLoader implements AssetLoader {
 
 	private BranchGroup sceneGroup;
 	private SceneBase base;
-	private HashMap dataMap;
+	private HashMap<Integer, Object> dataMap;
 	private ByteBuffer chunkBuffer;
 	private Integer chunkID;
 
@@ -306,7 +306,7 @@ public class Max3dsLoader implements AssetLoader {
 	 * @param data
 	 *            the data to store.
 	 */
-	public void pushData(Object key, Object data) {
+	public void pushData(Integer key, Object data) {
 		dataMap.put(key, data);
 	}
 
@@ -317,7 +317,7 @@ public class Max3dsLoader implements AssetLoader {
 	 * @param key
 	 *            the key used to store the datum earlier.
 	 */
-	public Object popData(Object key) {
+	public Object popData(Integer key) {
 		Object retVal = dataMap.remove(key);
 		return retVal;
 	}
