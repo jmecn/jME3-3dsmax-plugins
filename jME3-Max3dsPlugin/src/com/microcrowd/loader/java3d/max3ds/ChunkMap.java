@@ -63,12 +63,12 @@ public class ChunkMap extends HashMap
     /** Constant designating a chunk as a frames chunk*/
     public static final Integer FRAMES_CHUNK = new Integer((short)0x0B008);
     /** Constant designating a chunk as a mesh info chunk*/
-    //public static final Integer AMBIENT_LIGHT_INFO = new Integer((short)0x0B001);
+    public static final Integer AMBIENT_LIGHT_INFO = new Integer((short)0x0B001);
     public static final Integer MESH_INFO = new Integer((short)0x0B002);
-    //public static final Integer CAMERA_INFO = new Integer((short)0x0B003);
-    //public static final Integer CAMERA_TARGET_INFO = new Integer((short)0x0B004);
-    //public static final Integer OMNI_LIGHT_INFO = new Integer((short)0x0B005);
-    //public static final Integer SPOT_LIGHT_TARGET_INFO = new Integer((short)0x0B006);
+    public static final Integer CAMERA_INFO = new Integer((short)0x0B003);
+    public static final Integer CAMERA_TARGET_INFO = new Integer((short)0x0B004);
+    public static final Integer OMNI_LIGHT_INFO = new Integer((short)0x0B005);
+    public static final Integer SPOT_LIGHT_TARGET_INFO = new Integer((short)0x0B006);
     public static final Integer SPOT_LIGHT_INFO = new Integer((short)0x0B007);
     /** Key for the name and flags chunk */
     public static final Integer NAME_AND_FLAGS = new Integer((short)0xB010);
@@ -84,7 +84,7 @@ public class ChunkMap extends HashMap
     /** Indicates a hierarchy info chunk **/
     public static final Integer HIERARCHY_INFO= new Integer((short)0xB030);
     /** Signifies that the light is off **/
-    //public static final Integer LIGHT_OFF = new Integer((short)0x4620);
+    public static final Integer LIGHT_OFF = new Integer((short)0x4620);
     /** Signifies that the light is attenuated **/
     public static final Integer ATTENUATED = new Integer((short)0x4625);
     public static final Integer RANGE_START = new Integer((short)0x4659);
@@ -105,7 +105,7 @@ public class ChunkMap extends HashMap
     public static final Integer SPECULAR_COLOR = new Integer((short)0xA030);
     /** ID of the chunk that will be used to represent the shinines. **/
     public static final Integer SHININESS = new Integer((short)0xA040);
-    //public static final Integer SHININESS = new Integer((short)0xA041);
+//    public static final Integer SHININESS = new Integer((short)0xA041);
     /** ID of the chunk that will be used to represent the transparency. **/
     public static final Integer TRANSPARENCY = new Integer((short)0xA050);
     /** ID of the chunk that will be used to represent the two sided. **/
@@ -120,16 +120,16 @@ public class ChunkMap extends HashMap
     /** Represent a light */
     public static final Integer LIGHT = new Integer((short)0x4600);
     /** Signifies that the light is off **/
-    //public static final Integer LIGHT_OFF      = new Integer((short)0x4620);
-    //public static final Integer RAYTRACE       = new Integer((short)0x4627);
-    //public static final Integer SHADOWED       = new Integer((short)0x4630);
-    //public static final Integer SHADOW_MAP     = new Integer((short)0x4641);
-    //public static final Integer SHOW_CONE      = new Integer((short)0x4650);
-    //public static final Integer RECTANGULAR    = new Integer((short)0x4651);
-    //public static final Integer OVERSHOOT      = new Integer((short)0x4652);
-    //public static final Integer SPOT_MAP       = new Integer((short)0x4653);
-    //public static final Integer SPOT_ROLL      = new Integer((short)0x4656);
-    //public static final Integer RAY_TRACE_BIAS = new Integer((short)0x4658);
+//    public static final Integer LIGHT_OFF      = new Integer((short)0x4620);
+    public static final Integer RAYTRACE       = new Integer((short)0x4627);
+    public static final Integer SHADOWED       = new Integer((short)0x4630);
+    public static final Integer SHADOW_MAP     = new Integer((short)0x4641);
+    public static final Integer SHOW_CONE      = new Integer((short)0x4650);
+    public static final Integer RECTANGULAR    = new Integer((short)0x4651);
+    public static final Integer OVERSHOOT      = new Integer((short)0x4652);
+    public static final Integer SPOT_MAP       = new Integer((short)0x4653);
+    public static final Integer SPOT_ROLL      = new Integer((short)0x4656);
+    public static final Integer RAY_TRACE_BIAS = new Integer((short)0x4658);
     /** the id of a texture name chunk.*/
     public static final Integer TEXTURE_NAME = new Integer((short)0xA300);
     public static final int TEXTURE_TILING = 0xA351;
@@ -292,13 +292,14 @@ public class ChunkMap extends HashMap
         facesDescriptionChunk.addSubChunk(SMOOTH, smoothingChunk);
 
         /*
+           put(new Integer((short)0x0002), "Max 3DS Version");
            put(new Integer((short)0x0010), "Rgb (float)");
            put(new Integer((short)0x0011), "Rgb (byte)");
            put(new Integer((short)0x0012), "Rgb (byte) gamma corrected");
            put(new Integer((short)0x0013), "Rgb (float) gamma corrected");
            put(new Integer((short)0x0030), "percent (int)");
            put(new Integer((short)0x0031), "percent (float)");
-           put(new Integer((short)0x0002), "3DS-Version");
+           
            put(new Integer((short)0x3D3D), "3D editor chunk");
            put(new Integer((short)0x0100), "One unit");
            put(new Integer((short)0x1100), "Background bitmap");

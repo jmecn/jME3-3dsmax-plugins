@@ -1,8 +1,6 @@
 package com.jme3.asset.max3ds;
 
-import java.awt.Image;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -57,7 +55,7 @@ public class Max3dsLoader implements AssetLoader {
 
 	private BranchGroup sceneGroup;
 	private SceneBase base;
-	private HashMap<Integer, Object> dataMap;
+	private HashMap<Object, Object> dataMap;
 	private ByteBuffer chunkBuffer;
 	private Integer chunkID;
 
@@ -209,10 +207,6 @@ public class Max3dsLoader implements AssetLoader {
 			int previousLimit = chunkBuffer.limit();
 			chunkBuffer.limit(chunkBuffer.position() + currentChunkLength);
 
-			if (debug) {
-				debug(parentChunk, level, chunkID, currentChunkLength,
-						chunkBuffer.position(), chunkBuffer.limit());
-			}
 			if (chunk != null && currentChunkLength != 0) {
 				try {
 					chunk.loadData(this);
@@ -306,7 +300,7 @@ public class Max3dsLoader implements AssetLoader {
 	 * @param data
 	 *            the data to store.
 	 */
-	public void pushData(Integer key, Object data) {
+	public void pushData(Object key, Object data) {
 		dataMap.put(key, data);
 	}
 
@@ -317,7 +311,7 @@ public class Max3dsLoader implements AssetLoader {
 	 * @param key
 	 *            the key used to store the datum earlier.
 	 */
-	public Object popData(Integer key) {
+	public Object popData(Object key) {
 		Object retVal = dataMap.remove(key);
 		return retVal;
 	}
@@ -562,56 +556,4 @@ public class Max3dsLoader implements AssetLoader {
 		return null;
 	}
 
-	/**
-	 * prints some handy information... the chunk hierarchy.
-	 */
-	protected void debug(Chunk parentChunk, int level, Integer chunkID,
-			long chunkLength, int position, long limit) {
-		try {
-			for (int i = 0; i < level; i++) {
-				System.out.print("  ");
-			}
-			Object child = parentChunk.getSubChunk(chunkID);
-			int id = ((short) chunkID.intValue()) & 0xFFFF;
-			System.out.println(parentChunk + " is "
-					+ (child == null ? "skipping" : "LOADING") + ": [id="
-					+ Integer.toHexString(id) + ", object= <"
-					+ parentChunk.getSubChunk(chunkID) + ">, chunkLength="
-					+ chunkLength + ", position=" + position + " limit="
-					+ limit + "]");
-		} catch (Exception e) {
-			// We're debugging.. its ok
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Prints an exception and exits.
-	 */
-	private void exceptAndExit(Throwable exception) {
-		logger.log(
-				Level.SEVERE,
-				"\nThe chunk for loadData method read too much or not enough data from the stream."
-						+ " It needs be skipped or adjusted to read more or less data.");
-		exception.printStackTrace();
-		System.exit(3);
-	}
-
-	/**
-	 * Convert the integer to an unsigned number.
-	 * 
-	 * @param i
-	 *            the integer to convert.
-	 */
-	private static String byteString(int i) {
-		final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-				'9', 'a', 'b', 'c', 'd', 'e', 'f' };
-
-		char[] buf = new char[2];
-		buf[1] = digits[i & 0xF];
-		i >>>= 4;
-		buf[0] = digits[i & 0xF];
-
-		return "0x" + new String(buf).toUpperCase();
-	}
 }

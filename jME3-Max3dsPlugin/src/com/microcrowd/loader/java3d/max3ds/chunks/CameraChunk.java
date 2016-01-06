@@ -27,6 +27,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.renderer.Camera;
 /**
  * Loads percentage values from binary data representing them.
  */
@@ -55,7 +56,6 @@ public class CameraChunk extends Chunk
         //Vector3d cameraDirection = new Vector3d();
         //cameraDirection.sub(target,position);
         //AxisAngle4f bankAxisAngle = new AxisAngle4f(cameraDirection, bankAngle);
-
 
         Transform3D transform = new Transform3D();
         transform.lookAt(position, target, yVector);
