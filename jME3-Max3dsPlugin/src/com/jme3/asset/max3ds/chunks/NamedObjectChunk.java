@@ -21,9 +21,8 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.TransformGroup;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.scene.Node;
 
 /**
  * Loads information about a named object: Cameras, meshes and lights
@@ -37,15 +36,10 @@ public class NamedObjectChunk extends Chunk
      *
      * @param chopper The chopper containing the state of parsing.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(M3DLoader chopper)
     {
         final String name = chopper.getString();
-        TransformGroup transformGroup = new TransformGroup();
-
-        transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        transformGroup.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
-
-        chopper.addObject(name, transformGroup);
+        Node node = new Node(name);
+        chopper.attachNode(node);
     }
 }

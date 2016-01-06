@@ -21,9 +21,8 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.vecmath.Point3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.math.Vector3f;
 
 /**
  * Reads and store x,y,z vertex coordinates.
@@ -33,8 +32,6 @@ import com.jme3.asset.max3ds.Max3dsLoader;
  */
 public class Vertex3ListChunk extends Chunk
 {
-    private static final int POINT_3F_SIZE = 12;
-
     /**
      * Reads all the point data from the chopper
      * and stores it using this chunk's id as the key.
@@ -42,12 +39,12 @@ public class Vertex3ListChunk extends Chunk
      * @param chopper the chopper that will read and
      * store the data. 
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(M3DLoader chopper)
     {
         int numVertices = chopper.getUnsignedShort();
-        Point3f[] points = new Point3f[numVertices];
+        Vector3f[] points = new Vector3f[numVertices];
         for (int i = 0; i < numVertices; i++) {
-            points[i] = new Point3f(chopper.getPoint());
+            points[i] = new Vector3f(chopper.getVector3f());
         }
 
         chopper.pushData(chopper.getID(), points);

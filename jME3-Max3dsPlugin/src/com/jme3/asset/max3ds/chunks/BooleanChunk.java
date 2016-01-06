@@ -21,7 +21,7 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.M3DLoader;
 
 /**
  * A boolean chunk is true if it is present otherwise
@@ -39,7 +39,7 @@ public class BooleanChunk extends Chunk
      * @param chopper the chopper on which the boolean true data is to be set 
      * 
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(M3DLoader chopper)
     {
         chopper.pushData(chopper.getID(), new Boolean(true));
     }

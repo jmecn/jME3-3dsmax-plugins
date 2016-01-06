@@ -21,10 +21,8 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.math.Vector3f;
 
 /**
  * Extracts the local coordinate that will act 
@@ -65,13 +63,12 @@ public class AxisChunk extends Chunk
      *
      * @return the actual number of bytes read.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(M3DLoader chopper)
     {
-        Point3f xAxis  = new Point3f();
-        xAxis  = chopper.getPoint();
-        Point3f zAxis  = chopper.getPoint();
-        Point3f yAxis  = chopper.getPoint();
-        Point3f origin = chopper.getPoint();
+        Vector3f xAxis  = chopper.getVector3f();
+        Vector3f zAxis  = chopper.getVector3f();
+        Vector3f yAxis  = chopper.getVector3f();
+        Vector3f origin = chopper.getVector3f();
 
         Transform3D transform = new Transform3D(new double[]{
             xAxis.x,  xAxis.y,  xAxis.z, origin.x, 

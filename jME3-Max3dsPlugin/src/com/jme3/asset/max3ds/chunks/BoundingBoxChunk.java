@@ -21,11 +21,9 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.BoundingBox;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.bounding.BoundingBox;
+import com.jme3.math.Vector3f;
 
 /**
  * Loads the bounding box for keyframer of mesh. The pivot
@@ -39,13 +37,13 @@ public class BoundingBoxChunk extends Chunk
      * Gets the bounding box and associates it with the current mes.
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(M3DLoader chopper)
     {
-        Point3f min = chopper.getPoint();
-        Point3f max = chopper.getPoint();
-        BoundingBox box = new BoundingBox(new Point3d(min), new Point3d(max));
+        Vector3f min = chopper.getVector3f();
+        Vector3f max = chopper.getVector3f();
+        BoundingBox box = new BoundingBox(min, max);
 
-        Point3f center = new Point3f(max.x - min.x, 
+        Vector3f center = new Vector3f(max.x - min.x, 
                 max.y - min.y, 
                 max.z - min.z);
 

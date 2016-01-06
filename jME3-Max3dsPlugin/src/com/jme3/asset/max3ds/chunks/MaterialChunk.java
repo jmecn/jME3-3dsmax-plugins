@@ -21,16 +21,11 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.Material;
-import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.Texture;
-import javax.media.j3d.TransparencyAttributes;
 import javax.vecmath.Color3f;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
-import com.microcrowd.loader.java3d.max3ds.ChunkMap;
-
+import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.texture.Texture;
 
 
 /**
@@ -51,7 +46,7 @@ public class MaterialChunk extends Chunk
      * @param chopper the chopper containing the data
      * needed to set the attributes.
      */
-    public void initialize(Max3dsLoader chopper)
+    public void initialize(M3DLoader chopper)
     {
         Appearance appearance = new Appearance();
         Material material = new Material();

@@ -21,12 +21,10 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 /**
  * Loads percentage values from binary data representing them.
@@ -41,11 +39,11 @@ public class CameraChunk extends Chunk
      * rotate.  The translated and rotated vector is stored it the
      * chopper as a named object since camera chunks are named. 
      */
-    public void loadData(Max3dsLoader chopper) 
+    public void loadData(M3DLoader chopper) 
     {
-        Vector3d yVector  = new Vector3d(0,1,0);
-        Point3d position = new Point3d(chopper.getPoint());
-        Point3d target   = new Point3d(chopper.getPoint());
+    	Vector3f yVector  = new Vector3f(0,1,0);
+        Vector3f position = chopper.getVector3f();
+        Vector3f target   = chopper.getVector3f();
         float    bank     = chopper.getFloat();
         float    lens     = chopper.getFloat();
 
@@ -56,6 +54,11 @@ public class CameraChunk extends Chunk
         //Vector3d cameraDirection = new Vector3d();
         //cameraDirection.sub(target,position);
         //AxisAngle4f bankAxisAngle = new AxisAngle4f(cameraDirection, bankAngle);
+        
+        // Create a jME3 Camera
+        // Camera camera = new Camera(800, 600);
+        // camera.setLocation(position);
+        // camera.lookAt(target, yVector);
 
         Transform3D transform = new Transform3D();
         transform.lookAt(position, target, yVector);

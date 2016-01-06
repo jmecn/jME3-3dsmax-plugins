@@ -21,7 +21,7 @@ import com.jme3.asset.max3ds.M3DLoader;
  */
 public class Chunk 
 {
-    private HashMap subChunkMap = new HashMap();
+    private HashMap<Integer, Chunk> subChunkMap = new HashMap<Integer, Chunk>();
     private String name;
     private String description;
 

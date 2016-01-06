@@ -23,7 +23,7 @@ package com.jme3.asset.max3ds.chunks;
 
 import javax.vecmath.Color3f;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.M3DLoader;
 
 /**
  * Loads colors from binary data representing them.
@@ -45,7 +45,7 @@ public class ColorChunk extends Chunk
      *
      * @param chopper the chopper that will store the color data.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(M3DLoader chopper)
     {
         int colorType = getColorType(chopper);
         if (colorType == BYTE_COLOR) 
@@ -76,7 +76,7 @@ public class ColorChunk extends Chunk
      * @return the color type for the chunk retrieved
      * from the chopper using this chunks id.
      */
-    protected int getColorType(Max3dsLoader chopper)
+    protected int getColorType(M3DLoader chopper)
     {
         return chopper.getID().intValue();
     }

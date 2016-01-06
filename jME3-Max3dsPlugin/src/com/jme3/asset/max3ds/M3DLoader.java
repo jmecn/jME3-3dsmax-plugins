@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.j3d.Behavior;
-
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetLoader;
@@ -189,11 +187,10 @@ public class M3DLoader implements AssetLoader {
 	 * @param group
 	 *            the current group that the chopper will be adding things too.
 	 */
-	public void addObject(String name, Node node) {
-		node.setName(name);
+	public void attachNode(Node node) {
 		rootNode.attachChild(node);
 		currentNode = node;
-		currentObjectName = name;
+		currentObjectName = node.getName();
 	}
 
 	/**
@@ -282,11 +279,11 @@ public class M3DLoader implements AssetLoader {
 	 * @param behavior
 	 *            the behavior to add to the scene base.
 	 */
-	private void addBehaviorNode(Behavior behavior) {
+//	private void addBehaviorNode(Behavior behavior) {
 		// 不知道在JME3中这个有什么用
 		// 也许是InputManager
 //		base.addBehaviorNode(behavior);
-	}
+//	}
 
 	/**
 	 * Adds a light to the scene.

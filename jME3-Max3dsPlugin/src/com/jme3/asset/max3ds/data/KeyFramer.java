@@ -24,19 +24,11 @@ package com.jme3.asset.max3ds.data;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import javax.media.j3d.Alpha;
-import javax.media.j3d.Behavior;
-import javax.media.j3d.Group;
-import javax.media.j3d.Node;
-import javax.media.j3d.RotPosPathInterpolator;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
-import javax.media.j3d.TransformInterpolator;
-import javax.vecmath.Matrix4f;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
+
+import com.jme3.math.Matrix4f;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
 /**
  * @author Josh DeFord 
@@ -46,9 +38,9 @@ public class KeyFramer
     private HashMap lastGroupMap = new HashMap();
     private HashMap fatherMap = new HashMap();
 
-    private Quat4f   rotation;
-    private Point3f  position;
-    private Point3f  pivotCenter;
+    private Quaternion   rotation;
+    private Vector3f  position;
+    private Vector3f  pivotCenter;
     private Vector3f pivot;
     private Vector3f scale;
     private HashMap  namedObjectCoordinateSystems = new HashMap();
@@ -58,8 +50,8 @@ public class KeyFramer
     private List scaleKeys;
 
     private Integer id;
-    private Group father;
-    private Group dummyObject;
+    private Node father;
+    private Node dummyObject;
 
 
     /**
@@ -283,7 +275,7 @@ public class KeyFramer
      * @param vector the vector which will be used to translate the matrix.
      * @param offset the offset used to offset the pivot. 
      */
-    private void translatePivot(Transform3D transform, Vector3f vector, Point3f offset)
+    private void translatePivot(Transform3D transform, Vector3f vector, Vector3f offset)
     {
         if(offset != null)
         {
@@ -318,14 +310,14 @@ public class KeyFramer
         makeTwoListsTheSameSize(positionKeys, orientationKeys);
         int numKeys = positionKeys.size();
 
-        Point3f currentPoint = position; 
-        Quat4f  currentQuat  = rotation; 
+        Vector3f currentPoint = position; 
+        Quaternion  currentQuat  = rotation; 
         RotPosPathInterpolator rotator = null; 
         if(numKeys > 1) 
         {
             float[]    knots = new float[numKeys];
-            Point3f[] points = new Point3f[numKeys];
-            Quat4f[]  quats  = new Quat4f[numKeys];
+            Vector3f[] points = new Vector3f[numKeys];
+            Quaternion[]  quats  = new Quaternion[numKeys];
 
             for(int i=0; i < numKeys; i++) 
             {
@@ -333,13 +325,13 @@ public class KeyFramer
                 knots[i]= (i==0?0:((float)i/((float)(numKeys-1))));
                 if(positionKeys.size() > i)
                 {
-                    Point3f newPoint = (Point3f)positionKeys.get(i);
+                    Vector3f newPoint = (Vector3f)positionKeys.get(i);
                     if(newPoint != null)
                     {
                         currentPoint = newPoint;
                     }
 
-                    Quat4f newQuat = (Quat4f)orientationKeys.get(i);
+                    Quaternion newQuat = (Quaternion)orientationKeys.get(i);
                     if(newQuat != null)
                     {
                         currentQuat = newQuat;
@@ -388,7 +380,7 @@ public class KeyFramer
      * Sets the center of the bounding box that the pivot
      * should offset.
      */
-    public void setPivotCenter(Point3f center)
+    public void setPivotCenter(Vector3f center)
     {
         this.pivotCenter = center;
     }
@@ -409,7 +401,7 @@ public class KeyFramer
      * have been applied.
      * @param group the group that will act as the rotation transform.
      */
-    public void setRotation(Quat4f rotation)
+    public void setRotation(Quaternion rotation)
     {
         this.rotation = rotation;
     }
@@ -451,14 +443,14 @@ public class KeyFramer
      * has been applied.
      * @param group the group that will act as the position transform.
      */
-    public void setPosition(Point3f position)
+    public void setPosition(Vector3f position)
     {
         this.position = position;
     }
 
     /**
      * Sets the position information necessary for animation.s
-     * @param positions a list of Point3f, which may contain null elements,
+     * @param positions a list of Vector3f, which may contain null elements,
      * containing a position for some keys.
      */
     public void setPositionKeys(List positions)
@@ -468,7 +460,7 @@ public class KeyFramer
 
     /**
      * Sets the orientation information necessary for animation.s
-     * @param positions a list of Quat4f, which may contain null elements,
+     * @param positions a list of Quaternion, which may contain null elements,
      * containing a orientation for some keys.
      */
     public void setOrientationKeys(List orientations)
