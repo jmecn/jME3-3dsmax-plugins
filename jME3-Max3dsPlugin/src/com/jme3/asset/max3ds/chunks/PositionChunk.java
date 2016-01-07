@@ -23,9 +23,10 @@ package com.jme3.asset.max3ds.chunks;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3f;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.math.Vector3f;
 
 /**
  * Loads the position of a mesh as defined in the 3ds file.
@@ -41,7 +42,7 @@ public class PositionChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         int flags = chopper.getUnsignedShort();
         chopper.getLong();
@@ -53,7 +54,7 @@ public class PositionChunk extends Chunk
             long keyNumber = chopper.getUnsignedInt();
             int  accelerationData = chopper.getUnsignedShort(); 
 
-            Point3f position = chopper.getPoint(); 
+            Vector3f position = chopper.getVector3f(); 
             if(i==0)
             {
                 chopper.getKeyFramer().setPosition(position);

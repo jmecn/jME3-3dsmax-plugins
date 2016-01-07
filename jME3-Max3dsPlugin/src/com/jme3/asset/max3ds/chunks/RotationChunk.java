@@ -24,10 +24,9 @@ package com.jme3.asset.max3ds.chunks;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 
 /**
  * Extracts the rotation information from the 3ds file.
@@ -53,27 +52,27 @@ public class RotationChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         int flags = chopper.getUnsignedShort();
         chopper.getLong();
         int numKeys = chopper.getUnsignedInt();
 
-        Quat4f previousQuat = null;
+        Quaternion    previousQuat = null;
 
-        List quats = new ArrayList();
+        List<Quaternion>     quats = new ArrayList<Quaternion>();
         for(int i =0; i < numKeys; i++)
         {
-            long         frameNumber = chopper.getUnsignedInt();//Part of the track header
+            long       frameNumber = chopper.getUnsignedInt();//Part of the track header
             int   accelerationData = chopper.getUnsignedShort();//Part of the track header
             getSplineTerms(accelerationData, chopper);//Part of the track header
 
             float            angle = chopper.getFloat();
-            Vector3f        vector = chopper.getVector(); 
+            Vector3f        vector = chopper.getVector3f(); 
 
-            Quat4f quat = getQuaternion(vector, angle);
+            Quaternion        quat = getQuaternion(vector, angle);
             if(previousQuat != null) {
-                quat.mul(previousQuat, quat);
+                quat.mult(previousQuat, quat);
             }
             previousQuat = quat; 
 
@@ -102,7 +101,7 @@ public class RotationChunk extends Chunk
      * <li> EaseFrom
      * </ol>
      */
-    private void getSplineTerms(final int accelerationData, Max3dsLoader chopper)
+    private void getSplineTerms(final int accelerationData, ChunkChopper chopper)
     {
         int bits = accelerationData;
         for(int i=0; i < 5; i++)
@@ -122,10 +121,10 @@ public class RotationChunk extends Chunk
      * rotation must be made absolute by multiplying
      * it with its predecessor
      */
-    public Quat4f getQuaternion(Vector3f axis, float angle)
+    public Quaternion getQuaternion(Vector3f axis, float angle)
     {
         float sinA  = (float)(java.lang.Math.sin(angle/2.0f));
         float cosA  = (float)(java.lang.Math.cos(angle/2.0f));
-        return new Quat4f(axis.x * sinA, axis.y * sinA, axis.z * sinA, cosA);
+        return new Quaternion(axis.x * sinA, axis.y * sinA, axis.z * sinA, cosA);
     }
 }

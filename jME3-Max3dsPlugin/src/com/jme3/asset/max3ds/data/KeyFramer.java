@@ -21,14 +21,15 @@
  */
 package com.jme3.asset.max3ds.data;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 
 import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 /**
  * @author Josh DeFord 
@@ -73,66 +74,25 @@ public class KeyFramer
      * (X1,Y1,Z1) = local coordinates
      *
      */
-    public Behavior createBehavior(String meshName, Group transformGroup, Object testObject)
+    public Node createBehavior(String meshName, Node transformGroup, Object testObject)
     {
-        Group objectGroup = getObjectByName(meshName, transformGroup, testObject);
-        //System.out.println("mesh " + meshName + " scale " + scale);
-        if(objectGroup == null)
-            return null;
-
-        insertFather(objectGroup, meshName);
-
-        TransformInterpolator behavior = null;
-        Transform3D coordinateSystem  = (Transform3D)namedObjectCoordinateSystems.get(meshName);
-
-        //Gonna put these children back later.
-        Enumeration children = removeChildren(objectGroup);
-
-        Transform3D coordinateTransform = coordinateSystem == null ? new Transform3D() : new Transform3D(coordinateSystem);
-
-        Transform3D targetTransform = new Transform3D();
-        TransformGroup targetGroup = new TransformGroup(targetTransform);
-
-        TransformGroup localCoordinates = hasKeys() ? buildLocalCoordinates(coordinateSystem) : new TransformGroup();
-        TransformGroup lastGroup = (TransformGroup)addGroups(objectGroup, new Group[]
-                {
-                    localCoordinates,
-                    targetGroup,
-                    buildPivotGroup(coordinateTransform, pivot),
-                    buildKeysGroup(),
-                });
-
-        addChildren(children, lastGroup);
-        lastGroupMap.put(objectGroup, lastGroup);
-
-
-        behavior = buildInterpolator(targetGroup, coordinateSystem);
-        if(behavior != null)
-        {
-            behavior.setEnable(false);
-            targetGroup.addChild(behavior);
-
-            behavior.computeTransform(0f, targetTransform);
-            targetGroup.setTransform(targetTransform);
-        }
-        return behavior;
+    	// TODO 
+        return null;
     }
 
-    private Enumeration removeChildren(Group group)
+    private List<Spatial> removeChildren(Node group)
     {
-        Enumeration children = group.getAllChildren(); 
-        group.removeAllChildren();
+    	List<Spatial> children = group.getChildren(); 
+        group.detachAllChildren();
         return children;
     }
 
-    private void addChildren(Enumeration children, Group group)
+    private void addChildren(List<Spatial> children, Node group)
     {
         if(group == null)
             return;
-        while(children.hasMoreElements())
-        {
-            Node node = (Node)(children.nextElement());
-            group.addChild(node);
+        for(Spatial child : children) {
+        	 group.attachChild(child);
         }
     }
 
@@ -143,13 +103,13 @@ public class KeyFramer
      * If it isn't there it gets the dummy object
      * from the frames description chunk.
      */
-    private Group getObjectByName(String objectName, Group objectGroup, Object testObject)
+    private Node getObjectByName(String objectName, Node objectGroup, Object testObject)
     {
 
         //This means its a dummy object.  It needs to be created.
         if(objectGroup == null && testObject == null)
         {
-            namedObjectCoordinateSystems.put(objectName, new Transform3D());
+            namedObjectCoordinateSystems.put(objectName, new Transform());
             objectGroup = dummyObject;
         }
 
@@ -163,23 +123,23 @@ public class KeyFramer
      * model. like bones and stuff. The fatherGroup, if found,
      * is removed from whatever parent belonged to on before insertion.
      */
-    private void insertFather(Group parentGroup, String objectName)
+    private void insertFather(Node parentGroup, String objectName)
     {
         if(father == null)
             return;
-        Group topGroup = new TransformGroup(); 
-        topGroup.addChild(father);
-        Group bottomGroup = (Group)lastGroupMap.get(father);
+        Node topGroup = new Node(); 
+        topGroup.attachChild(father);
+        Node bottomGroup = (Node)lastGroupMap.get(father);
 
         if(topGroup == null)
             return;
 
-        Group fatherParent = (Group)topGroup.getParent();
+        Node fatherParent = (Node)topGroup.getParent();
         if(fatherParent != null)
-            fatherParent.removeChild(topGroup);
+            fatherParent.detachChild(topGroup);
         
-        Enumeration originalChildren = removeChildren(parentGroup);
-        parentGroup.addChild(topGroup);
+        List<Spatial> originalChildren = removeChildren(parentGroup);
+        parentGroup.attachChild(topGroup);
         addChildren(originalChildren, bottomGroup);
     }
 
@@ -188,22 +148,14 @@ public class KeyFramer
      * position and rotation tracks.
      * @return transform group with position and rotation information
      */
-    private TransformGroup buildKeysGroup()
+    private Node buildKeysGroup()
     {
-        Transform3D positionTransform   = new Transform3D();
-        positionTransform.set(new Vector3f(position));
-
-        Transform3D rotationTransform   = new Transform3D();
-        rotationTransform.set(rotation);
-
-        Transform3D scaleTransform = new Transform3D();
-        scaleTransform.setScale(new Vector3d(scale));
-        TransformGroup scaleGroup = new TransformGroup(scaleTransform);
-
-        Transform3D keyTransform = new Transform3D(positionTransform);
-        keyTransform.mul(scaleTransform);
-        keyTransform.mul(rotationTransform);
-        return new TransformGroup(keyTransform);
+        Node node = new Node();
+        node.setLocalTranslation(position);
+        node.setLocalRotation(rotation);
+        node.setLocalScale(scale);
+        
+        return node;
     }
 
     /**
@@ -215,14 +167,14 @@ public class KeyFramer
      * @param pivot the pivot defined in the 3ds file loaded by pivot chunk.
      * This is not changed.
      */
-    private TransformGroup buildPivotGroup(Transform3D coordinateTransform, Vector3f pivot)
+    private Node buildPivotGroup(Transform coordinateTransform, Vector3f pivot)
     {
-            Transform3D pivotTransform = new Transform3D();
-            pivotTransform.mulInverse(coordinateTransform);
+            Transform pivotTransform = new Transform();
+//            pivotTransform.mult(coordinateTransform);
             pivot = new Vector3f(pivot);
             pivot.negate();
             translatePivot(pivotTransform, pivot, pivotCenter);
-            return new TransformGroup(pivotTransform);
+            return null;
     }
 
     /**
@@ -234,22 +186,23 @@ public class KeyFramer
      * so it will be useful during the construction
      * of the animations.
      */
-    private TransformGroup buildLocalCoordinates(Transform3D coordinateSystem)
+    private Node buildLocalCoordinates(Transform coordinateSystem)
     {
-        Matrix4f coordMatrix = new Matrix4f();
-        Vector3f translation = new Vector3f();
+    	//Matrix4f coordMatrix = new Matrix4f();
+    	//Vector3f translation = new Vector3f();
 
-        coordinateSystem.get(translation);
-        coordinateSystem.invert();
+    	//translation = coordinateSystem.getTranslation();
+    	//coordinateSystem.invert();
 
-        coordinateSystem.get(coordMatrix);
-        coordMatrix.m03 = translation.x;
-        coordMatrix.m13 = translation.y;
-        coordMatrix.m23 = translation.z;
-        coordinateSystem.set(coordMatrix);
-        coordinateSystem.invert();
-        TransformGroup systemGroup = new TransformGroup(coordinateSystem);
-        coordinateSystem.invert();
+    	//coordinateSystem.get(coordMatrix);
+    	//coordMatrix.m03 = translation.x;
+    	//coordMatrix.m13 = translation.y;
+    	//coordMatrix.m23 = translation.z;
+    	//coordinateSystem.set(coordMatrix);
+        //coordinateSystem.invert();
+        Node systemGroup = new Node();
+        //systemGroup.setLocalTransform(coordinateSystem);
+        //coordinateSystem.invert();
         return systemGroup;
     }
 
@@ -258,12 +211,12 @@ public class KeyFramer
      * groups[0] is added to parentGroup, groups[1] is added to groups[0] etc.
      * @return the last group added (groups[groups.length - 1]).
      */
-    private Group addGroups(Group parentGroup, Group[] groups)
+    private Node addGroups(Node parentGroup, Node[] groups)
     {
-        Group nextGroup = parentGroup;
+    	Node nextGroup = parentGroup;
         for(int i=0; i < groups.length; i++)
         {
-            nextGroup.addChild(groups[i]);
+            nextGroup.attachChild(groups[i]);
             nextGroup = groups[i];
         }
         return groups[groups.length - 1];
@@ -275,20 +228,20 @@ public class KeyFramer
      * @param vector the vector which will be used to translate the matrix.
      * @param offset the offset used to offset the pivot. 
      */
-    private void translatePivot(Transform3D transform, Vector3f vector, Vector3f offset)
+    private void translatePivot(Transform transform, Vector3f vector, Vector3f offset)
     {
         if(offset != null)
         {
-            pivot.sub(offset);
+            pivot.subtractLocal(offset);
         }
         Matrix4f matrix = new Matrix4f();
-        transform.get(matrix);
+        matrix.setTransform(transform.getTranslation(), transform.getScale(), transform.getRotation().toRotationMatrix());
 
         matrix.m03 += (matrix.m00*vector.x + matrix.m01*vector.y + matrix.m02*vector.z);
         matrix.m13 += (matrix.m10*vector.x + matrix.m11*vector.y + matrix.m12*vector.z);
         matrix.m23 += (matrix.m20*vector.x + matrix.m21*vector.y + matrix.m22*vector.z);
-
-        transform.set(matrix);
+        
+        // transform.set(matrix);
     }
 
 
@@ -305,14 +258,13 @@ public class KeyFramer
     //TODO... This needs to use both a rotation interpolator and a position interpolator
     //in case there are keys with no position information but position information and 
     //vice versa right now its using RotPosPathInterpolator
-    private TransformInterpolator buildInterpolator(TransformGroup targetGroup, Transform3D axisOfTransform)
+    private Object buildInterpolator(Node targetGroup, Transform axisOfTransform)
     {
         makeTwoListsTheSameSize(positionKeys, orientationKeys);
         int numKeys = positionKeys.size();
 
         Vector3f currentPoint = position; 
         Quaternion  currentQuat  = rotation; 
-        RotPosPathInterpolator rotator = null; 
         if(numKeys > 1) 
         {
             float[]    knots = new float[numKeys];
@@ -344,15 +296,13 @@ public class KeyFramer
             }
 
             //This gives a continuous loop at a rate of 30 fps
-            Alpha alpha = new Alpha(-1, (long)(numKeys/.03));
-            alpha.setStartTime(System.currentTimeMillis());
-            alpha.setDuplicateOnCloneTree(true);
+            //Alpha alpha = new Alpha(-1, (long)(numKeys/.03));
+            //alpha.setStartTime(System.currentTimeMillis());
+            //alpha.setDuplicateOnCloneTree(true);
 
-            rotator = new RotPosPathInterpolator(alpha, targetGroup, 
-                    axisOfTransform, knots, 
-                    quats, points);
+            //rotator = new RotPosPathInterpolator(alpha, targetGroup, axisOfTransform, knots, quats, points);
         }
-        return rotator;
+        return null;
     }
 
     public void makeTwoListsTheSameSize(List list1, List list2)
@@ -390,7 +340,7 @@ public class KeyFramer
      * objectName. 
      * This is the first t
      */
-    public void setCoordinateSystem(String objectName, Transform3D coordinateSystem)
+    public void setCoordinateSystem(String objectName, Transform coordinateSystem)
     {
         namedObjectCoordinateSystems.put(objectName, coordinateSystem);
     }
@@ -471,7 +421,7 @@ public class KeyFramer
     /**
      *
      */
-    public void setDummyObject(Group object)
+    public void setDummyObject(Node object)
     {
         dummyObject = object;
     }
@@ -487,7 +437,7 @@ public class KeyFramer
 
     /**
      */
-    public void addFather(int fatherID, TransformGroup newFather)
+    public void addFather(int fatherID, Node newFather)
     {
         if(fatherID < 0)
         {
@@ -495,13 +445,13 @@ public class KeyFramer
         }
         else
         {
-            father = (TransformGroup)(fatherMap.get(new Integer(fatherID)));
+            father = (Node)(fatherMap.get(new Integer(fatherID)));
             //Remove the father's father because the father will
             //be inserted somewhere later.
-            Group grandFather = (Group)father.getParent();
+            Node grandFather = (Node)father.getParent();
             if(grandFather != null)
             {
-                grandFather.removeChild(father);
+                grandFather.detachChild(father);
             }
         }
         fatherMap.put(id, newFather);

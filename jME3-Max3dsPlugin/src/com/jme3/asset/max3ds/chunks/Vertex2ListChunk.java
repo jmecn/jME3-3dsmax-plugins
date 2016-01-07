@@ -21,9 +21,9 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.vecmath.TexCoord2f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.math.Vector2f;
 
 /**
  * Reads a list of x,y points that will be used
@@ -42,14 +42,14 @@ public class Vertex2ListChunk extends Chunk
      * @param chopper the chopper that will parse and store
      * the data using this chunks id as the key. 
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         int numVertices = chopper.getUnsignedShort();
-        TexCoord2f[] points = new TexCoord2f[numVertices];
+        Vector2f[] points = new Vector2f[numVertices];
         for (int i = 0; i < numVertices; i++) {
             float point0 = chopper.getFloat();
             float point1 = chopper.getFloat();
-            points[i] = new TexCoord2f(point0, point1);
+            points[i] = new Vector2f(point0, point1);
         }
         chopper.pushData(chopper.getID(), points);
     }

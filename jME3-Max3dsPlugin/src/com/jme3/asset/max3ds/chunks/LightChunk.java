@@ -20,16 +20,13 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.PointLight;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3f;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.light.PointLight;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
-import com.microcrowd.loader.java3d.max3ds.ChunkMap;
 /**
  * Lights to be placed in a scene.
  * Only point lights and target spot lights are supported.
@@ -48,14 +45,11 @@ public class LightChunk extends Chunk
      *
      * @param chopper used to store the position of the light. 
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
-        currentPosition = chopper.getVector();
-        TransformGroup group = chopper.getGroup();
-        Transform3D transform = new Transform3D();
-        group.getTransform(transform);
-        transform.setTranslation(currentPosition);
-        group.setTransform(transform);
+        currentPosition = chopper.getVector3f();
+        Node group = chopper.getGroup();
+        group.setLocalTranslation(currentPosition);
         chopper.pushData(chopper.getID(), currentPosition);
     }
 
@@ -64,18 +58,19 @@ public class LightChunk extends Chunk
      * and creates a light, adding it to the scene as a named object.
      * @param chopper the ChunkChopper containing sub chunk data.
      */
-    public void initialize(Max3dsLoader chopper)
+    public void initialize(ChunkChopper chopper)
     {
-        Color3f color = (Color3f)chopper.popData(ChunkMap.COLOR);
+        ColorRGBA color = (ColorRGBA)chopper.popData(ChunkMap.COLOR);
         PointLight light = (PointLight)chopper.popData(ChunkMap.SPOTLIGHT);
         if(light == null)
         {
             light = new PointLight();
-            chopper.addLightNode(light);
+            chopper.addLight(light);
         }
 
         light.setColor(color);
-        light.setInfluencingBounds(new BoundingSphere(new Point3d(0,0,0), 3000));
-        chopper.getGroup().addChild(light);
+        light.setPosition(new Vector3f(0,0,0));
+        light.setRadius(3000);
+        chopper.getGroup().addLight(light);
     }
 }

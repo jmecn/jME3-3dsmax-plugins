@@ -20,16 +20,11 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.SpotLight;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
-import com.microcrowd.loader.java3d.max3ds.ChunkMap;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.light.SpotLight;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
 /**
  * SpotLights to be placed in a scene.
@@ -50,25 +45,27 @@ public class SpotLightChunk extends Chunk
      *
      * @param chopper the ChunkChopper that will have the light placed in it.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
-        Point3f target = chopper.getPoint();
+    	Vector3f target = chopper.getVector3f();
         float beam = chopper.getFloat();
         float falloff = chopper.getFloat();
-        SpotLight light = new SpotLight();
-
-        Vector3f direction = new Vector3f(0,0,-1); 
 
         Vector3f position = (Vector3f)chopper.popData(ChunkMap.LIGHT);
-        TransformGroup group = chopper.getGroup();
-        Transform3D transform = new Transform3D();
-        group.getTransform(transform);
-        transform.lookAt(new Point3d(position), new Point3d(target), new Vector3d(0,1,0));
-        transform.invert();
-        transform.setTranslation(position);
-        group.setTransform(transform);
+        
+        SpotLight light = new SpotLight();
+        light.setDirection(new Vector3f(0, 0, -1));
+        
+        // TODO Im not sure if this is right. Need test
+        light.setSpotInnerAngle(beam);
+        light.setSpotOuterAngle(falloff);
+        
+        Node group = chopper.getGroup();
+        group.addLight(light);
+        
+        group.setLocalTranslation(position);
+        group.lookAt(target, new Vector3f(0,1,0));
 
         chopper.pushData(chopper.getID(), light);
-        chopper.addLightNode(light);
     }
 }

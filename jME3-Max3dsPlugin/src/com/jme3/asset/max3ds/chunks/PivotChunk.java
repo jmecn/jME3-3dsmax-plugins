@@ -21,10 +21,9 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.math.Vector3f;
 /**
  * Loads the pivot for a mesh. 
  * {@see KeyFramerInfoChunk} for more information about using
@@ -36,9 +35,9 @@ public class PivotChunk extends Chunk
      * Gets the pivot and associates it with the current mes.
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
-        Vector3f pivot = new Vector3f((Point3f)chopper.getPoint());
+        Vector3f pivot = chopper.getVector3f();
 
         chopper.getKeyFramer().setPivot(pivot);
     }

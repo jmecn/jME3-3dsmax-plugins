@@ -21,11 +21,8 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.vecmath.Point3d;
-
-import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.Camera;
 /**
  * Loads percentage values from binary data representing them.
  */
@@ -39,7 +36,7 @@ public class CameraChunk extends Chunk
      * rotate.  The translated and rotated vector is stored it the
      * chopper as a named object since camera chunks are named. 
      */
-    public void loadData(M3DLoader chopper) 
+    public void loadData(ChunkChopper chopper) 
     {
     	Vector3f yVector  = new Vector3f(0,1,0);
         Vector3f position = chopper.getVector3f();
@@ -60,10 +57,5 @@ public class CameraChunk extends Chunk
         // camera.setLocation(position);
         // camera.lookAt(target, yVector);
 
-        Transform3D transform = new Transform3D();
-        transform.lookAt(position, target, yVector);
-        transform.invert();
-        ((TransformGroup)chopper.getGroup()).setTransform(transform);
-        chopper.addViewGroup(chopper.getGroup());
     }  
 }

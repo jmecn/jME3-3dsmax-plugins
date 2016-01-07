@@ -22,10 +22,9 @@
 package com.jme3.asset.max3ds.chunks;
 
 
-import javax.media.j3d.TransformGroup;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
-import com.microcrowd.loader.java3d.max3ds.data.KeyFramer;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.data.KeyFramer;
+import com.jme3.scene.Node;
 /**
  * This chunk contains the name of the object
  * the frames belong to and the parameters and 
@@ -40,7 +39,7 @@ public class FramesDescriptionChunk extends Chunk
      * @param chopper the chopper used to store the transient data
      * for this chunk. 
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         KeyFramer keyFramer = chopper.getKeyFramer();
         String objectName = chopper.getString();
@@ -48,10 +47,10 @@ public class FramesDescriptionChunk extends Chunk
         chopper.getUnsignedShort();
         chopper.getUnsignedShort();
         int fatherID = chopper.getShort();
-        TransformGroup transformGroup = chopper.getNamedTransformGroup(objectName);
+        Node transformGroup = chopper.getNamedTransformGroup(objectName);
         if(transformGroup == null)//its a dummy transformGroup.
         {
-            transformGroup = new TransformGroup();
+            transformGroup = new Node();
             keyFramer.setDummyObject(transformGroup);
         }
 

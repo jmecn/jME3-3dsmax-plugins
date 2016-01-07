@@ -21,7 +21,7 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
 
 /**
  * FacesMaterialsChunk contains the materials information 
@@ -40,7 +40,7 @@ public class FacesMaterialChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         final String materialName = chopper.getString();
         int numFaces = chopper.getUnsignedShort();

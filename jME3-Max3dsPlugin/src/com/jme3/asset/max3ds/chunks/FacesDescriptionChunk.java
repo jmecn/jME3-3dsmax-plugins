@@ -21,26 +21,21 @@
 
 package com.jme3.asset.max3ds.chunks;
 
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.Geometry;
-import javax.media.j3d.Material;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.TransformGroup;
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
-import com.microcrowd.loader.java3d.max3ds.ChunkMap;
-import com.sun.j3d.utils.geometry.GeometryInfo;
-import com.sun.j3d.utils.geometry.NormalGenerator;
-import com.sun.j3d.utils.geometry.Stripifier;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.material.Material;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
+import com.jme3.scene.VertexBuffer.Type;
 
 /**
  * This chunk describes all the triangles that make up a mesh.
@@ -52,22 +47,9 @@ import com.sun.j3d.utils.geometry.Stripifier;
  */
 public class FacesDescriptionChunk extends Chunk
 {
-    public static final Appearance DEFAULT_APPEARANCE;
-
-    private Point3f[] currentVertices;
-    private TexCoord2f[] textureTriangles;
+    private Vector3f[] currentVertices;
+    private Vector2f[] textureTriangles;
     private PointMapper shareMap;
-
-    static {
-        DEFAULT_APPEARANCE= new Appearance();
-        Material defaultMaterial = new Material();
-        defaultMaterial.setAmbientColor(new Color3f(.5f, .5f, .5f));
-        //defaultMaterial.setDiffuseColor(new Color3f(.5f, .5f, .5f));
-        //defaultMaterial.setSpecularColor(new Color3f(.5f, .5f, .5f));
-        DEFAULT_APPEARANCE.setMaterial(defaultMaterial);
-    }
-
-
 
     /**
      * Maintains a two way mapping between coordinates
@@ -77,9 +59,10 @@ public class FacesDescriptionChunk extends Chunk
      * is a point in 3D space and a vertex is a coordinate serving
      * as one of three defining a face.
      */
-    private class PointMapper extends HashMap
+    @SuppressWarnings("serial")
+	private class PointMapper extends HashMap
     {
-        private Set[] coordinateSet;
+		private Set[] coordinateSet;
         /**
          * Constructs a PointMapper with a
          * the number of coordinates initialized to size.
@@ -97,7 +80,7 @@ public class FacesDescriptionChunk extends Chunk
          * @param coordinate the coordinate being mapped to the vertexNum 
          * @param vertexNum the number of the vertex using the coordinate
          */
-        public void addCoordinate(Point3f coordinate, int vertexNum)
+        public void addCoordinate(Vector3f coordinate, int vertexNum)
         {
             Set sharedCoordinates = (Set)get(coordinate); 
             if(sharedCoordinates == null)
@@ -146,18 +129,18 @@ public class FacesDescriptionChunk extends Chunk
      *
      * @param chopper chopper the has the data  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         int numFaces = chopper.getUnsignedShort();
         shareMap = new PointMapper(numFaces*3);
-        Point3f[] coordinates = (Point3f[])chopper.popData(ChunkMap.VERTEX_LIST);
-        TexCoord2f[] texturePoints = (TexCoord2f[])chopper.popData(ChunkMap.TEXTURE_COORDINATES);
+        Vector3f[] coordinates = (Vector3f[])chopper.popData(ChunkMap.VERTEX_LIST);
+        Vector2f[] texturePoints = (Vector2f[])chopper.popData(ChunkMap.TEXTURE_COORDINATES);
 
-        currentVertices = new Point3f[numFaces * 3];
+        currentVertices = new Vector3f[numFaces * 3];
         chopper.pushData(chopper.getID(), currentVertices);
         if (texturePoints != null) 
         {
-            textureTriangles = new TexCoord2f[numFaces * 3];
+            textureTriangles = new Vector2f[numFaces * 3];
         }
 
         for (int i = 0; i < numFaces; i++) {
@@ -192,51 +175,108 @@ public class FacesDescriptionChunk extends Chunk
      * If there is no material, this will put a default
      * material on the shape.
      */
-    public void initialize(Max3dsLoader chopper)
+    public void initialize(ChunkChopper chopper)
     {
         final String materialName = (String)chopper.popData(ChunkMap.FACES_MATERIAL);
         final int[]  smoothGroups = (int[])chopper.popData(ChunkMap.SMOOTH);
-        Shape3D      shape        = new Shape3D();
-        GeometryInfo geometryInfo = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
+        Geometry     shape        = new Geometry();
+        Mesh         mesh         = new Mesh();
 
-        geometryInfo.setCoordinates(currentVertices);
-        TransformGroup transformGroup = (TransformGroup)chopper.getGroup();
-        transformGroup.addChild(shape);
-
+        Node parent = chopper.getGroup();
+        shape.setName(parent.getName());
+        parent.attachChild(shape);
+        
+        // Vertex 顶点
+        float v[] = new float[currentVertices.length * 3];
+		for (int i = 0; i < currentVertices.length; i++) {
+			Vector3f vert = currentVertices[i];
+			
+			int j = i * 3;
+			v[j] = vert.x;
+			v[j + 1] = vert.y;
+			v[j + 2] = vert.z;
+		}
+		mesh.setBuffer(Type.Position, 3, v);
+		
+		// Faces Index
+        float f[] = new float[currentVertices.length * 3];
+		for (int i = 0; i < currentVertices.length; i++) {
+			int j = i * 3;
+			f[j] = j;
+			f[j + 1] = j + 1;
+			f[j + 2] = j + 2;
+		}
+		mesh.setBuffer(Type.Index, 3, f);
+		
+        // TextureCoord 纹理坐标
         if (textureTriangles != null) 
         {
-            geometryInfo.setTextureCoordinateParams(1, 2);
-            geometryInfo.setTextureCoordinates(0, textureTriangles);
+    		float tv[] = new float[textureTriangles.length * 2];
+    		for (int i = 0; i < textureTriangles.length; i++) {
+    			Vector2f texCoord = textureTriangles[i];
+    			
+    			int j = i * 2;
+    			tv[j] = texCoord.x;
+    			tv[j + 1] = texCoord.y;
+    		}
+            mesh.setBuffer(Type.TexCoord, 2, tv);
         }
-
-        if(materialName != null)
-        {
-            shape.setAppearance((Appearance)chopper.getNamedObject(materialName));
-        }
-        else
-        {
-            shape.setAppearance(DEFAULT_APPEARANCE);
-        }
+        
+        // Normals 法线
         if(smoothGroups == null)
         {
-            NormalGenerator normalGenerator = new NormalGenerator();
-            geometryInfo.recomputeIndices();
-            normalGenerator.generateNormals(geometryInfo);
+        	Vector3f[] normals = generateNormals(currentVertices);
+            float[] n = new float[normals.length * 3];
+            for(int i=0; i<normals.length; i++) {
+            	Vector3f normal = normals[i];
+            	int j = i * 3;
+            	n[j] = normal.x;
+            	n[j + 1] = normal.y;
+            	n[j + 2] = normal.z;
+            }
+            mesh.setBuffer(Type.Normal, 3, n);
         }
         else
         {
-            Vector3f[] normals = generateNormals(currentVertices);
+        	Vector3f[] normals = generateNormals(currentVertices);
             Vector3f[] smoothNormals = smoothNormals(normals, shareMap, smoothGroups);
-            geometryInfo.setNormals(smoothNormals);
+            float[] n = new float[smoothNormals.length * 3];
+            for(int i=0; i<smoothNormals.length; i++) {
+            	Vector3f normal = smoothNormals[i];
+            	int j = i * 3;
+            	n[j] = normal.x;
+            	n[j + 1] = normal.y;
+            	n[j + 2] = normal.z;
+            }
+            mesh.setBuffer(Type.Normal, 3, n);
         }
 
-        new Stripifier().stripify(geometryInfo);
-        shape.setGeometry(geometryInfo.getGeometryArray());
-        shape.setCapability(Geometry.ALLOW_INTERSECT);
-        com.sun.j3d.utils.picking.PickTool.setCapabilities(shape, com.sun.j3d.utils.picking.PickTool.INTERSECT_FULL);
+        // Stripifier 切线
+//        new Stripifier().stripify(geometryInfo);
+//        shape.setGeometry(geometryInfo.getGeometryArray());
+//        shape.setCapability(Geometry.ALLOW_INTERSECT);
+//        com.sun.j3d.utils.picking.PickTool.setCapabilities(shape, com.sun.j3d.utils.picking.PickTool.INTERSECT_FULL);
 
         currentVertices=null;
         textureTriangles=null;
+        
+        mesh.setStatic();
+		mesh.updateBound();
+		mesh.updateCounts();
+		
+        shape.setMesh(mesh);
+        
+
+        // Materials 材质
+        if(materialName != null)
+        {
+        	Material mat = (Material)chopper.getNamedObject(materialName);
+        	shape.setMaterial(mat);
+        }
+        else
+        {
+        	shape.setMaterial(chopper.getDefaultMaterial());
+        }
     }
 
     /**
@@ -299,7 +339,7 @@ public class FacesDescriptionChunk extends Chunk
      * @return the three normals that should be 
      * used for the triangle represented by the parameters.
      */
-    private Vector3f[] generateNormals(Point3f points[])
+    private Vector3f[] generateNormals(Vector3f points[])
     {
         Vector3f[] normals = new Vector3f[points.length];
         for(int i=0; i < normals.length;)
@@ -308,9 +348,9 @@ public class FacesDescriptionChunk extends Chunk
             Vector3f v1        = new Vector3f();
             Vector3f v2        = new Vector3f();
     
-            v1.sub(points[i+1], points[i]);
-            v2.sub(points[i+2], points[i]);
-            normal.cross(v1, v2);
+            v1 = points[i+1].subtract(points[i]);
+            v2 = points[i+2].subtract(points[i]);
+            v1.cross(v2, normal);
             normal.normalize();
 
     

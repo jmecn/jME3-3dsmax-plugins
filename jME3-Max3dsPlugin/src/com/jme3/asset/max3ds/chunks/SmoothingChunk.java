@@ -20,10 +20,9 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
-import javax.vecmath.Point3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
-import com.microcrowd.loader.java3d.max3ds.ChunkMap;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.math.Vector3f;
 
 /**
  * This chunk is used to generate normals for a mesh according
@@ -40,9 +39,9 @@ public class SmoothingChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
-        Point3f[] vertices = (Point3f[])chopper.popData(ChunkMap.FACES_DESCRIPTION);
+        Vector3f[] vertices = (Vector3f[])chopper.popData(ChunkMap.FACES_DESCRIPTION);
         int[] smoothGroups = new int[vertices.length];
         int numFaces = vertices.length/3;
         for(int i=0; i < numFaces; i++)

@@ -21,9 +21,8 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.vecmath.Color3f;
-
-import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.math.ColorRGBA;
 
 /**
  * Loads colors from binary data representing them.
@@ -45,7 +44,7 @@ public class ColorChunk extends Chunk
      *
      * @param chopper the chopper that will store the color data.  
      */
-    public void loadData(M3DLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         int colorType = getColorType(chopper);
         if (colorType == BYTE_COLOR) 
@@ -53,12 +52,12 @@ public class ColorChunk extends Chunk
             float r = (chopper.getUnsignedByte()) / 255f;
             float g = (chopper.getUnsignedByte()) / 255f;
             float b = (chopper.getUnsignedByte()) / 255f;
-            Color3f color = new Color3f(r, g, b);
+            ColorRGBA color = new ColorRGBA(r, g, b, 1);
             chopper.pushData(chopper.getID(), color);
         } 
         else if (colorType == FLOAT_COLOR) 
         {
-            Color3f color = new Color3f(chopper.getFloat(), chopper.getFloat(), chopper.getFloat());
+        	ColorRGBA color = new ColorRGBA(chopper.getFloat(), chopper.getFloat(), chopper.getFloat(), 1);
             chopper.pushData(chopper.getID(), color);
         }
         else 
@@ -76,7 +75,7 @@ public class ColorChunk extends Chunk
      * @return the color type for the chunk retrieved
      * from the chopper using this chunks id.
      */
-    protected int getColorType(M3DLoader chopper)
+    protected int getColorType(ChunkChopper chopper)
     {
         return chopper.getID().intValue();
     }

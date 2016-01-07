@@ -20,9 +20,8 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
-import javax.media.j3d.Behavior;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.scene.Node;
 
 /**
  * A KeyFramerInfoChunk stores information about things
@@ -57,13 +56,14 @@ public class KeyFramerInfoChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the current state of the parser. 
      */
-    public void initialize(Max3dsLoader chopper) 
+    public void initialize(ChunkChopper chopper) 
     {
         String meshName = (String)chopper.getObjectName();
-        Behavior frameBehavior = chopper.getKeyFramer().createBehavior(meshName,
+        Node frameBehavior = chopper.getKeyFramer().createBehavior(meshName,
                                                         chopper.getNamedTransformGroup(meshName),
                                                         chopper.getNamedObject(meshName));
-        if(frameBehavior != null)
-            chopper.addBehaviorNode(frameBehavior);
+        if(frameBehavior != null) {
+//            chopper.addBehaviorNode(frameBehavior);
+        }
     }
 }

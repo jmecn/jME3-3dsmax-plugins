@@ -21,7 +21,11 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import com.jme3.asset.max3ds.M3DLoader;
+
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 /**
@@ -31,8 +35,6 @@ import com.jme3.math.Vector3f;
  */
 public class AxisChunk extends Chunk
 {
-    private float value;
-
     /**
      * Loads the local coordinate system for the current mesh.
      *
@@ -45,7 +47,7 @@ public class AxisChunk extends Chunk
      * With either 3x3 or 4x4 rotation, translation, there
      * is a simple relationship between each matrix and the resulting coordinate
      * system. The first three columns of the matrix define the direction vector of the
-     * X, Y and Z axii respectively.
+     * X, Y and Z axis respectively.
      * If a 4x4 matrix is defined as:
      * <code>
      *     | A B C D |
@@ -63,18 +65,25 @@ public class AxisChunk extends Chunk
      *
      * @return the actual number of bytes read.  
      */
-    public void loadData(M3DLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         Vector3f xAxis  = chopper.getVector3f();
         Vector3f zAxis  = chopper.getVector3f();
         Vector3f yAxis  = chopper.getVector3f();
         Vector3f origin = chopper.getVector3f();
+        
+        Matrix3f rotation = new Matrix3f(
+        		xAxis.x, yAxis.x, zAxis.x,
+        		xAxis.y, yAxis.y, zAxis.y,
+        		xAxis.z, yAxis.z, zAxis.z
+        );
+        Quaternion rot = new Quaternion();
+        rot.fromRotationMatrix(rotation);
+        
+        Transform transform = new Transform();
+        transform.setRotation(rot);
+        transform.setTranslation(origin);
 
-        Transform3D transform = new Transform3D(new double[]{
-            xAxis.x,  xAxis.y,  xAxis.z, origin.x, 
-            yAxis.x,  yAxis.y,  yAxis.z, origin.y,  
-            -zAxis.x,  -zAxis.y,  -zAxis.z, origin.z,
-            0,0,0,1});
         String meshName = chopper.getObjectName();
         chopper.getKeyFramer().setCoordinateSystem(meshName, transform);
     }

@@ -21,7 +21,7 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
 
 /**
  * These have no subchunks. Only String data terminated with a null. For
@@ -38,7 +38,7 @@ public class StringChunk extends Chunk
      *
      * @param chopper the chopper that is doing the parsing.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         byte[] stringArray = chopper.getChunkBytes();
 
@@ -46,6 +46,8 @@ public class StringChunk extends Chunk
         if (value.indexOf((char)(0x0000)) > 0) {
             value = value.substring(0, value.indexOf((char)(0x0000)));
         }
+        
+        System.out.println("StringChunk: " + value);
 
         chopper.pushData(chopper.getID(), value);
     }

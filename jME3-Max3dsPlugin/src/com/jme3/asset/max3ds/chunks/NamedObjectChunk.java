@@ -21,7 +21,7 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.scene.Node;
 
 /**
@@ -36,7 +36,7 @@ public class NamedObjectChunk extends Chunk
      *
      * @param chopper The chopper containing the state of parsing.  
      */
-    public void loadData(M3DLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         final String name = chopper.getString();
         Node node = new Node(name);

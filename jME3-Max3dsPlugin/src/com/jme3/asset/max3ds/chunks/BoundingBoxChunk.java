@@ -21,6 +21,7 @@
 
 package com.jme3.asset.max3ds.chunks;
 
+import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.M3DLoader;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Vector3f;
@@ -37,7 +38,7 @@ public class BoundingBoxChunk extends Chunk
      * Gets the bounding box and associates it with the current mes.
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(M3DLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         Vector3f min = chopper.getVector3f();
         Vector3f max = chopper.getVector3f();

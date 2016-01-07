@@ -21,6 +21,7 @@
 
 package com.jme3.asset.max3ds.chunks;
 
+import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.M3DLoader;
 import com.jme3.math.Vector3f;
 
@@ -39,7 +40,7 @@ public class Vertex3ListChunk extends Chunk
      * @param chopper the chopper that will read and
      * store the data. 
      */
-    public void loadData(M3DLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         int numVertices = chopper.getUnsignedShort();
         Vector3f[] points = new Vector3f[numVertices];

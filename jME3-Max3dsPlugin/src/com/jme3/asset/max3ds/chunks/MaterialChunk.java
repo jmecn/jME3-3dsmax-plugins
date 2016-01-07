@@ -21,10 +21,12 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import javax.vecmath.Color3f;
 
+import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.ChunkMap;
-import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
+import com.jme3.math.ColorRGBA;
 import com.jme3.texture.Texture;
 
 
@@ -46,52 +48,43 @@ public class MaterialChunk extends Chunk
      * @param chopper the chopper containing the data
      * needed to set the attributes.
      */
-    public void initialize(M3DLoader chopper)
+    public void initialize(ChunkChopper chopper)
     {
-        Appearance appearance = new Appearance();
-        Material material = new Material();
+        Material material = chopper.getLightMaterial();
+        material.setBoolean("UseMaterialColors", true);
 
-        Color3f ambientColor = (Color3f)chopper.popData(ChunkMap.AMBIENT_COLOR);
+        ColorRGBA ambientColor = (ColorRGBA)chopper.popData(ChunkMap.AMBIENT_COLOR);
         if (ambientColor != null) {
-            material.setAmbientColor(ambientColor);
+        	material.setColor("Ambient", ambientColor);
         }
 
-        Color3f color = (Color3f)chopper.popData(ChunkMap.DIFFUSE_COLOR);
+        ColorRGBA color = (ColorRGBA)chopper.popData(ChunkMap.DIFFUSE_COLOR);
         if (color != null) {
-            material.setDiffuseColor(color);
+        	material.setColor("Diffuse", color);
         }
 
-        color = (Color3f)chopper.popData(ChunkMap.SPECULAR_COLOR);
+        color = (ColorRGBA)chopper.popData(ChunkMap.SPECULAR_COLOR);
         if (color != null) {
-            material.setSpecularColor(color);
+        	material.setColor("Specular", color);
         }
 
         Texture texture = (Texture)chopper.popData(ChunkMap.TEXTURE);
         if(texture != null)
         {
-            appearance.setTexture(texture);
+        	material.setTexture("DiffuseMap", texture);
         }
 
         Boolean twoSided = (Boolean)chopper.popData(ChunkMap.TWO_SIDED);
         if (twoSided != null) //Just being there is equivalent to a boolean true.
         {
-
-            PolygonAttributes polyAttributes = appearance.getPolygonAttributes(); 
-            if(polyAttributes == null)
-            {
-                polyAttributes = new PolygonAttributes();
-            }
-
-            polyAttributes.setCullFace(PolygonAttributes.CULL_NONE);
-            appearance.setPolygonAttributes(polyAttributes);
+        	RenderState rs = material.getAdditionalRenderState();
+        	rs.setFaceCullMode(RenderState.FaceCullMode.Off);// twoside
         }
 
         Float transparency = (Float)chopper.popData(ChunkMap.TRANSPARENCY);
         if (transparency != null) {
             if (transparency.floatValue() > 0.01f) {
-
-                TransparencyAttributes transparencyAttributes = new TransparencyAttributes(TransparencyAttributes.FASTEST, transparency.floatValue());
-                appearance.setTransparencyAttributes(transparencyAttributes);
+            	material.setFloat("AlphaDiscardThreshold", transparency);
             }
         }
 
@@ -100,7 +93,7 @@ public class MaterialChunk extends Chunk
         if (shininess != null) 
         {
             float shine = shininess.floatValue() * 1024f;
-            material.setShininess(shine);
+            material.setFloat("Shininess", shine);
         }
 
         /*
@@ -111,7 +104,7 @@ public class MaterialChunk extends Chunk
            }
            */
 
-        appearance.setMaterial(material);
-        chopper.setNamedObject(name, appearance);
+        material.setName(name);
+        chopper.setNamedObject(name, material);
     }
 }

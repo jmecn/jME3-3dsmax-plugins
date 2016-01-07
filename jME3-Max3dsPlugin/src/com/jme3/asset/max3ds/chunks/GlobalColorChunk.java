@@ -21,7 +21,7 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
 
 /**
  * Loads colors from binary data representing them.
@@ -36,7 +36,7 @@ public class GlobalColorChunk extends ColorChunk
      * chunk may use to determine color type
      * @return the color type for the chunk.
      */
-    protected int getColorType(Max3dsLoader chopper)
+    protected int getColorType(ChunkChopper chopper)
     {
         int type = chopper.getUnsignedShort();
         int colorLength = chopper.getUnsignedInt();

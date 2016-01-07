@@ -24,9 +24,8 @@ package com.jme3.asset.max3ds.chunks;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3f;
-
-import com.jme3.asset.max3ds.Max3dsLoader;
+import com.jme3.asset.max3ds.ChunkChopper;
+import com.jme3.math.Vector3f;
 
 /**
  * Extracts scale information from the 3ds file which
@@ -41,7 +40,7 @@ public class ScaleChunk extends Chunk
      *
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
-    public void loadData(Max3dsLoader chopper)
+    public void loadData(ChunkChopper chopper)
     {
         int flags = chopper.getUnsignedShort();
         chopper.getLong();

@@ -29,7 +29,8 @@ import com.jme3.asset.max3ds.chunks.*;
  * A Hashmap with the chunk names as values with keys
  * being the chunk id.
  */
-public class ChunkMap extends HashMap
+@SuppressWarnings("serial")
+public class ChunkMap extends HashMap<Integer, Chunk>
 {
     private Chunk mainChunk;
 
@@ -138,27 +139,8 @@ public class ChunkMap extends HashMap
     }
 
     /**
-     * looks up the chunk corresponding to chunkID
-     * in the chopper's cache. If its not there
-     * look it up from the parent chunk provided.
-     * @param chunkID the id of the chunk to lookup
-     * @return the chunk for chunkID
-    public synchronized Chunk getChunk(Chunk parentChunk, Integer chunkID)
-    {
-        Chunk chunk = (Chunk)get(chunkID);
-        if(chunk == null && parentChunk != null)
-        {
-            chunk = (Chunk)(parentChunk.getChunkMap().get(chunkID)); //look up chunk from its parent.
-            put(chunkID, chunk);
-        }
-        return chunk;
-    }
-     */
-
-    /**
-     * Called when debugging is turned on. The keys are cast to short so that
-     * they are improperly signed since java will be reading improperly signed
-     * ids out of the file.
+     * The keys are cast to short so that they are improperly signed since 
+     * java will be reading improperly signed ids out of the file.
      */
     private void initializeDataMap()
     {
