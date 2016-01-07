@@ -37,9 +37,13 @@ public class TestLoad3DS extends SimpleApplication {
 I rewrite 3DSLoader, migrating it from java3d to jME3. Here is the article i read during writing this plugin.
 
 (1) 3D-Studio File Format (.3ds)
+
 Author: Martin van Velsen (email: vvelsen@ronix.ptf.hro.nl )
+
 Site: http://www.martinreddy.net/gfx/3d/3DS.spec
+
 (2) 3DSLoader for Java3D
+
 Site:http://sourceforge.net/projects/java3dsloader/
 
 == License == 
