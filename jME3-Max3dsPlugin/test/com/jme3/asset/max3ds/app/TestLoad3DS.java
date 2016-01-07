@@ -56,7 +56,7 @@ public class TestLoad3DS extends SimpleApplication {
         dlsf.setEnabled(true);
         fpp.addFilter(dlsf);
         
-        SSAOFilter ssaoFilter = new SSAOFilter(12.94f, 43.92f, 0.33f, 0.61f);
+        SSAOFilter ssaoFilter = new SSAOFilter();
         fpp.addFilter(ssaoFilter);
 
         viewPort.addProcessor(fpp);
