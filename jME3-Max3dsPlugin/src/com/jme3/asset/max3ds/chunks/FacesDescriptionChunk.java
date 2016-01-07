@@ -21,7 +21,6 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,6 +29,7 @@ import java.util.Set;
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.ChunkMap;
 import com.jme3.material.Material;
+import com.jme3.math.Triangle;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -50,6 +50,8 @@ public class FacesDescriptionChunk extends Chunk
     private Vector3f[] currentVertices;
     private Vector2f[] textureTriangles;
     private PointMapper shareMap;
+    
+    private Mesh mesh = null;
 
     /**
      * Maintains a two way mapping between coordinates
@@ -136,11 +138,19 @@ public class FacesDescriptionChunk extends Chunk
         Vector3f[] coordinates = (Vector3f[])chopper.popData(ChunkMap.VERTEX_LIST);
         Vector2f[] texturePoints = (Vector2f[])chopper.popData(ChunkMap.TEXTURE_COORDINATES);
 
+        float v[] = null;
+        int f[] = null;
+        float tv[] = null;
+
         currentVertices = new Vector3f[numFaces * 3];
+        v = new float[numFaces * 3 * 3];
+
         chopper.pushData(chopper.getID(), currentVertices);
         if (texturePoints != null) 
         {
             textureTriangles = new Vector2f[numFaces * 3];
+            f = new int[numFaces * 3];
+            tv = new float[numFaces * 3 * 2];
         }
 
         for (int i = 0; i < numFaces; i++) {
@@ -152,6 +162,16 @@ public class FacesDescriptionChunk extends Chunk
             currentVertices[vertexIndex] = coordinates[index0];
             currentVertices[vertexIndex + 1] = coordinates[index1];
             currentVertices[vertexIndex + 2] = coordinates[index2];
+            
+            v[i * 9 + 0] = coordinates[index0].x;
+			v[i * 9 + 1] = coordinates[index0].y;
+			v[i * 9 + 2] = coordinates[index0].z;
+			v[i * 9 + 3] = coordinates[index1].x;
+			v[i * 9 + 4] = coordinates[index1].y;
+			v[i * 9 + 5] = coordinates[index1].z;
+			v[i * 9 + 6] = coordinates[index2].x;
+			v[i * 9 + 7] = coordinates[index2].y;
+			v[i * 9 + 8] = coordinates[index2].z;
 
             shareMap.addCoordinate(coordinates[index0], vertexIndex);
             shareMap.addCoordinate(coordinates[index1], vertexIndex+1);
@@ -162,7 +182,26 @@ public class FacesDescriptionChunk extends Chunk
                 textureTriangles[vertexIndex] = texturePoints[index0];
                 textureTriangles[vertexIndex + 1] = texturePoints[index1];
                 textureTriangles[vertexIndex + 2] = texturePoints[index2];
+                
+                // faces
+     			f[vertexIndex] = vertexIndex;
+     			f[vertexIndex + 1] = vertexIndex + 1;
+     			f[vertexIndex + 2] = vertexIndex + 2;
+     			
+    			tv[i * 6] = texturePoints[index0].x;
+    			tv[i * 6 + 1] = texturePoints[index0].y;
+    			tv[i * 6 + 2] = texturePoints[index1].x;
+    			tv[i * 6 + 3] = texturePoints[index1].y;
+    			tv[i * 6 + 4] = texturePoints[index2].x;
+    			tv[i * 6 + 5] = texturePoints[index2].y;
             }
+
+            mesh = new Mesh();
+    		mesh.setBuffer(Type.Position, 3, v);
+    		if (f != null)
+    			mesh.setBuffer(Type.Index, 3, f);
+    		if (tv != null)
+    			mesh.setBuffer(Type.TexCoord, 2, tv);
 
             //This is a bit masked value that is used to determine which edges are visible... not needed.
             chopper.getUnsignedShort(); 
@@ -180,77 +219,11 @@ public class FacesDescriptionChunk extends Chunk
         final String materialName = (String)chopper.popData(ChunkMap.FACES_MATERIAL);
         final int[]  smoothGroups = (int[])chopper.popData(ChunkMap.SMOOTH);
         Geometry     shape        = new Geometry();
-        Mesh         mesh         = new Mesh();
 
         Node parent = chopper.getGroup();
         shape.setName(parent.getName());
         parent.attachChild(shape);
         
-        // Vertex 顶点
-        float v[] = new float[currentVertices.length * 3];
-		for (int i = 0; i < currentVertices.length; i++) {
-			Vector3f vert = currentVertices[i];
-			
-			int j = i * 3;
-			v[j] = vert.x;
-			v[j + 1] = vert.y;
-			v[j + 2] = vert.z;
-		}
-		mesh.setBuffer(Type.Position, 3, v);
-		
-		// Faces Index
-        float f[] = new float[currentVertices.length * 3];
-		for (int i = 0; i < currentVertices.length; i++) {
-			int j = i * 3;
-			f[j] = j;
-			f[j + 1] = j + 1;
-			f[j + 2] = j + 2;
-		}
-		mesh.setBuffer(Type.Index, 3, f);
-		
-        // TextureCoord 纹理坐标
-        if (textureTriangles != null) 
-        {
-    		float tv[] = new float[textureTriangles.length * 2];
-    		for (int i = 0; i < textureTriangles.length; i++) {
-    			Vector2f texCoord = textureTriangles[i];
-    			
-    			int j = i * 2;
-    			tv[j] = texCoord.x;
-    			tv[j + 1] = texCoord.y;
-    		}
-            mesh.setBuffer(Type.TexCoord, 2, tv);
-        }
-        
-        // Normals 法线
-        if(smoothGroups == null)
-        {
-        	Vector3f[] normals = generateNormals(currentVertices);
-            float[] n = new float[normals.length * 3];
-            for(int i=0; i<normals.length; i++) {
-            	Vector3f normal = normals[i];
-            	int j = i * 3;
-            	n[j] = normal.x;
-            	n[j + 1] = normal.y;
-            	n[j + 2] = normal.z;
-            }
-            mesh.setBuffer(Type.Normal, 3, n);
-        }
-        else
-        {
-        	Vector3f[] normals = generateNormals(currentVertices);
-            Vector3f[] smoothNormals = smoothNormals(normals, shareMap, smoothGroups);
-            float[] n = new float[smoothNormals.length * 3];
-            for(int i=0; i<smoothNormals.length; i++) {
-            	Vector3f normal = smoothNormals[i];
-            	int j = i * 3;
-            	n[j] = normal.x;
-            	n[j + 1] = normal.y;
-            	n[j + 2] = normal.z;
-            }
-            mesh.setBuffer(Type.Normal, 3, n);
-        }
-
         // Stripifier 切线
 //        new Stripifier().stripify(geometryInfo);
 //        shape.setGeometry(geometryInfo.getGeometryArray());

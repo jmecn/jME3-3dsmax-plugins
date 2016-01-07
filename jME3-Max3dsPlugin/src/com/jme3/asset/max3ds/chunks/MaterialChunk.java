@@ -103,7 +103,7 @@ public class MaterialChunk extends Chunk
            material.setEmissiveColor(ambientColor);
            }
            */
-
+        
         material.setName(name);
         chopper.setNamedObject(name, material);
     }

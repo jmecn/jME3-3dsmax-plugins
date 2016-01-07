@@ -47,8 +47,6 @@ public class StringChunk extends Chunk
             value = value.substring(0, value.indexOf((char)(0x0000)));
         }
         
-        System.out.println("StringChunk: " + value);
-
         chopper.pushData(chopper.getID(), value);
     }
 }
