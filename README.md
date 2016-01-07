@@ -13,7 +13,9 @@ Some kind of material may not work rightly.
 == How to use ==
 
 import com.jme3.app.SimpleApplication;
+
 import com.jme3.asset.max3ds.M3DLoader;
+
 import com.jme3.asset.maxase.AseLoader;
 
 import com.jme3.scene.Node;
