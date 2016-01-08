@@ -22,7 +22,6 @@
 package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.M3DLoader;
 import com.jme3.math.Vector2f;
 
 /**
@@ -33,8 +32,6 @@ import com.jme3.math.Vector2f;
  */
 public class Vertex2ListChunk extends Chunk
 {
-    private static final int POINT_2F_SIZE = 8;
-
     /**
      * Reads all the point data from the chopper and stores
      * teh points in the chopper.

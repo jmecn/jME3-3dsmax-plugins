@@ -58,7 +58,7 @@ public class M3DLoader implements AssetLoader {
 	private Material defaultMaterial;
 	
 	public M3DLoader() {
-		ChunkChopper.debug = false;
+		ChunkChopper.debug = true;
 	}
 	
 	/**

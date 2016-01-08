@@ -22,11 +22,20 @@ public class TestLoad3DS extends SimpleApplication {
 		this.flyCam.setMoveSpeed(100f);
 		
 		assetManager.registerLoader(M3DLoader.class, "3ds");
-		Node model = (Node)assetManager.loadModel("Model/bounce.3DS");
+//		Node model = (Node)assetManager.loadModel("Model/bounce.3DS");
 //		Node model = (Node)assetManager.loadModel("Model/Books/Books.3DS");
-		Node dk = (Node)assetManager.loadModel("Model/DeathKnight/dk.3DS");
-		rootNode.attachChild(model);
-		rootNode.attachChild(dk);
+//		Node dk = (Node)assetManager.loadModel("Model/DeathKnight/dk.3DS");
+//		rootNode.attachChild(model);
+//		rootNode.attachChild(dk);
+		
+//		Node Dolphin = (Node)assetManager.loadModel("Model/Examples/Dolphin 1.3ds");
+//		rootNode.attachChild(Dolphin);
+		
+//		Node manikin = (Node)assetManager.loadModel("Model/Examples/Manikin-5.3DS");
+//		rootNode.attachChild(manikin);
+		
+		Node ostrich = (Node)assetManager.loadModel("Model/Examples/Ostrich.3ds");
+		rootNode.attachChild(ostrich);
 		
 		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		initLight();

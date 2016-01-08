@@ -244,7 +244,11 @@ public class FacesDescriptionChunk extends Chunk
         if(materialName != null)
         {
         	Material mat = (Material)chopper.getNamedObject(materialName);
-        	shape.setMaterial(mat);
+        	if (mat == null) {
+        		shape.setMaterial(chopper.getDefaultMaterial());
+        	} else {
+        		shape.setMaterial(mat);
+        	}
         }
         else
         {
