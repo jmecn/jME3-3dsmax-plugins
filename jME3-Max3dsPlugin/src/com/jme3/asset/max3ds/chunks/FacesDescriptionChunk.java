@@ -29,7 +29,6 @@ import java.util.Set;
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.ChunkMap;
 import com.jme3.material.Material;
-import com.jme3.math.Triangle;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -51,7 +50,7 @@ public class FacesDescriptionChunk extends Chunk
     private Vector2f[] textureTriangles;
     private PointMapper shareMap;
     
-    private Mesh mesh = null;
+    private int numFaces;
 
     /**
      * Maintains a two way mapping between coordinates
@@ -133,24 +132,19 @@ public class FacesDescriptionChunk extends Chunk
      */
     public void loadData(ChunkChopper chopper)
     {
-        int numFaces = chopper.getUnsignedShort();
+        numFaces = chopper.getUnsignedShort();
         shareMap = new PointMapper(numFaces*3);
         Vector3f[] coordinates = (Vector3f[])chopper.popData(ChunkMap.VERTEX_LIST);
         Vector2f[] texturePoints = (Vector2f[])chopper.popData(ChunkMap.TEXTURE_COORDINATES);
 
-        float v[] = null;
-        int f[] = null;
-        float tv[] = null;
+
 
         currentVertices = new Vector3f[numFaces * 3];
-        v = new float[numFaces * 3 * 3];
 
         chopper.pushData(chopper.getID(), currentVertices);
         if (texturePoints != null) 
         {
             textureTriangles = new Vector2f[numFaces * 3];
-            f = new int[numFaces * 3];
-            tv = new float[numFaces * 3 * 2];
         }
 
         for (int i = 0; i < numFaces; i++) {
@@ -162,16 +156,6 @@ public class FacesDescriptionChunk extends Chunk
             currentVertices[vertexIndex] = coordinates[index0];
             currentVertices[vertexIndex + 1] = coordinates[index1];
             currentVertices[vertexIndex + 2] = coordinates[index2];
-            
-            v[i * 9 + 0] = coordinates[index0].x;
-			v[i * 9 + 1] = coordinates[index0].y;
-			v[i * 9 + 2] = coordinates[index0].z;
-			v[i * 9 + 3] = coordinates[index1].x;
-			v[i * 9 + 4] = coordinates[index1].y;
-			v[i * 9 + 5] = coordinates[index1].z;
-			v[i * 9 + 6] = coordinates[index2].x;
-			v[i * 9 + 7] = coordinates[index2].y;
-			v[i * 9 + 8] = coordinates[index2].z;
 
             shareMap.addCoordinate(coordinates[index0], vertexIndex);
             shareMap.addCoordinate(coordinates[index1], vertexIndex+1);
@@ -182,26 +166,7 @@ public class FacesDescriptionChunk extends Chunk
                 textureTriangles[vertexIndex] = texturePoints[index0];
                 textureTriangles[vertexIndex + 1] = texturePoints[index1];
                 textureTriangles[vertexIndex + 2] = texturePoints[index2];
-                
-                // faces
-     			f[vertexIndex] = vertexIndex;
-     			f[vertexIndex + 1] = vertexIndex + 1;
-     			f[vertexIndex + 2] = vertexIndex + 2;
-     			
-    			tv[i * 6] = texturePoints[index0].x;
-    			tv[i * 6 + 1] = texturePoints[index0].y;
-    			tv[i * 6 + 2] = texturePoints[index1].x;
-    			tv[i * 6 + 3] = texturePoints[index1].y;
-    			tv[i * 6 + 4] = texturePoints[index2].x;
-    			tv[i * 6 + 5] = texturePoints[index2].y;
             }
-
-            mesh = new Mesh();
-    		mesh.setBuffer(Type.Position, 3, v);
-    		if (f != null)
-    			mesh.setBuffer(Type.Index, 3, f);
-    		if (tv != null)
-    			mesh.setBuffer(Type.TexCoord, 2, tv);
 
             //This is a bit masked value that is used to determine which edges are visible... not needed.
             chopper.getUnsignedShort(); 
@@ -224,22 +189,6 @@ public class FacesDescriptionChunk extends Chunk
         shape.setName(parent.getName());
         parent.attachChild(shape);
         
-        // Stripifier ÇÐÏß
-//        new Stripifier().stripify(geometryInfo);
-//        shape.setGeometry(geometryInfo.getGeometryArray());
-//        shape.setCapability(Geometry.ALLOW_INTERSECT);
-//        com.sun.j3d.utils.picking.PickTool.setCapabilities(shape, com.sun.j3d.utils.picking.PickTool.INTERSECT_FULL);
-
-        currentVertices=null;
-        textureTriangles=null;
-        
-        mesh.setStatic();
-		mesh.updateBound();
-		mesh.updateCounts();
-		
-        shape.setMesh(mesh);
-        
-
         // Materials ²ÄÖÊ
         if(materialName != null)
         {
@@ -254,6 +203,97 @@ public class FacesDescriptionChunk extends Chunk
         {
         	shape.setMaterial(chopper.getDefaultMaterial());
         }
+        
+        // Mesh
+        Mesh mesh = new Mesh();
+        float v[] = new float[numFaces * 9];
+        int f[] = null;
+        float tv[] = null;
+        float[] n = new float[numFaces * 9];
+        
+        if (textureTriangles != null) 
+        {
+            f = new int[numFaces * 3];
+            tv = new float[numFaces * 6];
+        }
+        
+        for (int i = 0; i < numFaces; i++) {
+            int vertexIndex = i * 3;
+            v[i * 9 + 0] = currentVertices[vertexIndex].x;
+			v[i * 9 + 1] = currentVertices[vertexIndex].y;
+			v[i * 9 + 2] = currentVertices[vertexIndex].z;
+			v[i * 9 + 3] = currentVertices[vertexIndex + 1].x;
+			v[i * 9 + 4] = currentVertices[vertexIndex + 1].y;
+			v[i * 9 + 5] = currentVertices[vertexIndex + 1].z;
+			v[i * 9 + 6] = currentVertices[vertexIndex + 2].x;
+			v[i * 9 + 7] = currentVertices[vertexIndex + 2].y;
+			v[i * 9 + 8] = currentVertices[vertexIndex + 2].z;
+
+
+            if (textureTriangles != null) {
+                // index
+     			f[vertexIndex] = vertexIndex;
+     			f[vertexIndex + 1] = vertexIndex + 1;
+     			f[vertexIndex + 2] = vertexIndex + 2;
+     			
+     			// uv
+    			tv[i * 6] = textureTriangles[vertexIndex].x;
+    			tv[i * 6 + 1] = textureTriangles[vertexIndex].y;
+    			tv[i * 6 + 2] = textureTriangles[vertexIndex + 1].x;
+    			tv[i * 6 + 3] = textureTriangles[vertexIndex + 1].y;
+    			tv[i * 6 + 4] = textureTriangles[vertexIndex + 2].x;
+    			tv[i * 6 + 5] = textureTriangles[vertexIndex + 2].y;
+            }
+        }
+		
+        // Normals
+        if (smoothGroups == null) {
+        	Vector3f[] normals = generateNormals(currentVertices);
+        	for(int i=0; i<normals.length; i++) {
+        		int j = i * 3;
+        		n[j] = normals[i].x;
+        		n[j+1] = normals[i].y;
+        		n[j+2] = normals[i].z;
+        	}
+        	mesh.setBuffer(Type.Normal, 3, n);
+        } else {
+        	Vector3f[] normals = generateNormals(currentVertices);
+            Vector3f[] smoothNormals = smoothNormals(normals, shareMap, smoothGroups);
+        	for(int i=0; i<smoothNormals.length; i++) {
+        		int j = i * 3;
+        		n[j] = smoothNormals[i].x;
+        		n[j+1] = smoothNormals[i].y;
+        		n[j+2] = smoothNormals[i].z;
+        	}
+        }
+        
+		mesh.setBuffer(Type.Position, 3, v);
+		mesh.setBuffer(Type.Normal, 3, n);
+		if (f != null) {
+			mesh.setBuffer(Type.Index, 3, f);
+			System.out.println(parent.getName() + " has no Index");
+		}
+		if (tv != null) {
+			mesh.setBuffer(Type.TexCoord, 2, tv);
+		} else {
+			System.out.println(parent.getName() + " has no TexCoord");
+		}
+        
+        // Stripifier ÇÐÏß
+//        new Stripifier().stripify(geometryInfo);
+//        shape.setGeometry(geometryInfo.getGeometryArray());
+//        shape.setCapability(Geometry.ALLOW_INTERSECT);
+//        com.sun.j3d.utils.picking.PickTool.setCapabilities(shape, com.sun.j3d.utils.picking.PickTool.INTERSECT_FULL);
+
+        
+        mesh.setStatic();
+		mesh.updateBound();
+		mesh.updateCounts();
+		
+        shape.setMesh(mesh);
+
+        currentVertices=null;
+        textureTriangles=null;
     }
 
     /**

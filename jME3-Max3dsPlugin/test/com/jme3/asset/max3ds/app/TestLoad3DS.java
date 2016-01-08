@@ -35,17 +35,21 @@ public class TestLoad3DS extends SimpleApplication {
 //		rootNode.attachChild(manikin);
 		
 		Node ostrich = (Node)assetManager.loadModel("Model/Examples/Ostrich.3ds");
+		ostrich.scale(10);
 		rootNode.attachChild(ostrich);
 		
-		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		initLight();
-		
+		initSunAndShadow();
 	}
 
 	private void initLight() {
 		AmbientLight al = new AmbientLight();
-		al.setColor(ColorRGBA.White.mult(1.3f));
+		al.setColor(ColorRGBA.White);
 		rootNode.addLight(al);
+	}
+	
+	private void initSunAndShadow() {
+		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		
 		DirectionalLight sun = new DirectionalLight();
 		sun.setColor(ColorRGBA.White);
@@ -57,18 +61,18 @@ public class TestLoad3DS extends SimpleApplication {
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 3);
         dlsr.setLight(sun);
         viewPort.addProcessor(dlsr);
- 
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         
-        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);
-        dlsf.setLight(sun);
-        dlsf.setEnabled(true);
-        fpp.addFilter(dlsf);
-        
-        SSAOFilter ssaoFilter = new SSAOFilter();
-        fpp.addFilter(ssaoFilter);
-
-        viewPort.addProcessor(fpp);
+//        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+//        
+//        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);
+//        dlsf.setLight(sun);
+//        dlsf.setEnabled(true);
+//        fpp.addFilter(dlsf);
+//        
+//        SSAOFilter ssaoFilter = new SSAOFilter();
+//        fpp.addFilter(ssaoFilter);
+//
+//        viewPort.addProcessor(fpp);
 	}
 	public static void main(String[] args) {
 		TestLoad3DS app = new TestLoad3DS();

@@ -190,8 +190,7 @@ public class ChunkChopper {
 			chunkBuffer.limit(chunkBuffer.position() + currentChunkLength);
 
 			if (debug) {
-				Debug.debug(parentChunk, level, chunkID, currentChunkLength,
-						chunkBuffer.position(), chunkBuffer.limit());
+				Debug.debug(parentChunk, level, chunkID, currentChunkLength, chunkBuffer.position(), chunkBuffer.limit());
 			}
 			if (chunk != null && currentChunkLength != 0) {
 				try {

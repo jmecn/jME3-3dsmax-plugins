@@ -93,6 +93,7 @@ public class ChunkMap extends HashMap<Integer, Chunk> implements ChunkID
         mainChunk.addSubChunk(KEYFRAMER, keyFramerChunk);
 
         editorChunk.addSubChunk(MATERIAL, materialChunk);
+        editorChunk.addSubChunk(AMBIENT, globalColorChunk);
         editorChunk.addSubChunk(SCALE, floatChunk);
         editorChunk.addSubChunk(NAMED_OBJECT, namedObjectChunk);
 
@@ -134,6 +135,7 @@ public class ChunkMap extends HashMap<Integer, Chunk> implements ChunkID
         materialChunk.addSubChunk(TWO_SIDED, booleanChunk);
 
         materialChunk.addSubChunk(SHININESS, percentageChunk);
+        materialChunk.addSubChunk(SHININESS_STRENGTH, percentageChunk);
         materialChunk.addSubChunk(TRANSPARENCY, percentageChunk);
 
         namedObjectChunk.addSubChunk(MESH, triangularMeshChunk);

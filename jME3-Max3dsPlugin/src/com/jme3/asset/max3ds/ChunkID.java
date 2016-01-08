@@ -2,89 +2,90 @@ package com.jme3.asset.max3ds;
 
 public interface ChunkID {
 	
-	int MAIN3DS                = 0x4D4D;
+	int MAIN3DS                = (short)0x4D4D;
 	
-    int VERSION                = 0x0002;
-    int COLOR                  = 0x0010;
-    int SCALE                  = 0x0100;
+    int VERSION                = (short)0x0002;
+    int COLOR                  = (short)0x0010;
+    int SCALE                  = (short)0x0100;
     
-    int EDITOR                 = 0x3D3D;
+    int AMBIENT                = (short)0x2100;//Ambient color
+    int EDITOR                 = (short)0x3D3D;
     
-    int NAMED_OBJECT           = 0x4000;
+    int NAMED_OBJECT           = (short)0x4000;
     /** Represent a mesh object for shapes. */
-    int MESH                   = 0x4100;
+    int MESH                   = (short)0x4100;
     /** The vertex list from which vertices of a face array will be used. */
-    int VERTEX_LIST            = 0x4110;
+    int VERTEX_LIST            = (short)0x4110;
     /** reference coordinates into the vertex list which represent shape vertex coordinates. */
-    int FACES_DESCRIPTION      = 0x4120;
+    int FACES_DESCRIPTION      = (short)0x4120;
     /**  Key mapping faces material chunk as a child of this chunk */
-    int FACES_MATERIAL         = 0x4130;
-    int TEXTURE_COORDINATES    = 0x4140;
+    int FACES_MATERIAL         = (short)0x4130;
+    int TEXTURE_COORDINATES    = (short)0x4140;
     /**  Key mapping smoothing chunk as a child of this chunk */
-    int SMOOTH                 = 0x4150;
+    int SMOOTH                 = (short)0x4150;
     /** Local coordinate system of the mesh. */
-    int COORDINATE_AXES        = 0x4160;
+    int COORDINATE_AXES        = (short)0x4160;
     
     /** Represent a light */
-    int LIGHT                  = 0x4600;
-    int SPOTLIGHT              = 0x4610;
+    int LIGHT                  = (short)0x4600;
+    int SPOTLIGHT              = (short)0x4610;
     /** Signifies that the light is off **/
-    int LIGHT_OFF              = 0x4620;
-    int ATTENUATED             = 0x4625;
-    int RAYTRACE               = 0x4627;
-    int SHADOWED               = 0x4630;
-    int SHADOW_MAP             = 0x4641;
-    int SHOW_CONE              = 0x4650;
-    int RECTANGULAR            = 0x4651;
-    int OVERSHOOT              = 0x4652;
-    int SPOT_MAP               = 0x4653;
-    int SPOT_ROLL              = 0x4656;
-    int RAY_TRACE_BIAS         = 0x4658;
-    int RANGE_START            = 0x4659;
-    int RANGE_END              = 0x465A;
-    int MULTIPLIER             = 0x465B;
+    int LIGHT_OFF              = (short)0x4620;
+    int ATTENUATED             = (short)0x4625;
+    int RAYTRACE               = (short)0x4627;
+    int SHADOWED               = (short)0x4630;
+    int SHADOW_MAP             = (short)0x4641;
+    int SHOW_CONE              = (short)0x4650;
+    int RECTANGULAR            = (short)0x4651;
+    int OVERSHOOT              = (short)0x4652;
+    int SPOT_MAP               = (short)0x4653;
+    int SPOT_ROLL              = (short)0x4656;
+    int RAY_TRACE_BIAS         = (short)0x4658;
+    int RANGE_START            = (short)0x4659;
+    int RANGE_END              = (short)0x465A;
+    int MULTIPLIER             = (short)0x465B;
     
     /** Represent a camera for viewing */
-    int CAMERA                 = 0x4700;
+    int CAMERA                 = (short)0x4700;
     
     /** Represent a material */
-    int MATERIAL               = 0xAFFF;
-    int MATERIAL_NAME          = 0xA000;
-    int AMBIENT_COLOR          = 0xA010;
-    int DIFFUSE_COLOR          = 0xA020;
-    int SPECULAR_COLOR         = 0xA030;
-    int SHININESS              = 0xA040;
-    //int SHININESS              = 0xA041;
-    int TRANSPARENCY           = 0xA050;
-    int TWO_SIDED              = 0xA081;
-    int SELF_ILLUMINATED       = 0xA084;
-    int TEXTURE                = 0xA200;
-    int TEXTURE_NAME           = 0xA300;
-    int TEXTURE_TILING         = 0xA351;
-    int TEXBLUR                = 0xA353;
+    int MATERIAL               = (short)0xAFFF;
+    int MATERIAL_NAME          = (short)0xA000;
+    int AMBIENT_COLOR          = (short)0xA010;
+    int DIFFUSE_COLOR          = (short)0xA020;
+    int SPECULAR_COLOR         = (short)0xA030;
+    int SHININESS              = (short)0xA040;
+    int SHININESS_STRENGTH     = (short)0xA041;
+    int TRANSPARENCY           = (short)0xA050;
+    int TWO_SIDED              = (short)0xA081;
+    int SELF_ILLUMINATED       = (short)0xA084;
+    int TEXTURE                = (short)0xA200;
+    int TEXTURE_NAME           = (short)0xA300;
+    int TEXTURE_TILING         = (short)0xA351;
+    int TEXBLUR                = (short)0xA353;
     
     /** Represent the key frame animation */
-    int KEYFRAMER              = 0xB000;
-	int AMBIENT_LIGHT_INFO     = 0xB001;
-	int MESH_INFO              = 0xB002;
-	int CAMERA_INFO            = 0xB003;
-	int CAMERA_TARGET_INFO     = 0xB004;
-	int OMNI_LIGHT_INFO        = 0xB005;
-	int SPOT_LIGHT_TARGET_INFO = 0xB006;
-	int SPOT_LIGHT_INFO        = 0xB007;
-	int FRAMES_CHUNK           = 0xB008;
-	int NAME_AND_FLAGS         = 0xB010;
+    int KEYFRAMER              = (short)0xB000;
+	int AMBIENT_LIGHT_INFO     = (short)0xB001;
+	int MESH_INFO              = (short)0xB002;
+	int CAMERA_INFO            = (short)0xB003;
+	int CAMERA_TARGET_INFO     = (short)0xB004;
+	int OMNI_LIGHT_INFO        = (short)0xB005;
+	int SPOT_LIGHT_TARGET_INFO = (short)0xB006;
+	int SPOT_LIGHT_INFO        = (short)0xB007;
+	int FRAMES_CHUNK           = (short)0xB008;
+	int NAME_AND_FLAGS         = (short)0xB010;
 	/** Key for the pivot chunk */
-	int PIVOT                  = 0xB013;
-	int BOUNDING_BOX           = 0x0B014;
+	int PIVOT                  = (short)0xB013;
+	int BOUNDING_BOX           = (short)0xB014;
 	/** Indicates a position track chunk **/
-	int POSITION               = 0xB020;
+	int POSITION               = (short)0xB020;
 	/** Indicates a scale track chunk */
-	int SCALE_TRACK            = 0xB022;
+	int SCALE_TRACK            = (short)0xB022;
 	/** Indicates a rotation track chunk */
-	int ROTATION               = 0xB021;
+	int ROTATION               = (short)0xB021;
 	/** Indicates a hierarchy info chunk **/
-	int HIERARCHY_INFO         = 0xB030;
+	int HIERARCHY_INFO         = (short)0xB030;
 	
 	
     /*
