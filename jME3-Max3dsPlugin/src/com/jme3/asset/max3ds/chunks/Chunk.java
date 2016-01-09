@@ -3,7 +3,6 @@ package com.jme3.asset.max3ds.chunks;
 import java.util.HashMap;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.M3DLoader;
 /**
  * The base class for all chunks. Chunks are  flyweights and should be managed
  * by  {@link ChunkChopper}  Every chunk should know how many bytes of data(or
@@ -41,12 +40,12 @@ public class Chunk
     {
     }
 
-    public void addSubChunk(Integer id, Chunk subChunk)
+    public void addSubChunk(int id, Chunk subChunk)
     {
         subChunkMap.put(id, subChunk);
     }
 
-    public Chunk getSubChunk(Integer id)
+    public Chunk getSubChunk(int id)
     {
         return (Chunk)subChunkMap.get(id);
     }
@@ -57,7 +56,7 @@ public class Chunk
      * ChunkChopper#popData}
      * The default implementation does nothing.
      *
-     * @param max3dsLoader may contain data loaded by subchunks. 
+     * @param chopper may contain data loaded by subchunks. 
      */
     public void initialize(ChunkChopper chopper) 
     {

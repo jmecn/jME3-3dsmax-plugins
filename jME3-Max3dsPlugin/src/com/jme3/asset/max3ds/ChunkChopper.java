@@ -11,7 +11,8 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jme3.asset.max3ds.chunks.Chunk;
+import static com.jme3.asset.max3ds.ChunkID.*;
+import com.jme3.asset.max3ds.chunks.*;
 import com.jme3.asset.max3ds.data.KeyFramer;
 import com.jme3.export.Savable;
 import com.jme3.light.Light;
@@ -43,12 +44,11 @@ public class ChunkChopper {
 	
 	
 	private HashMap<Object, Object> dataMap;
-	private HashMap<String, Savable> userData;
+	private HashMap<Object, Object> userData;
 	
 	protected ByteBuffer chunkBuffer;
 	protected Integer chunkID;
-	protected Chunk mainChunk = new Chunk("MainChunk");
-	protected ChunkMap chunkMap = new ChunkMap(mainChunk);
+	protected Chunk mainChunk;
 	
 	private Node rootNode;
 	private Node currentNode;
@@ -60,13 +60,125 @@ public class ChunkChopper {
 	/** This should be turned on by Loader3DS to view debugging information. */
 	public static boolean debug;
 	
-	/** Current chunk for which debugging info is viewed if debug == true */
-	public static Chunk debugChunk;
-	
     /**
-     * private singleton constructor.
+     * Initialize the chunks
      */
-    public ChunkChopper(){}
+    public ChunkChopper() {
+    	
+    	// Main Chunk
+    	mainChunk = new Chunk("MainChunk");
+    	
+    	// SubChunks of MainChunk
+    	Chunk editorChunk            = new Chunk("EditorChunk");
+    	Chunk keyFramerChunk         = new Chunk("KeyFramerChunk");
+
+    	// SubChunks Editor Chunk
+        Chunk namedObjectChunk       = new NamedObjectChunk();
+        Chunk materialChunk          = new MaterialChunk();
+        
+        // SubChunks of NamedObjectChunk
+        Chunk triangularMeshChunk    = new TriangularMeshChunk();
+        Chunk lightChunk             = new LightChunk();
+        Chunk cameraChunk            = new CameraChunk();
+        
+    	// Global Chunk
+    	Chunk floatChunk             = new FloatChunk();
+    	Chunk stringChunk            = new StringChunk();
+    	Chunk globalColorChunk       = new GlobalColorChunk();
+    	Chunk booleanChunk           = new BooleanChunk();
+    	Chunk percentageChunk        = new PercentageChunk();
+    	Chunk colorChunk             = new ColorChunk();
+    	
+        Chunk facesDescriptionChunk  = new FacesDescriptionChunk();
+        Chunk framesDescriptionChunk = new FramesDescriptionChunk();
+        Chunk textureChunk           = new TextureChunk();
+        
+        Chunk keyFramerInfoChunk     = new KeyFramerInfoChunk();
+        Chunk spotLightChunk         = new SpotLightChunk();
+        Chunk framesChunk            = new FramesChunk();
+        Chunk pivotChunk             = new PivotChunk();
+        Chunk positionChunk          = new PositionChunk();
+        Chunk rotationChunk          = new RotationChunk();
+        Chunk scaleChunk             = new ScaleChunk();
+        Chunk hierarchyInfoChunk     = new HierarchyInfoChunk();
+        Chunk boundingBoxChunk       = new BoundingBoxChunk();
+        Chunk vertex3ListChunk       = new Vertex3ListChunk();
+        Chunk vertex2ListChunk       = new Vertex2ListChunk();
+        Chunk axisChunk              = new AxisChunk();
+        Chunk facesMaterialChunk     = new FacesMaterialChunk();
+        Chunk smoothingChunk         = new SmoothingChunk();
+        
+        // Main Chunk
+        mainChunk.addSubChunk(EDITOR, editorChunk);
+        mainChunk.addSubChunk(KEYFRAMER, keyFramerChunk);
+        
+        // Editor Chunk
+        editorChunk.addSubChunk(SCALE, floatChunk);
+        editorChunk.addSubChunk(MATERIAL, materialChunk);
+        editorChunk.addSubChunk(NAMED_OBJECT, namedObjectChunk);
+        
+        // Material Chunk
+        materialChunk.addSubChunk(MATERIAL_NAME, stringChunk);
+        materialChunk.addSubChunk(AMBIENT_COLOR, globalColorChunk);
+        materialChunk.addSubChunk(DIFFUSE_COLOR, globalColorChunk);
+        materialChunk.addSubChunk(SPECULAR_COLOR, globalColorChunk);
+        materialChunk.addSubChunk(TEXTURE, textureChunk);
+        materialChunk.addSubChunk(TWO_SIDED, booleanChunk);
+        materialChunk.addSubChunk(SHININESS, percentageChunk);
+        materialChunk.addSubChunk(SHININESS_STRENGTH, percentageChunk);
+        materialChunk.addSubChunk(TRANSPARENCY, percentageChunk);
+        materialChunk.addSubChunk(TRANSPARENCY_FALLOUT, percentageChunk);
+        materialChunk.addSubChunk(REFLECTION_BLUR, percentageChunk);
+
+        textureChunk.addSubChunk(TEXTURE_NAME, stringChunk);
+        
+        // NamedObjectChunk
+        namedObjectChunk.addSubChunk(MESH, triangularMeshChunk);
+        //namedObjectChunk.addSubChunk(CAMERA, cameraChunk);// I think we don't need this camera
+        namedObjectChunk.addSubChunk(LIGHT, lightChunk);// I think we don't need this light
+        
+        triangularMeshChunk.addSubChunk(VERTEX_LIST, vertex3ListChunk);
+        triangularMeshChunk.addSubChunk(TEXTURE_COORDINATES, vertex2ListChunk);
+        triangularMeshChunk.addSubChunk(FACES_DESCRIPTION, facesDescriptionChunk);
+        triangularMeshChunk.addSubChunk(COORDINATE_AXES, axisChunk);
+
+        facesDescriptionChunk.addSubChunk(FACES_MATERIAL, facesMaterialChunk);
+        facesDescriptionChunk.addSubChunk(SMOOTH, smoothingChunk);
+        
+        lightChunk.addSubChunk(RANGE_START, floatChunk);
+        lightChunk.addSubChunk(COLOR, colorChunk);
+        lightChunk.addSubChunk(RANGE_END, floatChunk);
+        lightChunk.addSubChunk(MULTIPLIER, floatChunk);
+        lightChunk.addSubChunk(SPOTLIGHT, spotLightChunk);
+        
+        spotLightChunk.addSubChunk(LIGHT_OFF, booleanChunk);
+        spotLightChunk.addSubChunk(RAYTRACE, booleanChunk);
+        spotLightChunk.addSubChunk(SHADOWED, booleanChunk);
+        spotLightChunk.addSubChunk(SHOW_CONE, booleanChunk);
+        spotLightChunk.addSubChunk(RECTANGULAR, booleanChunk);
+        spotLightChunk.addSubChunk(SHADOW_MAP, booleanChunk);
+        spotLightChunk.addSubChunk(OVERSHOOT, booleanChunk);
+        spotLightChunk.addSubChunk(SPOT_MAP, booleanChunk);
+        spotLightChunk.addSubChunk(SPOT_ROLL, booleanChunk);
+        spotLightChunk.addSubChunk(RAY_TRACE_BIAS, booleanChunk);
+        
+        keyFramerChunk.addSubChunk(FRAMES_CHUNK, framesChunk);
+        keyFramerChunk.addSubChunk(MESH_INFO, keyFramerInfoChunk);
+        keyFramerChunk.addSubChunk(AMBIENT_LIGHT_INFO, keyFramerInfoChunk);
+        keyFramerChunk.addSubChunk(CAMERA_INFO, keyFramerInfoChunk);
+        keyFramerChunk.addSubChunk(CAMERA_TARGET_INFO, keyFramerInfoChunk);
+        keyFramerChunk.addSubChunk(OMNI_LIGHT_INFO, keyFramerInfoChunk);
+        keyFramerChunk.addSubChunk(SPOT_LIGHT_TARGET_INFO, keyFramerInfoChunk);
+        keyFramerChunk.addSubChunk(SPOT_LIGHT_INFO, keyFramerInfoChunk);
+
+        keyFramerInfoChunk.addSubChunk(NAME_AND_FLAGS, framesDescriptionChunk);
+        keyFramerInfoChunk.addSubChunk(PIVOT, pivotChunk);
+        keyFramerInfoChunk.addSubChunk(POSITION, positionChunk);
+        keyFramerInfoChunk.addSubChunk(ROTATION, rotationChunk);
+        keyFramerInfoChunk.addSubChunk(SCALE_TRACK, scaleChunk);
+        keyFramerInfoChunk.addSubChunk(HIERARCHY_INFO, hierarchyInfoChunk);
+        keyFramerInfoChunk.addSubChunk(BOUNDING_BOX, boundingBoxChunk);
+    }
 
     /**
      * This sequentially parses the chunks out of the input stream and
@@ -284,9 +396,9 @@ public class ChunkChopper {
 	 * @param value
 	 *            the named Object.
 	 */
-	public void setNamedObject(String key, Object data) {
+	public void setNamedObject(Object key, Object data) {
 		if (userData == null) {
-            userData = new HashMap<String, Savable>();
+            userData = new HashMap<Object, Object>();
         }
 		
         if(data == null){
@@ -304,7 +416,7 @@ public class ChunkChopper {
 	 * @param key
 	 *            the key used as the name for which the object will be returned
 	 */
-	public Object getNamedObject(String key) {
+	public Object getNamedObject(Object key) {
 		if (key == null) {
 			return null;
 		}
@@ -313,7 +425,7 @@ public class ChunkChopper {
             return null;
         }
 
-        Savable s = userData.get(key);
+        Object s = userData.get(key);
         if (s instanceof UserData) {
             return ((UserData) s).getValue();
         } else {

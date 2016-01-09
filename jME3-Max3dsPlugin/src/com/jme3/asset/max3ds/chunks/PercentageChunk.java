@@ -44,12 +44,14 @@ public class PercentageChunk extends Chunk
     public void loadData(ChunkChopper chopper)
     {
         int percentageType = chopper.getUnsignedShort();
-        int percentageLength = chopper.getUnsignedInt();
+        chopper.getUnsignedInt();// percentageLength
+        
         if (percentageType == INT) {
             percentage = (chopper.getUnsignedShort()) / 100f;
             chopper.pushData(chopper.getID(), new Float(percentage));
         } else if (percentageType == FLOAT) {
             percentage = chopper.getFloat() / 100f;
+            System.out.println("PercentageChunk " + percentage);
             chopper.pushData(chopper.getID(), new Float(percentage));
         } else {
             throw new IllegalArgumentException("Only float and int percentages are enabled.");

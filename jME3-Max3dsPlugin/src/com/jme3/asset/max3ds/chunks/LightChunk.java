@@ -21,7 +21,7 @@
 package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.asset.max3ds.ChunkID;
 import com.jme3.light.PointLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -60,8 +60,8 @@ public class LightChunk extends Chunk
      */
     public void initialize(ChunkChopper chopper)
     {
-        ColorRGBA color = (ColorRGBA)chopper.popData(ChunkMap.COLOR);
-        PointLight light = (PointLight)chopper.popData(ChunkMap.SPOTLIGHT);
+        ColorRGBA color = (ColorRGBA)chopper.popData(ChunkID.COLOR);
+        PointLight light = (PointLight)chopper.popData(ChunkID.SPOTLIGHT);
         if(light == null)
         {
             light = new PointLight();

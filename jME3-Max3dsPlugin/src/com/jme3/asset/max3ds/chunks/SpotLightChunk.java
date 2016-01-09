@@ -21,7 +21,7 @@
 package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.asset.max3ds.ChunkID;
 import com.jme3.light.SpotLight;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -51,7 +51,7 @@ public class SpotLightChunk extends Chunk
         float beam = chopper.getFloat();
         float falloff = chopper.getFloat();
 
-        Vector3f position = (Vector3f)chopper.popData(ChunkMap.LIGHT);
+        Vector3f position = (Vector3f)chopper.popData(ChunkID.LIGHT);
         
         SpotLight light = new SpotLight();
         light.setDirection(new Vector3f(0, 0, -1));

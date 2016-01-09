@@ -22,7 +22,6 @@
 package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.M3DLoader;
 import com.jme3.math.Vector3f;
 
 /**

@@ -56,6 +56,5 @@ public class CameraChunk extends Chunk
         // Camera camera = new Camera(800, 600);
         // camera.setLocation(position);
         // camera.lookAt(target, yVector);
-
     }  
 }

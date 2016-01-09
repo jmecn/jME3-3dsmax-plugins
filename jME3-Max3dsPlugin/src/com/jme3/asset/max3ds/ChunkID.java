@@ -8,7 +8,6 @@ public interface ChunkID {
     int COLOR                  = (short)0x0010;
     int SCALE                  = (short)0x0100;
     
-    int AMBIENT                = (short)0x2100;//Ambient color
     int EDITOR                 = (short)0x3D3D;
     
     int NAMED_OBJECT           = (short)0x4000;
@@ -57,8 +56,11 @@ public interface ChunkID {
     int SHININESS              = (short)0xA040;
     int SHININESS_STRENGTH     = (short)0xA041;
     int TRANSPARENCY           = (short)0xA050;
+    int TRANSPARENCY_FALLOUT   = (short)0xA052;
+    int REFLECTION_BLUR        = (short)0xA053;
     int TWO_SIDED              = (short)0xA081;
     int SELF_ILLUMINATED       = (short)0xA084;
+    int RENDER_TYPE            = (short)0xA100;
     int TEXTURE                = (short)0xA200;
     int TEXTURE_NAME           = (short)0xA300;
     int TEXTURE_TILING         = (short)0xA351;

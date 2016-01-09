@@ -29,9 +29,8 @@ import com.jme3.scene.Node;
  */
 public class NamedObjectChunk extends Chunk
 {
-
     /**
-     * Adds a TransformGroup the the chopper's branch
+     * Adds a Node the the chopper's branch
      * group to which meshes will be added.
      *
      * @param chopper The chopper containing the state of parsing.  
@@ -42,4 +41,5 @@ public class NamedObjectChunk extends Chunk
         Node node = new Node(name);
         chopper.attachNode(node);
     }
+    
 }

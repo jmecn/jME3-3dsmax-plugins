@@ -23,7 +23,7 @@ package com.jme3.asset.max3ds.chunks;
 
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.asset.max3ds.ChunkID;
 
 
 /**
@@ -41,7 +41,7 @@ public class TextureChunk extends Chunk
      */
     public void initialize(ChunkChopper chopper)
     {
-        String textureName = (String)chopper.popData(ChunkMap.TEXTURE_NAME);
-        chopper.pushData(ChunkMap.TEXTURE, chopper.createTexture(textureName));
+        String textureName = (String)chopper.popData(ChunkID.TEXTURE_NAME);
+        chopper.pushData(ChunkID.TEXTURE, chopper.createTexture(textureName));
     }
 }

@@ -23,12 +23,11 @@ package com.jme3.asset.max3ds.chunks;
 
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.ChunkMap;
+import com.jme3.asset.max3ds.ChunkID;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.texture.Texture;
-
 
 /**
  * Loads material chunks with ambient, diffuse and specular colors,
@@ -36,9 +35,6 @@ import com.jme3.texture.Texture;
  */
 public class MaterialChunk extends Chunk
 {
-
-    //public static final Integer SELF_ILLUMINATED = new Integer((short)0xA084);
-
 
     /**
      * This will set the ambient, diffuse and specular
@@ -53,56 +49,54 @@ public class MaterialChunk extends Chunk
         Material material = chopper.getLightMaterial();
         material.setBoolean("UseMaterialColors", true);
 
-        ColorRGBA ambientColor = (ColorRGBA)chopper.popData(ChunkMap.AMBIENT_COLOR);
+        ColorRGBA ambientColor = (ColorRGBA)chopper.popData(ChunkID.AMBIENT_COLOR);
         if (ambientColor != null) {
-        	material.setColor("Ambient", ambientColor);
+    		material.setColor("Ambient", ambientColor);
         }
 
-        ColorRGBA color = (ColorRGBA)chopper.popData(ChunkMap.DIFFUSE_COLOR);
+        ColorRGBA color = (ColorRGBA)chopper.popData(ChunkID.DIFFUSE_COLOR);
         if (color != null) {
         	material.setColor("Diffuse", color);
         }
 
-        color = (ColorRGBA)chopper.popData(ChunkMap.SPECULAR_COLOR);
+        color = (ColorRGBA)chopper.popData(ChunkID.SPECULAR_COLOR);
         if (color != null) {
         	material.setColor("Specular", color);
         }
 
-        Texture texture = (Texture)chopper.popData(ChunkMap.TEXTURE);
+        Texture texture = (Texture)chopper.popData(ChunkID.TEXTURE);
         if(texture != null)
         {
         	material.setTexture("DiffuseMap", texture);
         }
 
-        Boolean twoSided = (Boolean)chopper.popData(ChunkMap.TWO_SIDED);
+        Boolean twoSided = (Boolean)chopper.popData(ChunkID.TWO_SIDED);
         if (twoSided != null) //Just being there is equivalent to a boolean true.
         {
         	RenderState rs = material.getAdditionalRenderState();
         	rs.setFaceCullMode(RenderState.FaceCullMode.Off);// twoside
         }
 
-        Float transparency = (Float)chopper.popData(ChunkMap.TRANSPARENCY);
+        Float transparency = (Float)chopper.popData(ChunkID.TRANSPARENCY);
         if (transparency != null) {
             if (transparency.floatValue() > 0.01f) {
             	material.setFloat("AlphaDiscardThreshold", transparency);
             }
         }
 
-        String name = (String)chopper.popData(ChunkMap.MATERIAL_NAME);
-        Float shininess = (Float)chopper.popData(ChunkMap.SHININESS);
+        String name = (String)chopper.popData(ChunkID.MATERIAL_NAME);
+        Float shininess = (Float)chopper.popData(ChunkID.SHININESS);
         if (shininess != null) 
         {
             float shine = shininess.floatValue() * 1024f;
             material.setFloat("Shininess", shine);
         }
 
-        /*
-           Boolean illuminated = (Boolean)chopper.popData(SELF_ILLUMINATED);
-           if(illuminated != null && illuminated.booleanValue() == true)
-           {
-           material.setEmissiveColor(ambientColor);
-           }
-           */
+       Boolean illuminated = (Boolean)chopper.popData(ChunkID.SELF_ILLUMINATED);
+       if(illuminated != null && illuminated.booleanValue() == true)
+       {
+    	   material.setColor("Emissive", ambientColor);
+       }
         
         material.setName(name);
         chopper.setNamedObject(name, material);

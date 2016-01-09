@@ -21,7 +21,7 @@ public class Debug {
 			int id = ((short) chunkID.intValue()) & 0xFFFF;
 			System.out.println(parentChunk + " is "
 					+ (child == null ? "skipping" : "LOADING") + ": [id="
-					+ Integer.toHexString(id) + ", object= <"
+					+ byteString(id) + ", object= <"
 					+ parentChunk.getSubChunk(chunkID) + ">, chunkLength="
 					+ chunkLength + ", position=" + position + " limit="
 					+ limit + "]");
@@ -39,9 +39,13 @@ public class Debug {
 	 */
 	private static String byteString(int i) {
 		final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-				'9', 'a', 'b', 'c', 'd', 'e', 'f' };
+				'9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
-		char[] buf = new char[2];
+		char[] buf = new char[4];
+		buf[3] = digits[i & 0xF];
+		i >>>= 4;
+		buf[2] = digits[i & 0xF];
+		i >>>= 4;
 		buf[1] = digits[i & 0xF];
 		i >>>= 4;
 		buf[0] = digits[i & 0xF];

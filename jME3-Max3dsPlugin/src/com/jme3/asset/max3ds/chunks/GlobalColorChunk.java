@@ -39,7 +39,7 @@ public class GlobalColorChunk extends ColorChunk
     protected int getColorType(ChunkChopper chopper)
     {
         int type = chopper.getUnsignedShort();
-        int colorLength = chopper.getUnsignedInt();
+        chopper.getUnsignedInt();// colorLength
         return type;
     }
 }
