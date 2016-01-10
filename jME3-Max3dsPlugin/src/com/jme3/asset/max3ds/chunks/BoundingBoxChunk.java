@@ -22,7 +22,6 @@
 package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.M3DLoader;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Vector3f;
 
@@ -35,7 +34,7 @@ import com.jme3.math.Vector3f;
 public class BoundingBoxChunk extends Chunk
 {
     /**
-     * Gets the bounding box and associates it with the current mes.
+     * Gets the bounding box and associates it with the current mesh.
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
     public void loadData(ChunkChopper chopper)
@@ -43,14 +42,10 @@ public class BoundingBoxChunk extends Chunk
         Vector3f min = chopper.getVector3f();
         Vector3f max = chopper.getVector3f();
         BoundingBox box = new BoundingBox(min, max);
-
-        Vector3f center = new Vector3f(max.x - min.x, 
-                max.y - min.y, 
-                max.z - min.z);
-
-//        chopper.getKeyFramer().setBoundingBox(box);
+        Vector3f center = box.getCenter();
         chopper.getKeyFramer().setPivotCenter(center);
-        System.out.println("  BoundingBoxChunk box:" + box + " center:" + center);
+        
+        System.out.println("  BoundingBoxChunk PivotCenter:" + center);
     }
 
 }

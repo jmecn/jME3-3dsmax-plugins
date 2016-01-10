@@ -83,8 +83,6 @@ public class RotationChunk extends Chunk
             }
         }
         chopper.getKeyFramer().setOrientationKeys(quats);
-        
-        System.out.println("  RotationChunk flag:"+ flags + " numKeys:" + numKeys + " Orientation:"+ quats);
     }
 
     /**
@@ -114,19 +112,5 @@ public class RotationChunk extends Chunk
                 chopper.getFloat();
             }
         }
-    }
-
-    /**
-     * This converts a 3ds angle and axis to 
-     * a quaternion rotation.  Successive
-     * rotations are relative to the first so each
-     * rotation must be made absolute by multiplying
-     * it with its predecessor
-     */
-    public Quaternion getQuaternion(Vector3f axis, float angle)
-    {
-        float sinA  = (float)(java.lang.Math.sin(angle/2.0f));
-        float cosA  = (float)(java.lang.Math.cos(angle/2.0f));
-        return new Quaternion(axis.x * sinA, axis.y * sinA, axis.z * sinA, cosA);
     }
 }

@@ -41,7 +41,7 @@ public class PivotChunk extends Chunk
 
         chopper.getKeyFramer().setPivot(pivot);
         
-        System.out.println("  PivotChunk pivot:" + pivot);
+        System.out.println("  PivotChunk Pivot:" + pivot);
     }
 
 }

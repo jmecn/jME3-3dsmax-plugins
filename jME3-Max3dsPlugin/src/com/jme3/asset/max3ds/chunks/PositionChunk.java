@@ -62,7 +62,5 @@ public class PositionChunk extends Chunk
             pointList.add(position);
         }
         chopper.getKeyFramer().setPositionKeys(pointList);
-        
-        System.out.println("  PositionChunk flag:"+ flags + " numKeys:" + numKeys + " PositionList:"+ pointList);
     }
 }

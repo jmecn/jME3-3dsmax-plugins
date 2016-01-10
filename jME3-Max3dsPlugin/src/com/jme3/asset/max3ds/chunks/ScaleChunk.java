@@ -64,7 +64,5 @@ public class ScaleChunk extends Chunk
             scaleKeys.add(scale);
         }
         chopper.getKeyFramer().setScaleKeys(scaleKeys);
-        
-        System.out.println("  ScaleChunk flag:"+ flags + " numKeys:" + numKeys + " Scale:"+ scaleKeys);
     }
 }
