@@ -24,6 +24,7 @@ package com.jme3.asset.max3ds.data;
 import java.util.HashMap;
 import java.util.List;
 
+import com.jme3.animation.AnimControl;
 import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -44,7 +45,7 @@ public class KeyFramer
     private Vector3f  pivotCenter;
     private Vector3f pivot;
     private Vector3f scale;
-    private HashMap  namedObjectCoordinateSystems = new HashMap();
+    private HashMap<String, Transform>  namedObjectCoordinateSystems = new HashMap<String, Transform>();
 
     private List positionKeys;
     private List orientationKeys;
@@ -74,10 +75,53 @@ public class KeyFramer
      * (X1,Y1,Z1) = local coordinates
      *
      */
-    public Node createBehavior(String meshName, Node transformGroup, Object testObject)
+    public AnimControl createBehavior(String meshName, Node transformGroup, Object testObject)
     {
-    	// TODO 
-        return null;
+    	Node objectGroup = getObjectByName(meshName, transformGroup, testObject);
+    	if (objectGroup == null) {
+    		return null;
+    	}
+    	
+
+    	/*
+    	insertFather(objectGroup, meshName);
+    	
+        Transform coordinateSystem  = (Transform)namedObjectCoordinateSystems.get(meshName);
+
+        //Gonna put these children back later.
+        List<Spatial> children = removeChildren(objectGroup);
+
+        Transform coordinateTransform = coordinateSystem == null ? new Transform() : coordinateSystem;
+
+        Transform targetTransform = new Transform();
+        Node targetGroup = new Node();
+        targetGroup.setLocalTransform(targetTransform);
+
+        Node localCoordinates = hasKeys() ? buildLocalCoordinates(coordinateSystem) : new Node();
+        Node lastGroup = (Node)addGroups(objectGroup, new Node[]
+                {
+                    localCoordinates,
+                    targetGroup,
+                    buildPivotGroup(coordinateTransform, pivot),
+                    buildKeysGroup(),
+                });
+
+        addChildren(children, lastGroup);
+        lastGroupMap.put(objectGroup, lastGroup);
+
+
+        AnimControl anim = buildInterpolator(targetGroup, coordinateSystem);
+        if(anim != null)
+        {
+            anim.setEnabled(false);
+            targetGroup.addControl(anim);
+
+            // behavior.computeTransform(0f, targetTransform);
+            // targetGroup.setLocalTransform(targetTransform);
+        }
+        return anim;
+        */
+    	return null;
     }
 
     private List<Spatial> removeChildren(Node group)
@@ -131,9 +175,6 @@ public class KeyFramer
         topGroup.attachChild(father);
         Node bottomGroup = (Node)lastGroupMap.get(father);
 
-        if(topGroup == null)
-            return;
-
         Node fatherParent = (Node)topGroup.getParent();
         if(fatherParent != null)
             fatherParent.detachChild(topGroup);
@@ -174,6 +215,14 @@ public class KeyFramer
             pivot = new Vector3f(pivot);
             pivot.negate();
             translatePivot(pivotTransform, pivot, pivotCenter);
+            
+//            Transform3D pivotTransform = new Transform3D();
+//            pivotTransform.mulInverse(coordinateTransform);
+//            pivot = new Vector3f(pivot);
+//            pivot.negate();
+//            translatePivot(pivotTransform, pivot, pivotCenter);
+//            return new TransformGroup(pivotTransform);
+            
             return null;
     }
 
@@ -258,7 +307,7 @@ public class KeyFramer
     //TODO... This needs to use both a rotation interpolator and a position interpolator
     //in case there are keys with no position information but position information and 
     //vice versa right now its using RotPosPathInterpolator
-    private Object buildInterpolator(Node targetGroup, Transform axisOfTransform)
+    private AnimControl buildInterpolator(Node targetGroup, Transform axisOfTransform)
     {
         makeTwoListsTheSameSize(positionKeys, orientationKeys);
         int numKeys = positionKeys.size();

@@ -31,9 +31,16 @@ public class TestLoad3DS extends SimpleApplication {
 	public void simpleInitApp() {
 		assetManager.registerLoader(M3DLoader.class, "3ds");
 		
-//		loadBounce();
+		loadBounce();
+//		loadBook();
+//		loadDK();
 //		loadDolphin();
-		loadWoman();
+//		loadManikin();
+//		loadWoman();
+//		loadWoman2();
+//		loadLedy();
+//		loadGirl();
+//		loadOstrich();
 		
 		initCamera();
 		initLight();

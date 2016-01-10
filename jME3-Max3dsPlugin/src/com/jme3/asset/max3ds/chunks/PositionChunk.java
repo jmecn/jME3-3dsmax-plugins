@@ -48,7 +48,7 @@ public class PositionChunk extends Chunk
         chopper.getLong();
         int numKeys = chopper.getUnsignedInt();
 
-        ArrayList pointList = new ArrayList();
+        ArrayList<Vector3f> pointList = new ArrayList<Vector3f>();
         for(int i =0; i < numKeys; i++)
         {
             long keyNumber = chopper.getUnsignedInt();
@@ -62,5 +62,7 @@ public class PositionChunk extends Chunk
             pointList.add(position);
         }
         chopper.getKeyFramer().setPositionKeys(pointList);
+        
+        System.out.println("  PositionChunk flag:"+ flags + " numKeys:" + numKeys + " PositionList:"+ pointList);
     }
 }

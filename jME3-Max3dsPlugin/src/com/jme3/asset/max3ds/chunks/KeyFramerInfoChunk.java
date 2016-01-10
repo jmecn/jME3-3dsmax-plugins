@@ -20,6 +20,7 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
+import com.jme3.animation.AnimControl;
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.scene.Node;
 
@@ -59,11 +60,13 @@ public class KeyFramerInfoChunk extends Chunk
     public void initialize(ChunkChopper chopper) 
     {
         String meshName = (String)chopper.getObjectName();
-        Node frameBehavior = chopper.getKeyFramer().createBehavior(meshName,
-                                                        chopper.getNamedTransformGroup(meshName),
+        AnimControl frameBehavior = chopper.getKeyFramer().createBehavior(meshName,
+                                                        chopper.getNamedNode(meshName),
                                                         chopper.getNamedObject(meshName));
         if(frameBehavior != null) {
 //            chopper.addBehaviorNode(frameBehavior);
         }
+        
+        System.out.println("KeyFrameInfoChunk building animation of " + meshName);
     }
 }

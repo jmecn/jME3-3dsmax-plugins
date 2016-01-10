@@ -70,7 +70,7 @@ public class RotationChunk extends Chunk
             float            angle = chopper.getFloat();
             Vector3f        vector = chopper.getVector3f(); 
 
-            Quaternion        quat = getQuaternion(vector, angle);
+            Quaternion        quat = new Quaternion().fromAngleAxis(angle, vector);
             if(previousQuat != null) {
                 quat.mult(previousQuat, quat);
             }
@@ -83,6 +83,8 @@ public class RotationChunk extends Chunk
             }
         }
         chopper.getKeyFramer().setOrientationKeys(quats);
+        
+        System.out.println("  RotationChunk flag:"+ flags + " numKeys:" + numKeys + " Orientation:"+ quats);
     }
 
     /**

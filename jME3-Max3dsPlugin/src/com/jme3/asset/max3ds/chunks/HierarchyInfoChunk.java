@@ -41,6 +41,8 @@ public class HierarchyInfoChunk extends Chunk
     {
         int hierarchyIdentifier = chopper.getShort();
         chopper.getKeyFramer().setID(hierarchyIdentifier);
+        
+        System.out.println("  HierarchyInfoChunk hierarchyID=" + hierarchyIdentifier);
     }
 
 }

@@ -462,17 +462,18 @@ public class ChunkChopper {
 	 * Gets and cast the named object for the key provided. Its an error if its
 	 * not a transform group.
 	 */
-	public Node getNamedTransformGroup(String key) {
-		Object object = getNamedObject(key);
-		if (object instanceof Node) {
-			return (Node) object;
-		} else if (object != null) {
-			logger.log(Level.INFO, "Retrieving " + key
-					+ " which is a named object but not useable because "
-					+ " its not a transform group. Its a "
-					+ object.getClass().getName());
-		}
-		return null;
+	public Node getNamedNode(String key) {
+		return (Node) rootNode.getChild(key);
+//		Object object = getNamedObject(key);
+//		if (object instanceof Node) {
+//			return (Node) object;
+//		} else if (object != null) {
+//			logger.log(Level.INFO, "Retrieving " + key
+//					+ " which is a named object but not useable because "
+//					+ " its not a transform group. Its a "
+//					+ object.getClass().getName());
+//		}
+//		return null;
 	}
 	
 	/**

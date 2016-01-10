@@ -48,8 +48,9 @@ public class BoundingBoxChunk extends Chunk
                 max.y - min.y, 
                 max.z - min.z);
 
-            //chopper.getKeyFramer().setBoundingBox(box);
-            chopper.getKeyFramer().setPivotCenter(center);
+//        chopper.getKeyFramer().setBoundingBox(box);
+        chopper.getKeyFramer().setPivotCenter(center);
+        System.out.println("  BoundingBoxChunk box:" + box + " center:" + center);
     }
 
 }

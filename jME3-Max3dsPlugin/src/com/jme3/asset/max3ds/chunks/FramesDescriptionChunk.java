@@ -47,13 +47,15 @@ public class FramesDescriptionChunk extends Chunk
         chopper.getUnsignedShort();
         chopper.getUnsignedShort();
         int fatherID = chopper.getShort();
-        Node transformGroup = chopper.getNamedTransformGroup(objectName);
-        if(transformGroup == null)//its a dummy transformGroup.
+        Node node = chopper.getNamedNode(objectName);
+        
+        System.out.println("  FramesDescChunk Name:" + objectName + " FatherID:" + fatherID + " IsDummy:" + (node==null));
+        if(node == null)//its a dummy transformGroup.
         {
-            transformGroup = new Node();
-            keyFramer.setDummyObject(transformGroup);
+            node = new Node();
+            keyFramer.setDummyObject(node);
         }
 
-        keyFramer.addFather(fatherID, transformGroup);
+        keyFramer.addFather(fatherID, node);
     }
 }
