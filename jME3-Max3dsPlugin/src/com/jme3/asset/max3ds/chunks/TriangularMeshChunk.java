@@ -248,9 +248,9 @@ public class TriangularMeshChunk extends Chunk {
             normal.normalize();
 
     
-            normals[i++] = new Vector3f(normal);
-            normals[i++] = new Vector3f(normal);
-            normals[i++] = new Vector3f(normal);
+            normals[i++] = normal;
+            normals[i++] = normal;
+            normals[i++] = normal;
         }
 
         return normals;

@@ -77,7 +77,13 @@ public class ChunkChopper {
         Chunk materialChunk          = new MaterialChunk();
         
         // SubChunks of NamedObjectChunk
-        Chunk triangularMeshChunk    = new TriangularMeshChunk();
+        // Chunk triangularMeshChunk    = new TriangularMeshChunk();
+        
+        // use this instead of TriangularMeshChunk for two reason:
+        // 1) less vertex data
+        // 2) better vertex normals
+        Chunk triangularMeshChunk    = new MeshChunk();
+        
         Chunk lightChunk             = new LightChunk();
         Chunk cameraChunk            = new CameraChunk();
         
@@ -134,7 +140,7 @@ public class ChunkChopper {
         
         // NamedObjectChunk
         namedObjectChunk.addSubChunk(MESH, triangularMeshChunk);
-        //namedObjectChunk.addSubChunk(CAMERA, cameraChunk);// I think we don't need this camera
+        namedObjectChunk.addSubChunk(CAMERA, cameraChunk);// I think we don't need this camera
         namedObjectChunk.addSubChunk(LIGHT, lightChunk);// I think we don't need this light
         
         triangularMeshChunk.addSubChunk(VERTEX_LIST, vertex3ListChunk);
