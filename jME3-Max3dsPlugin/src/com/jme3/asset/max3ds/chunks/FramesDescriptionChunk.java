@@ -49,7 +49,6 @@ public class FramesDescriptionChunk extends Chunk
         int fatherID = chopper.getShort();
         Node node = chopper.getNamedNode(objectName);
         
-        System.out.println("  FramesDescChunk Name:" + objectName + " FatherID:" + fatherID + " IsDummy:" + (node==null));
         if(node == null)//its a dummy transformGroup.
         {
             node = new Node();

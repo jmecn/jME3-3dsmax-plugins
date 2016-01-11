@@ -66,7 +66,5 @@ public class KeyFramerInfoChunk extends Chunk
         if(frameBehavior != null) {
 //            chopper.addBehaviorNode(frameBehavior);
         }
-        
-        System.out.println("KeyFrameInfoChunk building animation of " + meshName);
     }
 }

@@ -40,8 +40,6 @@ public class PivotChunk extends Chunk
         Vector3f pivot = chopper.getVector3f();
 
         chopper.getKeyFramer().setPivot(pivot);
-        
-        System.out.println("  PivotChunk Pivot:" + pivot);
     }
 
 }

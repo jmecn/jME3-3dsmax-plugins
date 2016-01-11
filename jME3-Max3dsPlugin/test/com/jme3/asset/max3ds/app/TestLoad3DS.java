@@ -1,7 +1,13 @@
 package com.jme3.asset.max3ds.app;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.max3ds.M3DLoader;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
+import com.jme3.font.Rectangle;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
@@ -12,109 +18,68 @@ import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.debug.Grid;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.texture.Texture;
 
 public class TestLoad3DS extends SimpleApplication {
 
+	// Lights
 	private AmbientLight ambient;
 	private DirectionalLight sun;
+	
+	// Models
+	private List<TestLoader> list;
+	private int index = 0;
+	private Spatial current;
+	
+	// Debug
+	private Spatial axisNode;
 	
 	@Override
 	public void simpleInitApp() {
 		assetManager.registerLoader(M3DLoader.class, "3ds");
 		
-//		loadBounce();
-//		loadBook();
-		loadDK();
-//		loadDolphin();
-//		loadManikin();
-//		loadWoman();
-//		loadWoman2();
-//		loadLedy();
-//		loadGirl();
-//		loadOstrich();
+		index = 0;
+		initModelList();
+		loadModel();
 		
+		initGui();
 		initCamera();
 		initLight();
 		initShadow();
 		initKeys();
 		initViewPort();
-	}
-	void loadBounce() {
-		Node model = (Node)assetManager.loadModel("Model/bounce.3DS");
-		rootNode.attachChild(model);
-	}
-	void loadBook() {
-		Node book = (Node)assetManager.loadModel("Model/Examples/Books.3DS");
-		rootNode.attachChild(book);	
-	}
-	void loadDK() {
-		Node dk = (Node)assetManager.loadModel("Model/Examples/dk.3DS");
-		rootNode.attachChild(dk);
-	}
-	void loadDolphin() {
-		Node dolphin = (Node)assetManager.loadModel("Model/Examples/Dolphin 1.3ds");
-		rootNode.attachChild(dolphin);		
-	}
-	void loadManikin() {
-		Node manikin = (Node)assetManager.loadModel("Model/Examples/Manikin-5.3DS");
-		manikin.rotate(0, FastMath.QUARTER_PI, 0);
-		rootNode.attachChild(manikin);
-	}
-	void loadWoman() {
-		Node woman = (Node)assetManager.loadModel("Model/Examples/Woman.3ds");
-		woman.scale(0.1f);
-		rootNode.attachChild(woman);
-	}
-	void loadWoman2() {
-		Node woman2 = (Node)assetManager.loadModel("Model/Examples/Woman2.3ds");
-		rootNode.attachChild(woman2);
-	}
-	void loadLedy() {
-		Node ledy = (Node)assetManager.loadModel("Model/Examples/ledy-2.3DS");
-		rootNode.attachChild(ledy);
-	}
-	void loadGirl() {
-		Node girl = (Node)assetManager.loadModel("Model/Examples/Girl N171207.3ds");
-		girl.scale(100);
-		rootNode.attachChild(girl);
-	}
-	void loadOstrich() {
-		Node ostrich = (Node)assetManager.loadModel("Model/Examples/Ostrich.3ds");
-		ostrich.depthFirstTraversal(new SceneGraphVisitor() {
-			@Override
-			public void visit(Spatial spatial) {
-				if (spatial instanceof Geometry) {
-					if (spatial.getName().equals("ostrich"))
-					{
-						// I don't understand the one who made this model don't give it a texture
-						// so I add it my self
-						Material mat = ((Geometry)spatial).getMaterial();
-						Texture tex = assetManager.loadTexture("Model/Examples/ostrich.jpg");
-						mat.setTexture("DiffuseMap", tex);
-					}
-				}
-				
-			}
-		});
-		ostrich.scale(20);
-		rootNode.attachChild(ostrich);
+		axisNode = showNodeAxies(50f);
 	}
 	
+	@Override
+	public void simpleUpdate(float tpf) {
+		// TODO Auto-generated method stub
+	}
+
+	private void initGui() {
+		String txtB = "KeyPress:\n[J] [K]: Load model.\n[U] [I]: Rotate model.\n[O] [P]: Scale model.\n[F1]: turn on/off wireframe.\n[F2]: turn on/off axis.";
+		BitmapText txt;
+		BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
+        txt = new BitmapText(fnt, false);
+        txt.setBox(new Rectangle(0, 0, settings.getWidth(), settings.getHeight()));
+        txt.setText(txtB);
+        txt.setLocalTranslation(0, txt.getHeight(), 0);
+        guiNode.attachChild(txt);
+		
+	}
 	private void initCamera() {
 		cam.setLocation(new Vector3f(100, 80, 100));
 		cam.lookAt(Vector3f.ZERO, cam.getUp());
 		this.flyCam.setMoveSpeed(100f);
-		
-		
 	}
 	
 	/**
@@ -145,47 +110,137 @@ public class TestLoad3DS extends SimpleApplication {
 	
 	private void initViewPort() {
 		viewPort.setBackgroundColor(new ColorRGBA(0.3f, 0.4f, 0.5f, 1));
+	}
+	
+	public Spatial showNodeAxies(float axisLen) {
+		Node rootNode = new Node();
+		Mesh mesh = new Grid(31, 31, 4f);
+		Geometry grid = new Geometry("Axis", mesh);
+		Material gm = new Material(assetManager,
+				"Common/MatDefs/Misc/Unshaded.j3md");
+		gm.setColor("Color", ColorRGBA.White);
+		gm.getAdditionalRenderState().setWireframe(true);
+		grid.setMaterial(gm);
+		grid.center().move(0, -0.1f, 0);
+
+		rootNode.attachChild(grid);
+
+		//
+		Vector3f v = new Vector3f(axisLen, 0, 0);
+		Arrow a = new Arrow(v);
+		Material mat = new Material(assetManager,
+				"Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", ColorRGBA.Red);
+		Geometry geom = new Geometry(rootNode.getName() + "XAxis", a);
+		geom.setMaterial(mat);
+		rootNode.attachChild(geom);
+
+		//
+		v = new Vector3f(0, axisLen, 0);
+		a = new Arrow(v);
+		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", ColorRGBA.Green);
+		geom = new Geometry(rootNode.getName() + "YAxis", a);
+		geom.setMaterial(mat);
+		rootNode.attachChild(geom);
+
+		//
+		v = new Vector3f(0, 0, axisLen);
+		a = new Arrow(v);
+		mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", ColorRGBA.Blue);
+		geom = new Geometry(rootNode.getName() + "ZAxis", a);
+		geom.setMaterial(mat);
+		rootNode.attachChild(geom);
 		
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-        
-        SSAOFilter ssaoFilter = new SSAOFilter();
-        fpp.addFilter(ssaoFilter);
-        
-        viewPort.addProcessor(fpp);
+		return rootNode;
 	}
 	
 	private void initKeys() {
 		inputManager.addMapping("wireFrame", new KeyTrigger(KeyInput.KEY_F1));
+		inputManager.addMapping("showAxis", new KeyTrigger(KeyInput.KEY_F2));
+		inputManager.addMapping("nextModel", new KeyTrigger(KeyInput.KEY_J));
+		inputManager.addMapping("preModel", new KeyTrigger(KeyInput.KEY_K));
+		inputManager.addMapping("rotateP", new KeyTrigger(KeyInput.KEY_U));
+		inputManager.addMapping("rotateN", new KeyTrigger(KeyInput.KEY_I));
+		inputManager.addMapping("scaleP", new KeyTrigger(KeyInput.KEY_O));
+		inputManager.addMapping("scaleN", new KeyTrigger(KeyInput.KEY_P));
 		inputManager.addListener(new ActionListener(){
 			@Override
 			public void onAction(String name, boolean isPressed, float tpf) {
 				if (isPressed) {
-					if (name.equals("wireFrame")) {
+					switch (name) {
+					case "wireFrame":
+						wireFrameFlag = !wireFrameFlag;
 						toggleWireFrame();
+						break;
+					case "showAxis":
+						if (rootNode.hasChild(axisNode)) {
+							rootNode.detachChild(axisNode);
+						} else {
+							rootNode.attachChild(axisNode);
+						}
+						break;
+					case "nextModel":
+						index = index==list.size()-1?0:index+1;
+						loadModel();
+						break;
+					case "preModel":
+						index = index==0?list.size()-1:index-1;
+						loadModel();
+						break;
+					case "rotateP":
+						if (current != null) {
+							current.rotate(0, FastMath.QUARTER_PI/3, 0);
+						}
+						break;
+					case "rotateN":
+						if (current != null) {
+							current.rotate(0, -FastMath.QUARTER_PI/3, 0);
+						}
+						break;
+					case "scaleP":
+						if (current != null) {
+							current.scale(1.33333333333333f);
+						}
+						break;
+					case "scaleN":
+						if (current != null) {
+							current.scale(0.75f);
+						}
+						break;
 					}
 				}
 				
-			}}, "wireFrame");
+			}}, "wireFrame", "showAxis", "nextModel", "preModel", "rotateP", "rotateN", "scaleP", "scaleN");
 	}
 	
 	boolean wireFrameFlag = false;
 	
 	private void toggleWireFrame() {
-		wireFrameFlag = !wireFrameFlag;
-		
-		rootNode.depthFirstTraversal(new SceneGraphVisitor() {
-			@Override
-			public void visit(Spatial spatial) {
-				if (spatial instanceof Geometry) {
-					Geometry geom = (Geometry)spatial;
-					Material material = geom.getMaterial();
-					if (material != null) {
-						RenderState rs = material.getAdditionalRenderState();
-						rs.setWireframe(wireFrameFlag);
+		if (current != null) {
+			current.depthFirstTraversal(new SceneGraphVisitor() {
+				@Override
+				public void visit(Spatial spatial) {
+					if (spatial instanceof Geometry) {
+						Geometry geom = (Geometry)spatial;
+						Material material = geom.getMaterial();
+						if (material != null) {
+							RenderState rs = material.getAdditionalRenderState();
+							rs.setWireframe(wireFrameFlag);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
+	}
+	
+	void loadModel() {
+		if (current != null) rootNode.detachChild(current);
+		TestLoader tl = list.get(index);
+		System.out.println("=========== " + tl.name + " ==========");
+		tl.load();
+		toggleWireFrame();
 	}
 	
 	public static void main(String[] args) {
@@ -193,4 +248,169 @@ public class TestLoad3DS extends SimpleApplication {
 		app.start();
 	}
 
+	/**
+	 * Use for test loading model
+	 * @author yanmaoyuan
+	 *
+	 */
+	abstract static class TestLoader {
+		String name;
+		TestLoader(String name) {
+			this.name = name;
+		}
+		abstract void load();
+	}
+	void initModelList() {
+		list = new ArrayList<TestLoader>();
+		list.add(new TestLoader("Bounce") {
+			void load() {
+				Node model = (Node)assetManager.loadModel("Model/bounce.3DS");
+				rootNode.attachChild(model);
+				current = model;
+			}
+		});
+		
+		list.add(new TestLoader("Book") {
+			void load() {
+				Node book = (Node)assetManager.loadModel("Model/Examples/Books.3DS");
+				rootNode.attachChild(book);	
+				current = book;
+			}
+		});
+		
+		list.add(new TestLoader("DeathKnight") {
+			void load() {
+				Node dk = (Node)assetManager.loadModel("Model/Examples/dk.3DS");
+				rootNode.attachChild(dk);
+				current = dk;
+			}
+		});
+		
+		list.add(new TestLoader("Dolphin") {
+			void load() {
+				Node dolphin = (Node)assetManager.loadModel("Model/Examples/Dolphin 1.3ds");
+				rootNode.attachChild(dolphin);
+				current = dolphin;
+			}
+		});
+		
+		list.add(new TestLoader("Manikin") {
+			void load() {
+				Node manikin = (Node)assetManager.loadModel("Model/Examples/Manikin-5.3DS");
+				rootNode.attachChild(manikin);
+				current = manikin;
+			}
+		});
+		
+		list.add(new TestLoader("Woman01") {
+			void load() {
+				Node woman = (Node)assetManager.loadModel("Model/Examples/Woman.3ds");
+				rootNode.attachChild(woman);
+				current = woman;
+			}
+		});
+		
+		list.add(new TestLoader("Woman02") {
+			void load() {
+				Node woman2 = (Node)assetManager.loadModel("Model/Examples/Woman2.3ds");
+				rootNode.attachChild(woman2);
+				current = woman2;
+			}
+		});
+		
+		list.add(new TestLoader("ledy") {
+			void load() {
+				Node ledy = (Node)assetManager.loadModel("Model/Examples/ledy-2.3DS");
+				rootNode.attachChild(ledy);
+				current = ledy;
+			}
+		});
+		
+		list.add(new TestLoader("Girl") {
+			void load() {
+				Node girl = (Node)assetManager.loadModel("Model/Examples/Girl N171207.3ds");
+				rootNode.attachChild(girl);
+				current = girl;
+			}
+		});
+		
+		list.add(new TestLoader("Ostrich") {
+			void load() {
+				Node ostrich = (Node)assetManager.loadModel("Model/Examples/Ostrich.3ds");
+				ostrich.depthFirstTraversal(new SceneGraphVisitor() {
+					@Override
+					public void visit(Spatial spatial) {
+						if (spatial instanceof Geometry && spatial.getName().equals("ostrich")) {
+							// I don't understand the one who made this model don't give it a texture
+							// so I add it my self
+							Material mat = ((Geometry)spatial).getMaterial();
+							Texture tex = assetManager.loadTexture("Model/Examples/ostrich.jpg");
+							mat.setTexture("DiffuseMap", tex);
+						}
+					}
+				});
+				rootNode.attachChild(ostrich);
+				current = ostrich;
+			}
+		});
+		
+		list.add(new TestLoader("fighter") {
+			void load() {
+				Node fighter = (Node)assetManager.loadModel("Model/Resources/fighter.3ds");
+				fighter.depthFirstTraversal(new SceneGraphVisitor() {
+					@Override
+					public void visit(Spatial spatial) {
+						if (spatial instanceof Geometry && spatial.getName().equals("Box01")) {
+							Material mat = ((Geometry)spatial).getMaterial();
+							mat.setTexture("DiffuseMap", assetManager.loadTexture("Model/Resources/fighter.png"));
+						}
+					}
+				});
+				rootNode.attachChild(fighter);
+				current = fighter;
+			}
+		});
+		
+		list.add(new TestLoader("frigate") {
+			void load() {
+				Node frigate = (Node)assetManager.loadModel("Model/Resources/frigate.3ds");
+				rootNode.attachChild(frigate);
+				current = frigate;
+			}
+		});
+		
+		list.add(new TestLoader("ship") {
+			void load() {
+				Node ship = (Node)assetManager.loadModel("Model/Resources/ship.3ds");
+				ship.depthFirstTraversal(new SceneGraphVisitor() {
+					@Override
+					public void visit(Spatial spatial) {
+						if (spatial instanceof Geometry && spatial.getName().equals("Cylinder06")) {
+							Material mat = ((Geometry)spatial).getMaterial();
+							mat.setTexture("DiffuseMap", assetManager.loadTexture("Model/Resources/ship.png"));
+						}
+					}
+				});
+				rootNode.attachChild(ship);
+				current = ship;
+			}
+		});
+		
+		list.add(new TestLoader("stall") {
+			void load() {
+				Node stall = (Node)assetManager.loadModel("Model/Resources/stall.3ds");
+				stall.depthFirstTraversal(new SceneGraphVisitor() {
+					@Override
+					public void visit(Spatial spatial) {
+						if (spatial instanceof Geometry && spatial.getName().equals("Cube.001")) {
+							Material mat = ((Geometry)spatial).getMaterial();
+							mat.setTexture("DiffuseMap", assetManager.loadTexture("Model/Resources/stall.png"));
+						}
+					}
+				});
+				rootNode.attachChild(stall);
+				current = stall;
+			}
+		});
+	}
 }

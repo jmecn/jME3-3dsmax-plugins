@@ -124,7 +124,7 @@ public class M3DLoader implements AssetLoader {
 	public Material getDefaultMaterial() {
 		if (defaultMaterial == null) {
 			defaultMaterial = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
-			defaultMaterial.setColor("Color", new ColorRGBA(.5f, .5f, .5f, 0f));
+			defaultMaterial.setColor("Color", ColorRGBA.Cyan);
 		}
 		
 		return defaultMaterial;

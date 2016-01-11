@@ -43,15 +43,11 @@ public class MeshChunk extends Chunk {
         	// Vertex Normals
         	Vector3f[] normals = generateNormals(coordinates, indices);
         	mesh.setBuffer(Type.Normal, 3, BufferUtils.createFloatBuffer(normals));
-        } else {
-        	System.out.println(parent.getName() + " has no Index");
         }
         
         if (texturePoints != null) {
 	        // Texture Coord
 	        mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texturePoints));
-        } else {
-        	System.out.println(parent.getName() + " has no TexCoord");
         }
         mesh.setStatic();
 		mesh.updateBound();
@@ -112,8 +108,6 @@ public class MeshChunk extends Chunk {
         for(int i=0; i<normals.length; i++) {
         	if (normals[i] != null) {
         		normals[i].normalize();
-        	} else {
-        		System.out.println("MeshChunk vector " + i + " has no normals");
         	}
         }
 

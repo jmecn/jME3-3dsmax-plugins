@@ -44,8 +44,6 @@ public class BoundingBoxChunk extends Chunk
         BoundingBox box = new BoundingBox(min, max);
         Vector3f center = box.getCenter();
         chopper.getKeyFramer().setPivotCenter(center);
-        
-        System.out.println("  BoundingBoxChunk PivotCenter:" + center);
     }
 
 }
