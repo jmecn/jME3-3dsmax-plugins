@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.jme3.asset.max3ds.ChunkID.*;
+
 import com.jme3.asset.max3ds.chunks.*;
 import com.jme3.asset.max3ds.data.KeyFramer;
 import com.jme3.export.Savable;
@@ -220,6 +221,7 @@ public class ChunkChopper {
     {
         this.loader = loader;
         this.rootNode = new Node();
+        rootNode.setName("3DS@" + Integer.toHexString(rootNode.hashCode()));
         this.dataMap = new HashMap<Object, Object>();
 
         // FileChannel channel = null;
@@ -249,7 +251,7 @@ public class ChunkChopper {
      * @param channel the file channel to load the data from
      * @return a direct byte buffer containing all the data of the channel at position 0 
      */
-    public ByteBuffer getByteBuffer(ReadableByteChannel channel) throws IOException
+    private ByteBuffer getByteBuffer(ReadableByteChannel channel) throws IOException
     {
     	// Read 3DS file header
  		ByteBuffer mainChunkBuffer = ByteBuffer.allocate(6);
@@ -293,7 +295,7 @@ public class ChunkChopper {
 	 * <li>The chunks initialize method is called.
 	 * </ol>
 	 */
-	protected void loadSubChunks(Chunk parentChunk, int level)
+	private void loadSubChunks(Chunk parentChunk, int level)
 			throws CannotChopException {
 		level++;
 		while (chunkBuffer.hasRemaining())// hasRemaining() evaluates limit - position.

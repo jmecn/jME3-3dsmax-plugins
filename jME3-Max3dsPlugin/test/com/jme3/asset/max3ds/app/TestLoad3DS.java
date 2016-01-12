@@ -60,11 +60,6 @@ public class TestLoad3DS extends SimpleApplication {
 		axisNode = showNodeAxies(50f);
 	}
 	
-	@Override
-	public void simpleUpdate(float tpf) {
-		// TODO Auto-generated method stub
-	}
-
 	private void initGui() {
 		String txtB = "KeyPress:\n[J] [K]: Load model.\n[U] [I]: Rotate model.\n[O] [P]: Scale model.\n[F1]: turn on/off wireframe.\n[F2]: turn on/off axis.";
 		BitmapText txt;
@@ -239,7 +234,10 @@ public class TestLoad3DS extends SimpleApplication {
 		if (current != null) rootNode.detachChild(current);
 		TestLoader tl = list.get(index);
 		System.out.println("=========== " + tl.name + " ==========");
-		tl.load();
+		Spatial model = tl.load();
+		rootNode.attachChild(model);
+		current = model;
+		
 		toggleWireFrame();
 	}
 	
@@ -258,84 +256,81 @@ public class TestLoad3DS extends SimpleApplication {
 		TestLoader(String name) {
 			this.name = name;
 		}
-		abstract void load();
+		abstract Spatial load();
 	}
 	void initModelList() {
 		list = new ArrayList<TestLoader>();
+		list.add(new TestLoader("Char") {
+			Spatial load() {
+				Node model = (Node)assetManager.loadModel("Model/Examples/char.3ds");
+				return model;
+			}
+		});
+		list.add(new TestLoader("Bike") {
+			Spatial load() {
+				return assetManager.loadModel("Model/Examples/bike.3ds");
+			}
+		});
 		list.add(new TestLoader("Bounce") {
-			void load() {
-				Node model = (Node)assetManager.loadModel("Model/bounce.3DS");
-				rootNode.attachChild(model);
-				current = model;
+			Spatial load() {
+				return assetManager.loadModel("Model/bounce.3DS");
 			}
 		});
 		
 		list.add(new TestLoader("Book") {
-			void load() {
-				Node book = (Node)assetManager.loadModel("Model/Examples/Books.3DS");
-				rootNode.attachChild(book);	
-				current = book;
+			Spatial load() {
+				return assetManager.loadModel("Model/Examples/Books.3DS");
 			}
 		});
 		
 		list.add(new TestLoader("DeathKnight") {
-			void load() {
-				Node dk = (Node)assetManager.loadModel("Model/Examples/dk.3DS");
-				rootNode.attachChild(dk);
-				current = dk;
+			Spatial load() {
+				return assetManager.loadModel("Model/Examples/dk.3DS");
 			}
 		});
 		
 		list.add(new TestLoader("Dolphin") {
-			void load() {
-				Node dolphin = (Node)assetManager.loadModel("Model/Examples/Dolphin 1.3ds");
-				rootNode.attachChild(dolphin);
-				current = dolphin;
+			Spatial load() {
+				return assetManager.loadModel("Model/Examples/Dolphin 1.3ds");
 			}
 		});
 		
 		list.add(new TestLoader("Manikin") {
-			void load() {
-				Node manikin = (Node)assetManager.loadModel("Model/Examples/Manikin-5.3DS");
-				rootNode.attachChild(manikin);
-				current = manikin;
+			Spatial load() {
+				return assetManager.loadModel("Model/Examples/Manikin-5.3DS");
 			}
 		});
 		
 		list.add(new TestLoader("Woman01") {
-			void load() {
-				Node woman = (Node)assetManager.loadModel("Model/Examples/Woman.3ds");
-				rootNode.attachChild(woman);
-				current = woman;
+			Spatial load() {
+				return assetManager.loadModel("Model/Examples/Woman.3ds");
 			}
 		});
 		
 		list.add(new TestLoader("Woman02") {
-			void load() {
-				Node woman2 = (Node)assetManager.loadModel("Model/Examples/Woman2.3ds");
-				rootNode.attachChild(woman2);
-				current = woman2;
+			Spatial load() {
+				return assetManager.loadModel("Model/Examples/Woman2.3ds");
 			}
 		});
 		
 		list.add(new TestLoader("ledy") {
-			void load() {
+			Spatial load() {
 				Node ledy = (Node)assetManager.loadModel("Model/Examples/ledy-2.3DS");
-				rootNode.attachChild(ledy);
-				current = ledy;
+				ledy.move(0, 0, 0);
+				return ledy;
 			}
 		});
 		
 		list.add(new TestLoader("Girl") {
-			void load() {
+			Spatial load() {
 				Node girl = (Node)assetManager.loadModel("Model/Examples/Girl N171207.3ds");
-				rootNode.attachChild(girl);
-				current = girl;
+				girl.scale(10f);
+				return girl;
 			}
 		});
 		
 		list.add(new TestLoader("Ostrich") {
-			void load() {
+			Spatial load() {
 				Node ostrich = (Node)assetManager.loadModel("Model/Examples/Ostrich.3ds");
 				ostrich.depthFirstTraversal(new SceneGraphVisitor() {
 					@Override
@@ -349,13 +344,12 @@ public class TestLoad3DS extends SimpleApplication {
 						}
 					}
 				});
-				rootNode.attachChild(ostrich);
-				current = ostrich;
+				return ostrich;
 			}
 		});
 		
 		list.add(new TestLoader("fighter") {
-			void load() {
+			Spatial load() {
 				Node fighter = (Node)assetManager.loadModel("Model/Resources/fighter.3ds");
 				fighter.depthFirstTraversal(new SceneGraphVisitor() {
 					@Override
@@ -366,21 +360,18 @@ public class TestLoad3DS extends SimpleApplication {
 						}
 					}
 				});
-				rootNode.attachChild(fighter);
-				current = fighter;
+				return fighter;
 			}
 		});
 		
 		list.add(new TestLoader("frigate") {
-			void load() {
-				Node frigate = (Node)assetManager.loadModel("Model/Resources/frigate.3ds");
-				rootNode.attachChild(frigate);
-				current = frigate;
+			Spatial load() {
+				return assetManager.loadModel("Model/Resources/frigate.3ds");
 			}
 		});
 		
 		list.add(new TestLoader("ship") {
-			void load() {
+			Spatial load() {
 				Node ship = (Node)assetManager.loadModel("Model/Resources/ship.3ds");
 				ship.depthFirstTraversal(new SceneGraphVisitor() {
 					@Override
@@ -391,13 +382,12 @@ public class TestLoad3DS extends SimpleApplication {
 						}
 					}
 				});
-				rootNode.attachChild(ship);
-				current = ship;
+				return ship;
 			}
 		});
 		
 		list.add(new TestLoader("stall") {
-			void load() {
+			Spatial load() {
 				Node stall = (Node)assetManager.loadModel("Model/Resources/stall.3ds");
 				stall.depthFirstTraversal(new SceneGraphVisitor() {
 					@Override
@@ -408,8 +398,7 @@ public class TestLoad3DS extends SimpleApplication {
 						}
 					}
 				});
-				rootNode.attachChild(stall);
-				current = stall;
+				return stall;
 			}
 		});
 	}
