@@ -3,6 +3,7 @@ package com.jme3.asset.max3ds.app;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jme3.animation.AnimControl;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.max3ds.M3DLoader;
 import com.jme3.font.BitmapFont;
@@ -26,6 +27,7 @@ import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
+import com.jme3.scene.debug.SkeletonDebugger;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.texture.Texture;
 
@@ -239,6 +241,22 @@ public class TestLoad3DS extends SimpleApplication {
 		current = model;
 		
 		toggleWireFrame();
+		
+		startAnim();
+	}
+	
+	void startAnim() {
+		AnimControl ac = current.getControl(AnimControl.class);
+		if (ac != null) {
+			ac.createChannel().setAnim("3DS Animation");
+			
+			SkeletonDebugger sd = new SkeletonDebugger("SkeletonDebuger", ac.getSkeleton());
+			final Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", ColorRGBA.Magenta);
+			mat.getAdditionalRenderState().setDepthTest(false);
+			sd.setMaterial(mat);
+			rootNode.attachChild(sd);
+		}
 	}
 	
 	public static void main(String[] args) {

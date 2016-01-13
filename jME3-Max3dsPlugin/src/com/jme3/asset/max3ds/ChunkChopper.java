@@ -15,21 +15,29 @@ import java.util.logging.Logger;
 
 import static com.jme3.asset.max3ds.ChunkID.*;
 
+import com.jme3.animation.AnimControl;
+import com.jme3.animation.Animation;
+import com.jme3.animation.Bone;
+import com.jme3.animation.Skeleton;
+import com.jme3.animation.SkeletonControl;
 import com.jme3.asset.max3ds.anim.KeyFrameTrack;
 import com.jme3.asset.max3ds.chunks.*;
-import com.jme3.asset.max3ds.data.KeyFramer;
 import com.jme3.export.Savable;
 import com.jme3.light.Light;
 import com.jme3.material.Material;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.UserData;
+import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.texture.Texture;
 
 /**
- * A singleton flyweight factory responsible for chopping the 
+ * A flyweight factory responsible for chopping the 
  * data up and sending it to the corresponding 
  * chunks(which are flyweights ala the flyweight pattern)
  * for processing.
@@ -58,8 +66,10 @@ public class ChunkChopper {
 	private Node scene;
 	private Spatial currentObject;
 	private String currentObjectName;
-	private HashMap<String, Transform>  namedObjectCoordinateSystems = new HashMap<String, Transform>();
+	private HashMap<String, Transform> namedObjectCoordinateSystems = new HashMap<String, Transform>();
 	
+	private int startFrame;
+	private int endFrame;
 	private List<KeyFrameTrack> meshTracks;
 	private KeyFrameTrack currentTrack;
 	
@@ -235,12 +245,11 @@ public class ChunkChopper {
  		channel = Channels.newChannel(inputStream);
  		chunkBuffer = getByteBuffer(channel);
  		
- 		// skip header(6 bytes)
 
  		long begin = System.currentTimeMillis();
- 		
  		try {
  			loadSubChunks(mainChunk, 0);
+ 			createAnimation();
  		} catch (CannotChopException e) {
  			e.printStackTrace();
  		}
@@ -252,7 +261,7 @@ public class ChunkChopper {
         return scene;
     }
 
-    /**
+	/**
      * Allocates and loads a byte buffer from the channel
      * @param channel the file channel to load the data from
      * @return a direct byte buffer containing all the data of the channel at position 0 
@@ -324,9 +333,7 @@ public class ChunkChopper {
 				} catch (BufferUnderflowException e) {
 					chunkBuffer.position(finishedPosition);
 					chunkBuffer.limit(previousLimit);
-					throw new CannotChopException(
-							" tried to read too much data from the buffer. Trying to recover.",
-							e);
+					throw new CannotChopException(" tried to read too much data from the buffer. Trying to recover.", e);
 				}
 				try {
 					if (chunkBuffer.hasRemaining()) {
@@ -353,6 +360,12 @@ public class ChunkChopper {
         namedObjectCoordinateSystems.put(objectName, coordinateSystem);
     }
     
+    public void setStartFrame(int startFrame) {
+    	this.startFrame = startFrame;
+    }
+    public void setEndFrame(int endFrame) {
+    	this.endFrame = endFrame;
+    }
     /**
      * Add an objectTrack to scene.
      * @param track
@@ -658,5 +671,152 @@ public class ChunkChopper {
 	
 	public Texture createTexture(String textureName) {
 		return loader.createTexture(textureName);
+	}
+	
+	/**
+	 * Create Animation !
+	 * 
+	 */
+    private void createAnimation() {
+    	if (endFrame == 0) return;
+    	
+    	/** add controls to the model*/
+		AnimControl ac = createAnimControl();
+		scene.addControl(ac);
+		
+		Skeleton ske = ac.getSkeleton();
+		SkeletonControl sc = new SkeletonControl(ske);
+		scene.addControl(sc);
+		
+		// try to use hardware skinning animation
+		sc.setHardwareSkinningPreferred(true);
+		
+		/** skinning the model */
+		for(Spatial child : scene.getChildren()) {
+			if (child instanceof Geometry) {
+				Geometry geom = (Geometry)child;
+				String name = geom.getName();
+				skinning(geom.getMesh(), (byte)ske.getBoneIndex(name));
+			}
+		}
+	}
+    
+	/**
+	 * Create an AnimControl, it contains an Animation with 3 BoneTracks.
+	 * @return
+	 */
+	private AnimControl createAnimControl() {
+		
+		Skeleton ske = buildSkeleton();
+		
+		AnimControl animControl = new AnimControl(ske);
+		
+		Animation anim = buildAnimation(ske);
+		
+		animControl.addAnim(anim);
+		
+		return animControl;
+	}
+
+	/**
+	 * Create a Skeleton with data of KeyFrameTracks.
+	 * 
+	 * @return
+	 */
+    private Skeleton buildSkeleton() {
+    	int boneSize = meshTracks.size();
+    	Bone[] bones = new Bone[boneSize + 1];
+    	
+    	bones[0] = new Bone("RootBone who's ID is -1");
+    	for(int i=0; i<meshTracks.size(); i++) {
+    		KeyFrameTrack track = meshTracks.get(i);
+    		
+    		bones[track.ID+1] = new Bone(track.name);
+    		
+    		bones[track.fatherID+1].addChild(bones[track.ID+1]);
+    		
+    		Vector3f initTranslation = new Vector3f();
+    		Quaternion initRotation = new Quaternion();
+    		Vector3f initScale = new Vector3f();
+    		
+    		Transform initTransform = namedObjectCoordinateSystems.get(track.name);
+    		if (initTransform != null) {
+    			initTranslation.set(initTransform.getTranslation());
+    			initRotation.set(initTransform.getRotation());
+    			initScale.set(initTransform.getScale());
+    		}
+    		bones[track.ID + 1].setBindTransforms(initTranslation, initRotation, initScale);;
+    		
+    	}
+    	
+    	Skeleton skeleton = new Skeleton(bones);
+    	
+    	return skeleton;
+    }
+    
+    /**
+     * Create animation
+     * @param ske
+     * @return
+     */
+    private Animation buildAnimation(Skeleton ske) {
+    	// Calculate animation length
+    	System.out.printf("start: %d stop:%d", startFrame, endFrame);
+    	
+    	float speed = 10f;
+    	float length = endFrame / speed;
+    	
+    	Animation anim = new Animation("3DS Animation", length);
+    	
+    	for(KeyFrameTrack track : meshTracks) {
+    		int targetBoneIndex = ske.getBoneIndex(track.name);
+    		
+    		anim.addTrack(track.toBoneTrack(targetBoneIndex, speed));
+    	}
+    	return anim;
+    }
+    
+	/**
+	 * Skinning the mesh
+	 * @param mesh
+	 * @param targetBoneIndex
+	 */
+	private void skinning(Mesh mesh, byte targetBoneIndex) {
+		if (targetBoneIndex == -1) return;
+		
+		// Calculate vertex count
+		int limit = mesh.getBuffer(Type.Position).getData().limit();
+		// Notice: i should call mesh.getMode() to decide how many 
+		// floats is used for each vertex. Default mode is Mode.Triangles
+		int vertexCount = limit/3;// by default
+		
+		int boneIndexCount = vertexCount * 4;
+		byte[] boneIndex = new byte[boneIndexCount];
+		float[] boneWeight = new float[boneIndexCount];
+
+		// calculate bone indices and bone weights;
+		for(int i=0; i<boneIndexCount; i+=4) {
+			boneIndex[i] = targetBoneIndex;
+			// I don't need the other 3 indices so I discard them
+			boneIndex[i+1] = 0;
+			boneIndex[i+2] = 0;
+			boneIndex[i+3] = 0;
+			
+			boneWeight[i] = 1;
+			// I don't need the other 3 indices so I discard them
+			boneWeight[i+1] = 0;
+			boneWeight[i+2] = 0;
+			boneWeight[i+3] = 0;
+		}
+		mesh.setMaxNumWeights(1);
+		
+		// apply software skinning
+		mesh.setBuffer(Type.BoneIndex, 4, boneIndex);
+		mesh.setBuffer(Type.BoneWeight, 4, boneWeight);
+		// apply hardware skinning
+		mesh.setBuffer(Type.HWBoneIndex, 4, boneIndex);
+		mesh.setBuffer(Type.HWBoneWeight, 4, boneWeight);
+
+		mesh.generateBindPose(true);
 	}
 }

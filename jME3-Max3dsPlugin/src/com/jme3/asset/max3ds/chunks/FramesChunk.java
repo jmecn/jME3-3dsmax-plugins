@@ -39,9 +39,10 @@ public class FramesChunk extends Chunk
      */
     public void loadData(ChunkChopper chopper)
     {
-        long start = chopper.getUnsignedInt();
-        long stop = chopper.getUnsignedInt();
+        int start = chopper.getUnsignedInt();
+        int stop = chopper.getUnsignedInt();
         
-        System.out.println("FramesChunk start:" + start + " stop:" + stop);
+        chopper.setStartFrame(start);
+        chopper.setEndFrame(stop);
     }
 }
