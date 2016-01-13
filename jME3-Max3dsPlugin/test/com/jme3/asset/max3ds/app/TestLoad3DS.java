@@ -248,14 +248,18 @@ public class TestLoad3DS extends SimpleApplication {
 	void startAnim() {
 		AnimControl ac = current.getControl(AnimControl.class);
 		if (ac != null) {
+			try {
 			ac.createChannel().setAnim("3DS Animation");
+			} catch (Exception e) {
+				
+			}
 			
 			SkeletonDebugger sd = new SkeletonDebugger("SkeletonDebuger", ac.getSkeleton());
 			final Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 			mat.setColor("Color", ColorRGBA.Magenta);
 			mat.getAdditionalRenderState().setDepthTest(false);
 			sd.setMaterial(mat);
-			rootNode.attachChild(sd);
+			((Node)current).attachChild(sd);
 		}
 	}
 	

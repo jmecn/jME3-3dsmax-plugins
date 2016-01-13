@@ -678,6 +678,8 @@ public class ChunkChopper {
 	 * 
 	 */
     private void createAnimation() {
+    	System.out.printf("start: %d stop:%d\n", startFrame, endFrame);
+    	
     	if (endFrame == 0) return;
     	
     	/** add controls to the model*/
@@ -761,8 +763,6 @@ public class ChunkChopper {
      */
     private Animation buildAnimation(Skeleton ske) {
     	// Calculate animation length
-    	System.out.printf("start: %d stop:%d", startFrame, endFrame);
-    	
     	float speed = 10f;
     	float length = endFrame / speed;
     	

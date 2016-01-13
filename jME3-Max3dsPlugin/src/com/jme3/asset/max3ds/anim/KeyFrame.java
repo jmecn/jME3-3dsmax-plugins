@@ -16,4 +16,8 @@ public class KeyFrame {
 	public float hotSpot;
 	public float fallOff;
 	public ColorRGBA colorTrack;
+	
+	public String toString() {
+		return "Frame:" + frame + " Position:" + position + " Rotation:" + rotation + " Scale:" + scale;
+	}
 }

@@ -9,6 +9,7 @@ import com.jme3.animation.Animation;
 import com.jme3.animation.Bone;
 import com.jme3.animation.BoneTrack;
 import com.jme3.animation.Skeleton;
+import com.jme3.animation.SkeletonControl;
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetManager;
@@ -32,10 +33,12 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+import com.jme3.util.BufferUtils;
 import com.jme3.util.IntMap;
 import com.jme3.util.IntMap.Entry;
 
@@ -76,7 +79,7 @@ public class AseProcessor implements CONSTANT {
 		// create animation - don't use
 		compileAnimation(scene);
 		// bake animation
-		bake();
+		bake(scene);
 		return rootNode;
 	}
 
@@ -321,6 +324,9 @@ public class AseProcessor implements CONSTANT {
 			f[i * 3 + 2] = face.v3;
 		}
 		mesh.setBuffer(Type.Index, 3, f);
+		
+		Vector3f[] normals = generateNormals(obj.verts, f);
+		mesh.setBuffer(Type.Normal, 3, BufferUtils.createFloatBuffer(normals));
 
 		mesh.setStatic();
 		mesh.updateBound();
@@ -328,6 +334,71 @@ public class AseProcessor implements CONSTANT {
 
 		return mesh;
 	}
+	
+    private Vector3f[] generateNormals(List<Vector3f> verts)
+    {
+        Vector3f[] normals = new Vector3f[verts.size()];
+        for(int i=0; i < normals.length;)
+        {
+            Vector3f normal    = new Vector3f();
+            Vector3f v1        = new Vector3f();
+            Vector3f v2        = new Vector3f();
+    
+            v1 = verts.get(i+1).subtract(verts.get(i));
+            v2 = verts.get(i+2).subtract(verts.get(i));
+            v1.cross(v2, normal);
+            normal.normalize();
+
+    
+            normals[i++] = normal;
+            normals[i++] = normal;
+            normals[i++] = normal;
+        }
+
+        return normals;
+    }
+    
+    private Vector3f[] generateNormals(List<Vector3f> verts, int[] indices)
+    {
+    	Vector3f[] normals = new Vector3f[verts.size()];
+        for(int i=0; i < indices.length; i+=3)
+        {
+        	int index0 = indices[i];
+            int index1 = indices[i+1];
+            int index2 = indices[i+2];
+            
+            Vector3f v1 = verts.get(index1).subtract(verts.get(index0));
+            Vector3f v2 = verts.get(index2).subtract(verts.get(index0));
+            Vector3f normal = v1.cross(v2);
+            normal.normalize();
+
+            if (normals[index0] == null) {
+            	normals[index0] = normal;
+            } else {
+        		normals[index0].addLocal(normal);
+        	}
+            
+            if (normals[index1] == null) {
+            	normals[index1] = normal;
+            } else {
+        		normals[index1].addLocal(normal);
+        	}
+            
+            if (normals[index2] == null) {
+            	normals[index2] = normal;
+            } else {
+        		normals[index2].addLocal(normal);
+        	}
+        }
+        
+        for(int i=0; i<normals.length; i++) {
+        	if (normals[i] != null) {
+        		normals[i].normalize();
+        	}
+        }
+
+        return normals;
+    }
 
 	/*******************************
 	 * 
@@ -712,10 +783,69 @@ public class AseProcessor implements CONSTANT {
 			anim.addTrack(track);
 		}
 		
-		rootNode.getControl(AnimControl.class).addAnim(anim);
+		AnimControl ac = rootNode.getControl(AnimControl.class);
+		ac.addAnim(anim);
+		
+		SkeletonControl sc = new SkeletonControl(ske);
+		rootNode.addControl(sc);
+		
 	}
 	
-	protected void bake() {
+	protected void bake(AseScene scene) {
+		Node node = (Node)rootNode.getChild("BONES");
+		Skeleton ske = rootNode.getControl(AnimControl.class).getSkeleton();
 		
+		/** skinning the model */
+		for(Spatial child : node.getChildren()) {
+			if (child instanceof Geometry) {
+				Geometry geom = (Geometry)child;
+				String name = geom.getName();
+				skinning(geom.getMesh(), (byte)ske.getBoneIndex(name));
+			}
+		}
+	}
+	
+	/**
+	 * Skinning the mesh
+	 * @param mesh
+	 * @param targetBoneIndex
+	 */
+	private void skinning(Mesh mesh, byte targetBoneIndex) {
+		if (targetBoneIndex == -1) return;
+		
+		// Calculate vertex count
+		int limit = mesh.getBuffer(Type.Position).getData().limit();
+		// Notice: i should call mesh.getMode() to decide how many 
+		// floats is used for each vertex. Default mode is Mode.Triangles
+		int vertexCount = limit/3;// by default
+		
+		int boneIndexCount = vertexCount * 4;
+		byte[] boneIndex = new byte[boneIndexCount];
+		float[] boneWeight = new float[boneIndexCount];
+
+		// calculate bone indices and bone weights;
+		for(int i=0; i<boneIndexCount; i+=4) {
+			boneIndex[i] = targetBoneIndex;
+			// I don't need the other 3 indices so I discard them
+			boneIndex[i+1] = 0;
+			boneIndex[i+2] = 0;
+			boneIndex[i+3] = 0;
+			
+			boneWeight[i] = 1;
+			// I don't need the other 3 indices so I discard them
+			boneWeight[i+1] = 0;
+			boneWeight[i+2] = 0;
+			boneWeight[i+3] = 0;
+		}
+		mesh.setMaxNumWeights(1);
+		
+		// apply software skinning
+		mesh.setBuffer(Type.BoneIndex, 4, boneIndex);
+		mesh.setBuffer(Type.BoneWeight, 4, boneWeight);
+		// apply hardware skinning
+		mesh.setBuffer(Type.HWBoneIndex, 4, boneIndex);
+		mesh.setBuffer(Type.HWBoneWeight, 4, boneWeight);
+
+		mesh.generateBindPose(true);
 	}
 }
