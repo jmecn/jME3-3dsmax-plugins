@@ -22,7 +22,7 @@ package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.animation.AnimControl;
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.scene.Node;
+import com.jme3.asset.max3ds.anim.KeyFrameTrack;
 
 /**
  * A KeyFramerInfoChunk stores information about things
@@ -37,6 +37,14 @@ import com.jme3.scene.Node;
 public class KeyFramerInfoChunk extends Chunk
 {
 
+	/**
+	 * Create a new KeyFrameTrack to store animation data
+	 */
+	@Override
+	public void loadData(ChunkChopper chopper) {
+		KeyFrameTrack track = new KeyFrameTrack();
+		chopper.addObjectTrack(track);
+	}
     /**
      * Retrieves the named object for the current key framer
      * inserts the rotation, position and pivot transformations for frame 0
@@ -59,12 +67,6 @@ public class KeyFramerInfoChunk extends Chunk
      */
     public void initialize(ChunkChopper chopper) 
     {
-        String meshName = (String)chopper.getObjectName();
-        AnimControl frameBehavior = chopper.getKeyFramer().createBehavior(meshName,
-                                                        chopper.getNamedNode(meshName),
-                                                        chopper.getNamedObject(meshName));
-        if(frameBehavior != null) {
-//            chopper.addBehaviorNode(frameBehavior);
-        }
+    	System.out.println(chopper.getCurrentTrack());
     }
 }

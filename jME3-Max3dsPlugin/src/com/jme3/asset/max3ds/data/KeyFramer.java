@@ -52,7 +52,7 @@ public class KeyFramer
     private List scaleKeys;
 
     private Integer id;
-    private Node father;
+    private Spatial father;
     private Node dummyObject;
 
 
@@ -75,14 +75,13 @@ public class KeyFramer
      * (X1,Y1,Z1) = local coordinates
      *
      */
-    public AnimControl createBehavior(String meshName, Node transformGroup, Object testObject)
+    public AnimControl createBehavior(String meshName, Spatial transformGroup, Object testObject)
     {
-    	Node objectGroup = getObjectByName(meshName, transformGroup, testObject);
+    	Spatial objectGroup = getObjectByName(meshName, transformGroup, testObject);
     	if (objectGroup == null) {
     		return null;
     	}
     	
-
     	/*
     	insertFather(objectGroup, meshName);
     	
@@ -147,7 +146,7 @@ public class KeyFramer
      * If it isn't there it gets the dummy object
      * from the frames description chunk.
      */
-    private Node getObjectByName(String objectName, Node objectGroup, Object testObject)
+    private Spatial getObjectByName(String objectName, Spatial objectGroup, Object testObject)
     {
 
         //This means its a dummy object.  It needs to be created.
@@ -486,7 +485,7 @@ public class KeyFramer
 
     /**
      */
-    public void addFather(int fatherID, Node newFather)
+    public void addFather(int fatherID, Spatial newFather)
     {
         if(fatherID < 0)
         {
@@ -494,7 +493,7 @@ public class KeyFramer
         }
         else
         {
-            father = (Node)(fatherMap.get(new Integer(fatherID)));
+            father = (Spatial)(fatherMap.get(new Integer(fatherID)));
             //Remove the father's father because the father will
             //be inserted somewhere later.
             Node grandFather = (Node)father.getParent();

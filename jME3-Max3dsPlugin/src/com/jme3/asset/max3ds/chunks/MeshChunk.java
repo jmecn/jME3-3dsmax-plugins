@@ -28,11 +28,9 @@ public class MeshChunk extends Chunk {
     	final int[] indices = (int[])chopper.popData(ChunkID.FACES_DESCRIPTION);
         final int[] smoothGroups = (int[])chopper.popData(ChunkID.SMOOTH);
         
-        Node parent = chopper.getGroup();
-        String name= parent.getName();
+        Geometry geom = (Geometry)chopper.getCurrentObject();
         Mesh mesh = new Mesh();
-        Geometry geom = new Geometry(name, mesh);
-        parent.attachChild(geom);
+        geom.setMesh(mesh);
         
         // Vertex
         mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(coordinates));

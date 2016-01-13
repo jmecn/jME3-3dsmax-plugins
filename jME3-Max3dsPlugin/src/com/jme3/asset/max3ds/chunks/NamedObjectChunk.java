@@ -22,7 +22,7 @@
 package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.scene.Node;
+import com.jme3.scene.Geometry;
 
 /**
  * Loads information about a named object: Cameras, meshes and lights
@@ -38,8 +38,15 @@ public class NamedObjectChunk extends Chunk
     public void loadData(ChunkChopper chopper)
     {
         final String name = chopper.getString();
-        Node node = new Node(name);
-        chopper.attachNode(node);
+        Geometry object = new Geometry(name);
+        chopper.attachChild(object);
     }
     
+    @Override
+    public void initialize(ChunkChopper chopper) {
+    	Geometry geom = (Geometry)chopper.getCurrentObject();
+    	if (geom.getMesh() == null) {
+    		chopper.detachChild(geom);
+    	}
+    }
 }

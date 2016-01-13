@@ -42,8 +42,8 @@ public class BoundingBoxChunk extends Chunk
         Vector3f min = chopper.getVector3f();
         Vector3f max = chopper.getVector3f();
         BoundingBox box = new BoundingBox(min, max);
-        Vector3f center = box.getCenter();
-        chopper.getKeyFramer().setPivotCenter(center);
+        
+        chopper.getCurrentTrack().box = box;
     }
 
 }

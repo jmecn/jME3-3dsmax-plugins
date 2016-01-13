@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 
 
+
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.math.Vector3f;
 
@@ -47,20 +48,13 @@ public class PositionChunk extends Chunk
         int flags = chopper.getUnsignedShort();
         chopper.getLong();
         int numKeys = chopper.getUnsignedInt();
-
-        ArrayList<Vector3f> pointList = new ArrayList<Vector3f>();
         for(int i =0; i < numKeys; i++)
         {
-            long keyNumber = chopper.getUnsignedInt();
+            int frameNumber = chopper.getUnsignedInt();
             int  accelerationData = chopper.getUnsignedShort(); 
 
-            Vector3f position = chopper.getVector3f(); 
-            if(i==0)
-            {
-                chopper.getKeyFramer().setPosition(position);
-            }
-            pointList.add(position);
+            Vector3f position = chopper.getVector3f();
+            chopper.getCurrentTrack().locateTrack(frameNumber).position = position;
         }
-        chopper.getKeyFramer().setPositionKeys(pointList);
     }
 }

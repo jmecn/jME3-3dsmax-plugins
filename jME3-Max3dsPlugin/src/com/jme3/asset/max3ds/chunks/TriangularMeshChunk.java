@@ -34,12 +34,8 @@ public class TriangularMeshChunk extends Chunk {
     	
     	int numFaces = (Integer)chopper.getNamedObject(ChunkID.FACES_DESCRIPTION);
         
-        Geometry geom = new Geometry();
+        Geometry geom = (Geometry)chopper.getCurrentObject();
 
-        Node parent = chopper.getGroup();
-        geom.setName(parent.getName());
-        parent.attachChild(geom);
-        
         // Materials ²ÄÖÊ
         final String materialName = (String)chopper.popData(ChunkID.FACES_MATERIAL);
         if(materialName != null) {
@@ -110,12 +106,12 @@ public class TriangularMeshChunk extends Chunk {
 		if (f != null) {
 			mesh.setBuffer(Type.Index, 3, f);
 		} else {
-			System.out.println(parent.getName() + " has no Index");
+			System.out.println(geom.getName() + " has no Index");
 		}
 		if (tv != null) {
 			mesh.setBuffer(Type.TexCoord, 2, tv);
 		} else {
-			System.out.println(parent.getName() + " has no TexCoord");
+			System.out.println(geom.getName() + " has no TexCoord");
 		}
         
         mesh.setStatic();

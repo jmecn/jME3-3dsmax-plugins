@@ -21,48 +21,35 @@
 
 package com.jme3.asset.max3ds.chunks;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.math.Vector3f;
 
 /**
- * Extracts scale information from the 3ds file which
- * is then used by the mesh info chunk to construct a 
- * animation.
+ * Extracts scale information from the 3ds file which is then used by the mesh
+ * info chunk to construct a animation.
  */
-public class ScaleChunk extends Chunk
-{
-    /**
-     * Loads the scale for a shape
-     * and notifies the KeyFramerInfoChunk
-     *
-     * @param chopper the ChunkChopper containing the state of the parser.  
-     */
-    public void loadData(ChunkChopper chopper)
-    {
-        int flags = chopper.getUnsignedShort();
-        chopper.getLong();
-        int numKeys = chopper.getUnsignedInt();
+public class ScaleChunk extends Chunk {
+	/**
+	 * Loads the scale for a shape and notifies the KeyFramerInfoChunk
+	 * 
+	 * @param chopper
+	 *            the ChunkChopper containing the state of the parser.
+	 */
+	public void loadData(ChunkChopper chopper) {
+		int flags = chopper.getUnsignedShort();
+		chopper.getLong();
+		int numKeys = chopper.getUnsignedInt();
 
-        List scaleKeys = new ArrayList();
+		for (int i = 0; i < numKeys; i++) {
+			int frameNumber = chopper.getUnsignedInt();
+			int accelerationData = chopper.getUnsignedShort();
 
-        for(int i =0; i < numKeys; i++)
-        {
-            long keyNumber = chopper.getUnsignedInt();
-            int  accelerationData = chopper.getUnsignedShort(); 
+			float scaleX = chopper.getFloat();
+			float scaleZ = chopper.getFloat();
+			float scaleY = chopper.getFloat();
+			Vector3f scale = new Vector3f(scaleX, scaleY, scaleZ);
 
-            float scaleX = chopper.getFloat();
-            float scaleZ = chopper.getFloat();
-            float scaleY = chopper.getFloat();
-            Vector3f scale = new Vector3f(scaleX, scaleY, scaleZ);
-            if(i==0)
-            {
-                chopper.getKeyFramer().setScale(scale);
-            }
-            scaleKeys.add(scale);
-        }
-        chopper.getKeyFramer().setScaleKeys(scaleKeys);
-    }
+			chopper.getCurrentTrack().locateTrack(frameNumber).scale = scale;
+		}
+	}
 }

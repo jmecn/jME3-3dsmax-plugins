@@ -23,9 +23,9 @@ package com.jme3.asset.max3ds.chunks;
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.ChunkID;
 import com.jme3.light.PointLight;
+import com.jme3.light.SpotLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 
 /**
  * Lights to be placed in a scene.
@@ -35,8 +35,6 @@ import com.jme3.scene.Node;
  */
 public class LightChunk extends Chunk
 {
-    private Vector3f currentPosition;
-
     /**
      * This is called by the chunk chopper before any of the chunk's 
      * subchunks  are loaded.  Any data loaded that may need to be 
@@ -47,10 +45,8 @@ public class LightChunk extends Chunk
      */
     public void loadData(ChunkChopper chopper)
     {
-        currentPosition = chopper.getVector3f();
-        Node group = chopper.getGroup();
-        group.setLocalTranslation(currentPosition);
-        chopper.pushData(chopper.getID(), currentPosition);
+    	Vector3f position = chopper.getVector3f();
+        chopper.pushData(chopper.getID(), position);
     }
 
     /**
@@ -61,16 +57,22 @@ public class LightChunk extends Chunk
     public void initialize(ChunkChopper chopper)
     {
         ColorRGBA color = (ColorRGBA)chopper.popData(ChunkID.COLOR);
-        PointLight light = (PointLight)chopper.popData(ChunkID.SPOTLIGHT);
+        SpotLight light = (SpotLight)chopper.popData(ChunkID.SPOTLIGHT);
+        
+        Float rangeStart = (Float)chopper.popData(ChunkID.RANGE_START);
+        Float rangeEnd = (Float)chopper.popData(ChunkID.RANGE_END);
+        
         if(light == null)
         {
-            light = new PointLight();
-            chopper.addLight(light);
+            light = new SpotLight();
+            Vector3f position = (Vector3f)chopper.popData(ChunkID.LIGHT);
+            light.setPosition(position);
+        } else {
+        	light.setColor(color);
+        	if (rangeEnd != null) {
+        		light.setSpotRange(rangeEnd.floatValue());
+        	}
         }
-
-        light.setColor(color);
-        light.setPosition(new Vector3f(0,0,0));
-        light.setRadius(3000);
-        chopper.getGroup().addLight(light);
+        chopper.addLight(light);
     }
 }

@@ -85,6 +85,6 @@ public class AxisChunk extends Chunk
         transform.setTranslation(origin);
 
         String meshName = chopper.getObjectName();
-        chopper.getKeyFramer().setCoordinateSystem(meshName, transform);
+        chopper.setCoordinateSystem(meshName, transform);
     }
 }

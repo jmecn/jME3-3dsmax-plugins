@@ -7,19 +7,24 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.jme3.asset.max3ds.ChunkID.*;
 
+import com.jme3.asset.max3ds.anim.KeyFrameTrack;
 import com.jme3.asset.max3ds.chunks.*;
 import com.jme3.asset.max3ds.data.KeyFramer;
 import com.jme3.export.Savable;
 import com.jme3.light.Light;
 import com.jme3.material.Material;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.UserData;
 import com.jme3.texture.Texture;
 
@@ -43,7 +48,6 @@ public class ChunkChopper {
 	
 	protected M3DLoader loader;
 	
-	
 	private HashMap<Object, Object> dataMap;
 	private HashMap<Object, Object> userData;
 	
@@ -51,12 +55,13 @@ public class ChunkChopper {
 	protected Integer chunkID;
 	protected Chunk mainChunk;
 	
-	private Node rootNode;
-	private Node currentNode;
+	private Node scene;
+	private Spatial currentObject;
 	private String currentObjectName;
+	private HashMap<String, Transform>  namedObjectCoordinateSystems = new HashMap<String, Transform>();
 	
-	private KeyFramer keyFramer = new KeyFramer();
-
+	private List<KeyFrameTrack> meshTracks;
+	private KeyFrameTrack currentTrack;
 	
 	/** This should be turned on by Loader3DS to view debugging information. */
 	public static boolean debug;
@@ -171,12 +176,13 @@ public class ChunkChopper {
         
         keyFramerChunk.addSubChunk(FRAMES_CHUNK, framesChunk);
         keyFramerChunk.addSubChunk(MESH_INFO, keyFramerInfoChunk);
-        keyFramerChunk.addSubChunk(AMBIENT_LIGHT_INFO, keyFramerInfoChunk);
-        keyFramerChunk.addSubChunk(CAMERA_INFO, keyFramerInfoChunk);
-        keyFramerChunk.addSubChunk(CAMERA_TARGET_INFO, keyFramerInfoChunk);
-        keyFramerChunk.addSubChunk(OMNI_LIGHT_INFO, keyFramerInfoChunk);
-        keyFramerChunk.addSubChunk(SPOT_LIGHT_TARGET_INFO, keyFramerInfoChunk);
-        keyFramerChunk.addSubChunk(SPOT_LIGHT_INFO, keyFramerInfoChunk);
+        // we don't need these thing in jME
+        //keyFramerChunk.addSubChunk(AMBIENT_LIGHT_INFO, keyFramerInfoChunk);
+        //keyFramerChunk.addSubChunk(CAMERA_INFO, keyFramerInfoChunk);
+        //keyFramerChunk.addSubChunk(CAMERA_TARGET_INFO, keyFramerInfoChunk);
+        //keyFramerChunk.addSubChunk(OMNI_LIGHT_INFO, keyFramerInfoChunk);
+        //keyFramerChunk.addSubChunk(SPOT_LIGHT_TARGET_INFO, keyFramerInfoChunk);
+        //keyFramerChunk.addSubChunk(SPOT_LIGHT_INFO, keyFramerInfoChunk);
 
         keyFramerInfoChunk.addSubChunk(NAME_AND_FLAGS, framesDescriptionChunk);
         keyFramerInfoChunk.addSubChunk(PIVOT, pivotChunk);
@@ -220,8 +226,8 @@ public class ChunkChopper {
     public synchronized Node loadSceneBase(InputStream inputStream, M3DLoader loader) throws IOException
     {
         this.loader = loader;
-        this.rootNode = new Node();
-        rootNode.setName("3DS@" + Integer.toHexString(rootNode.hashCode()));
+        this.scene = new Node();
+        scene.setName("3DS@" + Integer.toHexString(scene.hashCode()));
         this.dataMap = new HashMap<Object, Object>();
 
         // FileChannel channel = null;
@@ -243,7 +249,7 @@ public class ChunkChopper {
  		
  		// close channel
  		channel.close();
-        return rootNode;
+        return scene;
     }
 
     /**
@@ -337,12 +343,33 @@ public class ChunkChopper {
 		}
 	}
 	
+    /**
+     * Called to set the coordinate system transform for an object named
+     * objectName. 
+     * This is the first transform.
+     */
+    public void setCoordinateSystem(String objectName, Transform coordinateSystem)
+    {
+        namedObjectCoordinateSystems.put(objectName, coordinateSystem);
+    }
+    
+    /**
+     * Add an objectTrack to scene.
+     * @param track
+     */
+	public void addObjectTrack(KeyFrameTrack track) {
+		if (meshTracks == null) {
+			meshTracks = new ArrayList<KeyFrameTrack>();
+		}
+		meshTracks.add(track);
+		currentTrack = track;
+	}
 	/**
-	 * Gets the key framer chunk These should be their own objects instead of
+	 * Gets the key framer track These should be their own objects instead of
 	 * chunks.
 	 */
-	public KeyFramer getKeyFramer() {
-		return keyFramer;
+	public KeyFrameTrack getCurrentTrack() {
+		return currentTrack;
 	}
 	
 	/**
@@ -355,10 +382,16 @@ public class ChunkChopper {
 	 * @param group
 	 *            the current group that the chopper will be adding things too.
 	 */
-	public void attachNode(Node node) {
-		rootNode.attachChild(node);
-		currentNode = node;
-		currentObjectName = node.getName();
+	public void attachChild(Spatial object) {
+		scene.attachChild(object);
+		currentObject = object;
+		currentObjectName = object.getName();
+	}
+	
+	public void detachChild(Spatial object) {
+		if (scene.hasChild(object)) {
+			scene.detachChild(object);
+		}
 	}
 
 	/**
@@ -391,8 +424,8 @@ public class ChunkChopper {
 	 * 
 	 * @return the group for the current object being constructed.
 	 */
-	public Node getGroup() {
-		return currentNode;
+	public Spatial getCurrentObject() {
+		return currentObject;
 	}
 
 
@@ -447,7 +480,7 @@ public class ChunkChopper {
 	 * @return true if there are lights.
 	 */
 	public boolean hasLights() {
-		return rootNode.getLocalLightList().size() > 0;
+		return scene.getLocalLightList().size() > 0;
 	}
 	
 	/**
@@ -457,25 +490,15 @@ public class ChunkChopper {
 	 *            the light to add to the scene.
 	 */
 	public void addLight(Light light) {
-		rootNode.addLight(light);
+		scene.addLight(light);
 	}
 	
 	/**
 	 * Gets and cast the named object for the key provided. Its an error if its
 	 * not a transform group.
 	 */
-	public Node getNamedNode(String key) {
-		return (Node) rootNode.getChild(key);
-//		Object object = getNamedObject(key);
-//		if (object instanceof Node) {
-//			return (Node) object;
-//		} else if (object != null) {
-//			logger.log(Level.INFO, "Retrieving " + key
-//					+ " which is a named object but not useable because "
-//					+ " its not a transform group. Its a "
-//					+ object.getClass().getName());
-//		}
-//		return null;
+	public Spatial getChild(String key) {
+		return scene.getChild(key);
 	}
 	
 	/**

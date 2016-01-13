@@ -24,7 +24,6 @@ import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.ChunkID;
 import com.jme3.light.SpotLight;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 
 /**
  * SpotLights to be placed in a scene.
@@ -52,20 +51,16 @@ public class SpotLightChunk extends Chunk
         float falloff = chopper.getFloat();
 
         Vector3f position = (Vector3f)chopper.popData(ChunkID.LIGHT);
+        Vector3f direction = target.subtract(position);
         
         SpotLight light = new SpotLight();
-        light.setDirection(new Vector3f(0, 0, -1));
+        light.setPosition(position);
+        light.setDirection(direction);
         
         // TODO Im not sure if this is right. Need test
         light.setSpotInnerAngle(beam);
         light.setSpotOuterAngle(falloff);
         
-        Node group = chopper.getGroup();
-        group.addLight(light);
-        
-        group.setLocalTranslation(position);
-        group.lookAt(target, new Vector3f(0,1,0));
-
         chopper.pushData(chopper.getID(), light);
     }
 }

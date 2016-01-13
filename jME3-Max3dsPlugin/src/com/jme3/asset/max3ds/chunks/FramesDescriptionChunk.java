@@ -25,6 +25,7 @@ package com.jme3.asset.max3ds.chunks;
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.data.KeyFramer;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 /**
  * This chunk contains the name of the object
  * the frames belong to and the parameters and 
@@ -41,20 +42,12 @@ public class FramesDescriptionChunk extends Chunk
      */
     public void loadData(ChunkChopper chopper)
     {
-        KeyFramer keyFramer = chopper.getKeyFramer();
         String objectName = chopper.getString();
-        chopper.setObjectName(objectName);
         chopper.getUnsignedShort();
         chopper.getUnsignedShort();
         int fatherID = chopper.getShort();
-        Node node = chopper.getNamedNode(objectName);
         
-        if(node == null)//its a dummy transformGroup.
-        {
-            node = new Node();
-            keyFramer.setDummyObject(node);
-        }
-
-        keyFramer.addFather(fatherID, node);
+        chopper.getCurrentTrack().name = objectName;
+        chopper.getCurrentTrack().fatherID = fatherID;
     }
 }

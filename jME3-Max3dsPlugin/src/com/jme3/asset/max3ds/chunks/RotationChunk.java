@@ -59,11 +59,9 @@ public class RotationChunk extends Chunk
         int numKeys = chopper.getUnsignedInt();
 
         Quaternion    previousQuat = null;
-
-        List<Quaternion>     quats = new ArrayList<Quaternion>();
         for(int i =0; i < numKeys; i++)
         {
-            long       frameNumber = chopper.getUnsignedInt();//Part of the track header
+            int        frameNumber = chopper.getUnsignedInt();//Part of the track header
             int   accelerationData = chopper.getUnsignedShort();//Part of the track header
             getSplineTerms(accelerationData, chopper);//Part of the track header
 
@@ -71,18 +69,12 @@ public class RotationChunk extends Chunk
             Vector3f        vector = chopper.getVector3f(); 
 
             Quaternion        quat = new Quaternion().fromAngleAxis(angle, vector);
+            chopper.getCurrentTrack().locateTrack(frameNumber).rotation = quat;
             if(previousQuat != null) {
                 quat.mult(previousQuat, quat);
             }
             previousQuat = quat; 
-
-            quats.add(quat); 
-            if(i==0)
-            {
-                chopper.getKeyFramer().setRotation(quat);
-            }
         }
-        chopper.getKeyFramer().setOrientationKeys(quats);
     }
 
     /**

@@ -32,14 +32,13 @@ import com.jme3.math.Vector3f;
 public class PivotChunk extends Chunk
 {
     /**
-     * Gets the pivot and associates it with the current mes.
+     * Gets the pivot and associates it with the current mesh.
      * @param chopper the ChunkChopper containing the state of the parser.  
      */
     public void loadData(ChunkChopper chopper)
     {
         Vector3f pivot = chopper.getVector3f();
-
-        chopper.getKeyFramer().setPivot(pivot);
+		chopper.getCurrentTrack().pivot = pivot;
     }
 
 }
