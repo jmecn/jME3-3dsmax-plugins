@@ -1,5 +1,56 @@
 package com.jme3.asset.max3ds;
 
+import static com.jme3.asset.max3ds.ChunkID.AMBIENT_COLOR;
+import static com.jme3.asset.max3ds.ChunkID.BOUNDING_BOX;
+import static com.jme3.asset.max3ds.ChunkID.CAMERA;
+import static com.jme3.asset.max3ds.ChunkID.COLOR;
+import static com.jme3.asset.max3ds.ChunkID.COORDINATE_AXES;
+import static com.jme3.asset.max3ds.ChunkID.DIFFUSE_COLOR;
+import static com.jme3.asset.max3ds.ChunkID.EDITOR;
+import static com.jme3.asset.max3ds.ChunkID.FACES_DESCRIPTION;
+import static com.jme3.asset.max3ds.ChunkID.FACES_MATERIAL;
+import static com.jme3.asset.max3ds.ChunkID.FRAMES_CHUNK;
+import static com.jme3.asset.max3ds.ChunkID.HIERARCHY_INFO;
+import static com.jme3.asset.max3ds.ChunkID.KEYFRAMER;
+import static com.jme3.asset.max3ds.ChunkID.LIGHT;
+import static com.jme3.asset.max3ds.ChunkID.LIGHT_OFF;
+import static com.jme3.asset.max3ds.ChunkID.MATERIAL;
+import static com.jme3.asset.max3ds.ChunkID.MATERIAL_NAME;
+import static com.jme3.asset.max3ds.ChunkID.MESH;
+import static com.jme3.asset.max3ds.ChunkID.MESH_INFO;
+import static com.jme3.asset.max3ds.ChunkID.MULTIPLIER;
+import static com.jme3.asset.max3ds.ChunkID.NAMED_OBJECT;
+import static com.jme3.asset.max3ds.ChunkID.NAME_AND_FLAGS;
+import static com.jme3.asset.max3ds.ChunkID.OVERSHOOT;
+import static com.jme3.asset.max3ds.ChunkID.PIVOT;
+import static com.jme3.asset.max3ds.ChunkID.POSITION;
+import static com.jme3.asset.max3ds.ChunkID.RANGE_END;
+import static com.jme3.asset.max3ds.ChunkID.RANGE_START;
+import static com.jme3.asset.max3ds.ChunkID.RAYTRACE;
+import static com.jme3.asset.max3ds.ChunkID.RAY_TRACE_BIAS;
+import static com.jme3.asset.max3ds.ChunkID.RECTANGULAR;
+import static com.jme3.asset.max3ds.ChunkID.REFLECTION_BLUR;
+import static com.jme3.asset.max3ds.ChunkID.ROTATION;
+import static com.jme3.asset.max3ds.ChunkID.SCALE;
+import static com.jme3.asset.max3ds.ChunkID.SCALE_TRACK;
+import static com.jme3.asset.max3ds.ChunkID.SHADOWED;
+import static com.jme3.asset.max3ds.ChunkID.SHADOW_MAP;
+import static com.jme3.asset.max3ds.ChunkID.SHININESS;
+import static com.jme3.asset.max3ds.ChunkID.SHININESS_STRENGTH;
+import static com.jme3.asset.max3ds.ChunkID.SHOW_CONE;
+import static com.jme3.asset.max3ds.ChunkID.SMOOTH;
+import static com.jme3.asset.max3ds.ChunkID.SPECULAR_COLOR;
+import static com.jme3.asset.max3ds.ChunkID.SPOTLIGHT;
+import static com.jme3.asset.max3ds.ChunkID.SPOT_MAP;
+import static com.jme3.asset.max3ds.ChunkID.SPOT_ROLL;
+import static com.jme3.asset.max3ds.ChunkID.TEXTURE;
+import static com.jme3.asset.max3ds.ChunkID.TEXTURE_COORDINATES;
+import static com.jme3.asset.max3ds.ChunkID.TEXTURE_NAME;
+import static com.jme3.asset.max3ds.ChunkID.TRANSPARENCY;
+import static com.jme3.asset.max3ds.ChunkID.TRANSPARENCY_FALLOUT;
+import static com.jme3.asset.max3ds.ChunkID.TWO_SIDED;
+import static com.jme3.asset.max3ds.ChunkID.VERTEX_LIST;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.BufferUnderflowException;
@@ -14,15 +65,41 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.jme3.asset.max3ds.ChunkID.*;
-
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.Animation;
 import com.jme3.animation.Bone;
 import com.jme3.animation.Skeleton;
 import com.jme3.animation.SkeletonControl;
 import com.jme3.asset.max3ds.anim.KeyFrameTrack;
-import com.jme3.asset.max3ds.chunks.*;
+import com.jme3.asset.max3ds.chunks.AxisChunk;
+import com.jme3.asset.max3ds.chunks.BooleanChunk;
+import com.jme3.asset.max3ds.chunks.BoundingBoxChunk;
+import com.jme3.asset.max3ds.chunks.CameraChunk;
+import com.jme3.asset.max3ds.chunks.Chunk;
+import com.jme3.asset.max3ds.chunks.ColorChunk;
+import com.jme3.asset.max3ds.chunks.FacesDescriptionChunk;
+import com.jme3.asset.max3ds.chunks.FacesMaterialChunk;
+import com.jme3.asset.max3ds.chunks.FloatChunk;
+import com.jme3.asset.max3ds.chunks.FramesChunk;
+import com.jme3.asset.max3ds.chunks.FramesDescriptionChunk;
+import com.jme3.asset.max3ds.chunks.GlobalColorChunk;
+import com.jme3.asset.max3ds.chunks.HierarchyInfoChunk;
+import com.jme3.asset.max3ds.chunks.KeyFramerInfoChunk;
+import com.jme3.asset.max3ds.chunks.LightChunk;
+import com.jme3.asset.max3ds.chunks.MaterialChunk;
+import com.jme3.asset.max3ds.chunks.MeshChunk;
+import com.jme3.asset.max3ds.chunks.NamedObjectChunk;
+import com.jme3.asset.max3ds.chunks.PercentageChunk;
+import com.jme3.asset.max3ds.chunks.PivotChunk;
+import com.jme3.asset.max3ds.chunks.PositionChunk;
+import com.jme3.asset.max3ds.chunks.RotationChunk;
+import com.jme3.asset.max3ds.chunks.ScaleChunk;
+import com.jme3.asset.max3ds.chunks.SmoothingChunk;
+import com.jme3.asset.max3ds.chunks.SpotLightChunk;
+import com.jme3.asset.max3ds.chunks.StringChunk;
+import com.jme3.asset.max3ds.chunks.TextureChunk;
+import com.jme3.asset.max3ds.chunks.Vertex2ListChunk;
+import com.jme3.asset.max3ds.chunks.Vertex3ListChunk;
 import com.jme3.export.Savable;
 import com.jme3.light.Light;
 import com.jme3.material.Material;
@@ -250,7 +327,6 @@ public class ChunkChopper {
  		long begin = System.currentTimeMillis();
  		try {
  			loadSubChunks(mainChunk, 0);
- 			reCalculateVertex();
  			createAnimation();
  		} catch (CannotChopException e) {
  			e.printStackTrace();
@@ -675,23 +751,48 @@ public class ChunkChopper {
 		return loader.createTexture(textureName);
 	}
 	
-	/**
-	 * Recalculate mesh vertex
-	 */
-	private void reCalculateVertex() {
-		for(Spatial child : scene.getChildren()) {
-			if (child instanceof Geometry) {
+    /**
+     * Retrieves the named object for the each key framer
+     * inserts the rotation, position and pivot transformations for frame 0
+     * and assigns the coordinate system to it.
+     *
+     * The inverse of the local coordinate system converts from 3ds 
+     * semi-absolute coordinates (what is in the file) to local coordinates.
+     *
+     * Then these local coordinates are converted with matrix 
+     * that will instantiate them to absolute coordinates:
+     * Xabs = sx a1 (Xl-Px) + sy a2 (Yl-Py) + sz a3 (Zl-Pz) + Tx
+     * Yabs = sx b1 (Xl-Px) + sy b2 (Yl-Py) + sz b3 (Zl-Pz) + Ty
+     * Zabs = sx c1 (Xl-Px) + sy c2 (Yl-Py) + sz c3 (Zl-Pz) + Tz
+     * Where:
+     * (Xabs,Yabs,Zabs) = absolute coordinate
+     * (Px,Py,Pz) = mesh pivot (constant)
+     * (X1,Y1,Z1) = local coordinates
+     *
+     */
+	private void reCalculateVertex(Skeleton ske) {
+		
+		for(KeyFrameTrack track : meshTracks) {
+			String name = track.name;
+			Spatial child = scene.getChild(name);
+			// Bone bone = ske.getBone(name);
+			
+			Matrix4f coordinateSystem = namedObjectCoordinateSystems.get(name);
+			if (coordinateSystem == null) coordinateSystem = new Matrix4f();
+			Vector3f pivot = findPivot(name);
+			System.out.println(name + " coordinate system:\n" + coordinateSystem + "\nPivot:" + pivot);
+
+			// reset mesh vertex
+			if (child != null && child instanceof Geometry) {
 				Geometry geom = (Geometry)child;
-				String name = geom.getName();
-				Matrix4f coordinateSystem = namedObjectCoordinateSystems.get(name);
-				if (coordinateSystem == null) coordinateSystem = new Matrix4f();
-				Vector3f pivot = findPivot(name);
-				
 				reCalculate(geom, coordinateSystem, pivot);
 			}
+			
 		}
 	}
 	
+
+
 	/**
 	 * Find the Geometry's pivot by it's name
 	 * @param name
@@ -714,6 +815,7 @@ public class ChunkChopper {
 		return rVal;
 	}
 	
+	
 	private void reCalculate(Geometry geom, Matrix4f coordinateSystem, Vector3f pivot) {
 		Vector3f tmp = new Vector3f();
 		Matrix4f coordinateTransform = new Matrix4f(coordinateSystem).invertLocal();
@@ -723,7 +825,7 @@ public class ChunkChopper {
 		FloatBuffer fb = (FloatBuffer)mesh.getBuffer(Type.Position).getData();
 		fb.flip();// ready to read
 		
-		// recalculate
+		// recalculate vertex
 		int limit = fb.limit();
 		for(int i=0; i<limit; i+=3) {
 			tmp.x = fb.get();
@@ -737,9 +839,8 @@ public class ChunkChopper {
 			fb.put(i+1, tmp.y);
 			fb.put(i+2, tmp.z);
 		}
-		
-		System.out.println(geom.getName() + " coordinate system:\n" + coordinateSystem + " pivot:" + pivot);
 	}
+	
 	/**
 	 * Create Animation !
 	 * 
@@ -747,7 +848,8 @@ public class ChunkChopper {
     private void createAnimation() {
     	System.out.printf("start: %d stop:%d\n", startFrame, endFrame);
     	
-    	if (endFrame == 0) return;
+    	if (endFrame == 0 || meshTracks == null) return;
+    	
     	
     	/** add controls to the model*/
 		AnimControl ac = createAnimControl();
@@ -757,9 +859,9 @@ public class ChunkChopper {
 		SkeletonControl sc = new SkeletonControl(ske);
 		scene.addControl(sc);
 		
-		// try to use hardware skinning animation
-		sc.setHardwareSkinningPreferred(true);
-		
+		/** recalcualte the vertex coordinate */
+		reCalculateVertex(ske);
+
 		/** skinning the model */
 		for(Spatial child : scene.getChildren()) {
 			if (child instanceof Geometry) {
@@ -874,14 +976,11 @@ public class ChunkChopper {
 			boneWeight[i+2] = 0;
 			boneWeight[i+3] = 0;
 		}
-		mesh.setMaxNumWeights(1);
+		mesh.setMaxNumWeights(4);
 		
 		// apply software skinning
 		mesh.setBuffer(Type.BoneIndex, 4, boneIndex);
 		mesh.setBuffer(Type.BoneWeight, 4, boneWeight);
-		// apply hardware skinning
-		mesh.setBuffer(Type.HWBoneIndex, 4, boneIndex);
-		mesh.setBuffer(Type.HWBoneWeight, 4, boneWeight);
 
 		mesh.generateBindPose(true);
 	}

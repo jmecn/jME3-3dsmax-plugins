@@ -20,7 +20,6 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
-import com.jme3.animation.AnimControl;
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.anim.KeyFrameTrack;
 
@@ -45,28 +44,4 @@ public class KeyFramerInfoChunk extends Chunk
 		KeyFrameTrack track = new KeyFrameTrack();
 		chopper.addObjectTrack(track);
 	}
-    /**
-     * Retrieves the named object for the current key framer
-     * inserts the rotation, position and pivot transformations for frame 0
-     * and assigns the coordinate system to it.
-     *
-     * The inverse of the local coordinate system converts from 3ds 
-     * semi-absolute coordinates (what is in the file) to local coordinates.
-     *
-     * Then these local coordinates are converted with matrix 
-     * that will instantiate them to absolute coordinates:
-     * Xabs = sx a1 (Xl-Px) + sy a2 (Yl-Py) + sz a3 (Zl-Pz) + Tx
-     * Yabs = sx b1 (Xl-Px) + sy b2 (Yl-Py) + sz b3 (Zl-Pz) + Ty
-     * Zabs = sx c1 (Xl-Px) + sy c2 (Yl-Py) + sz c3 (Zl-Pz) + Tz
-     * Where:
-     * (Xabs,Yabs,Zabs) = absolute coordinate
-     * (Px,Py,Pz) = mesh pivot (constant)
-     * (X1,Y1,Z1) = local coordinates
-     *
-     * @param chopper the ChunkChopper containing the current state of the parser. 
-     */
-    public void initialize(ChunkChopper chopper) 
-    {
-    	System.out.println(chopper.getCurrentTrack());
-    }
 }
