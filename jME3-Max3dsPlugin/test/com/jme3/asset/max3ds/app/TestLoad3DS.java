@@ -282,6 +282,12 @@ public class TestLoad3DS extends SimpleApplication {
 	}
 	void initModelList() {
 		list = new ArrayList<TestLoader>();
+		list.add(new TestLoader("Bounce") {
+			Spatial load() {
+				return assetManager.loadModel("Model/bounce.3DS");
+			}
+		});
+		
 		list.add(new TestLoader("Char") {
 			Spatial load() {
 				Node model = (Node)assetManager.loadModel("Model/Examples/char.3ds");
@@ -293,48 +299,36 @@ public class TestLoad3DS extends SimpleApplication {
 				return assetManager.loadModel("Model/Examples/bike.3ds");
 			}
 		});
-		list.add(new TestLoader("Bounce") {
-			Spatial load() {
-				return assetManager.loadModel("Model/bounce.3DS");
-			}
-		});
-		
 		list.add(new TestLoader("Book") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Examples/Books.3DS");
 			}
 		});
-		
 		list.add(new TestLoader("DeathKnight") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Examples/dk.3DS");
 			}
 		});
-		
 		list.add(new TestLoader("Dolphin") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Examples/Dolphin 1.3ds");
 			}
 		});
-		
 		list.add(new TestLoader("Manikin") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Examples/Manikin-5.3DS");
 			}
 		});
-		
 		list.add(new TestLoader("Woman01") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Examples/Woman.3ds");
 			}
 		});
-		
 		list.add(new TestLoader("Woman02") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Examples/Woman2.3ds");
 			}
 		});
-		
 		list.add(new TestLoader("ledy") {
 			Spatial load() {
 				Node ledy = (Node)assetManager.loadModel("Model/Examples/ledy-2.3DS");
@@ -342,7 +336,6 @@ public class TestLoad3DS extends SimpleApplication {
 				return ledy;
 			}
 		});
-		
 		list.add(new TestLoader("Girl") {
 			Spatial load() {
 				Node girl = (Node)assetManager.loadModel("Model/Examples/Girl N171207.3ds");
@@ -350,7 +343,6 @@ public class TestLoad3DS extends SimpleApplication {
 				return girl;
 			}
 		});
-		
 		list.add(new TestLoader("Ostrich") {
 			Spatial load() {
 				Node ostrich = (Node)assetManager.loadModel("Model/Examples/Ostrich.3ds");
@@ -369,7 +361,6 @@ public class TestLoad3DS extends SimpleApplication {
 				return ostrich;
 			}
 		});
-		
 		list.add(new TestLoader("fighter") {
 			Spatial load() {
 				Node fighter = (Node)assetManager.loadModel("Model/Resources/fighter.3ds");
@@ -385,13 +376,11 @@ public class TestLoad3DS extends SimpleApplication {
 				return fighter;
 			}
 		});
-		
 		list.add(new TestLoader("frigate") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Resources/frigate.3ds");
 			}
 		});
-		
 		list.add(new TestLoader("ship") {
 			Spatial load() {
 				Node ship = (Node)assetManager.loadModel("Model/Resources/ship.3ds");
@@ -407,7 +396,6 @@ public class TestLoad3DS extends SimpleApplication {
 				return ship;
 			}
 		});
-		
 		list.add(new TestLoader("stall") {
 			Spatial load() {
 				Node stall = (Node)assetManager.loadModel("Model/Resources/stall.3ds");

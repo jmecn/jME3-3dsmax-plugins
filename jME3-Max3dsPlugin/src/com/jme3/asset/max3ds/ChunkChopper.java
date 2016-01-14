@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
@@ -25,8 +26,8 @@ import com.jme3.asset.max3ds.chunks.*;
 import com.jme3.export.Savable;
 import com.jme3.light.Light;
 import com.jme3.material.Material;
+import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -66,7 +67,7 @@ public class ChunkChopper {
 	private Node scene;
 	private Spatial currentObject;
 	private String currentObjectName;
-	private HashMap<String, Transform> namedObjectCoordinateSystems = new HashMap<String, Transform>();
+	private HashMap<String, Matrix4f> namedObjectCoordinateSystems = new HashMap<String, Matrix4f>();
 	
 	private int startFrame;
 	private int endFrame;
@@ -249,6 +250,7 @@ public class ChunkChopper {
  		long begin = System.currentTimeMillis();
  		try {
  			loadSubChunks(mainChunk, 0);
+ 			reCalculateVertex();
  			createAnimation();
  		} catch (CannotChopException e) {
  			e.printStackTrace();
@@ -355,7 +357,7 @@ public class ChunkChopper {
      * objectName. 
      * This is the first transform.
      */
-    public void setCoordinateSystem(String objectName, Transform coordinateSystem)
+    public void setCoordinateSystem(String objectName, Matrix4f coordinateSystem)
     {
         namedObjectCoordinateSystems.put(objectName, coordinateSystem);
     }
@@ -674,6 +676,71 @@ public class ChunkChopper {
 	}
 	
 	/**
+	 * Recalculate mesh vertex
+	 */
+	private void reCalculateVertex() {
+		for(Spatial child : scene.getChildren()) {
+			if (child instanceof Geometry) {
+				Geometry geom = (Geometry)child;
+				String name = geom.getName();
+				Matrix4f coordinateSystem = namedObjectCoordinateSystems.get(name);
+				if (coordinateSystem == null) coordinateSystem = new Matrix4f();
+				Vector3f pivot = findPivot(name);
+				
+				reCalculate(geom, coordinateSystem, pivot);
+			}
+		}
+	}
+	
+	/**
+	 * Find the Geometry's pivot by it's name
+	 * @param name
+	 * @return
+	 */
+	private Vector3f findPivot(String name) {
+		Vector3f rVal = null;
+		
+		if (meshTracks == null) return new Vector3f();
+		
+		for(KeyFrameTrack track : meshTracks) {
+			if (track.name.equals(name)) {
+				rVal = track.pivot;
+				break;
+			}
+		}
+		
+		if (rVal == null) rVal = new Vector3f();
+		
+		return rVal;
+	}
+	
+	private void reCalculate(Geometry geom, Matrix4f coordinateSystem, Vector3f pivot) {
+		Vector3f tmp = new Vector3f();
+		Matrix4f coordinateTransform = new Matrix4f(coordinateSystem).invertLocal();
+		
+		// get vertex data
+		Mesh mesh = geom.getMesh();
+		FloatBuffer fb = (FloatBuffer)mesh.getBuffer(Type.Position).getData();
+		fb.flip();// ready to read
+		
+		// recalculate
+		int limit = fb.limit();
+		for(int i=0; i<limit; i+=3) {
+			tmp.x = fb.get();
+			tmp.y = fb.get();
+			tmp.z = fb.get();
+			
+			tmp = coordinateTransform.mult(tmp);
+			tmp.subtractLocal(pivot);
+			
+			fb.put(i, tmp.x);
+			fb.put(i+1, tmp.y);
+			fb.put(i+2, tmp.z);
+		}
+		
+		System.out.println(geom.getName() + " coordinate system:\n" + coordinateSystem + " pivot:" + pivot);
+	}
+	/**
 	 * Create Animation !
 	 * 
 	 */
@@ -727,32 +794,31 @@ public class ChunkChopper {
 	 */
     private Skeleton buildSkeleton() {
     	int boneSize = meshTracks.size();
-    	Bone[] bones = new Bone[boneSize + 1];
+    	Bone[] bones = new Bone[boneSize];
     	
-    	bones[0] = new Bone("RootBone who's ID is -1");
     	for(int i=0; i<meshTracks.size(); i++) {
     		KeyFrameTrack track = meshTracks.get(i);
     		
-    		bones[track.ID+1] = new Bone(track.name);
-    		
-    		bones[track.fatherID+1].addChild(bones[track.ID+1]);
+    		bones[track.ID] = new Bone(track.name);
+    		if (track.fatherID != -1)
+    			bones[track.fatherID].addChild(bones[track.ID]);
     		
     		Vector3f initTranslation = new Vector3f();
     		Quaternion initRotation = new Quaternion();
     		Vector3f initScale = new Vector3f();
     		
-    		Transform initTransform = namedObjectCoordinateSystems.get(track.name);
-    		if (initTransform != null) {
-    			initTranslation.set(initTransform.getTranslation());
-    			initRotation.set(initTransform.getRotation());
-    			initScale.set(initTransform.getScale());
+    		if (track.locateTrack(0) != null) {
+    			initTranslation.set(track.locateTrack(0).position);
+    			initRotation.set(track.locateTrack(0).rotation);
+    			initScale.set(track.locateTrack(0).scale);
     		}
-    		bones[track.ID + 1].setBindTransforms(initTranslation, initRotation, initScale);;
+    		bones[track.ID].setBindTransforms(initTranslation, initRotation, initScale);;
     		
     	}
     	
     	Skeleton skeleton = new Skeleton(bones);
     	
+    	System.out.println(skeleton);
     	return skeleton;
     }
     
@@ -763,7 +829,7 @@ public class ChunkChopper {
      */
     private Animation buildAnimation(Skeleton ske) {
     	// Calculate animation length
-    	float speed = 10f;
+    	float speed = 30f;
     	float length = endFrame / speed;
     	
     	Animation anim = new Animation("3DS Animation", length);
