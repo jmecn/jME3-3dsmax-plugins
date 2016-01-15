@@ -327,7 +327,8 @@ public class ChunkChopper {
  		long begin = System.currentTimeMillis();
  		try {
  			loadSubChunks(mainChunk, 0);
- 			createAnimation();
+ 			// This part can't work right now
+ 			// createAnimation();
  		} catch (CannotChopException e) {
  			e.printStackTrace();
  		}

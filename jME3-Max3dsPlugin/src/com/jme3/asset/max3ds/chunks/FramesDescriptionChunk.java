@@ -23,9 +23,6 @@ package com.jme3.asset.max3ds.chunks;
 
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.asset.max3ds.data.KeyFramer;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 /**
  * This chunk contains the name of the object
  * the frames belong to and the parameters and 
