@@ -165,16 +165,16 @@ public class ChunkChopper {
         lightChunk.addSubChunk(MULTIPLIER, floatChunk);
         lightChunk.addSubChunk(SPOTLIGHT, spotLightChunk);
         
-        spotLightChunk.addSubChunk(LIGHT_OFF, booleanChunk);
-        spotLightChunk.addSubChunk(RAYTRACE, booleanChunk);
-        spotLightChunk.addSubChunk(SHADOWED, booleanChunk);
-        spotLightChunk.addSubChunk(SHOW_CONE, booleanChunk);
-        spotLightChunk.addSubChunk(RECTANGULAR, booleanChunk);
-        spotLightChunk.addSubChunk(SHADOW_MAP, booleanChunk);
-        spotLightChunk.addSubChunk(OVERSHOOT, booleanChunk);
-        spotLightChunk.addSubChunk(SPOT_MAP, booleanChunk);
-        spotLightChunk.addSubChunk(SPOT_ROLL, booleanChunk);
-        spotLightChunk.addSubChunk(RAY_TRACE_BIAS, booleanChunk);
+//        spotLightChunk.addSubChunk(LIGHT_OFF, booleanChunk);
+//        spotLightChunk.addSubChunk(RAYTRACE, booleanChunk);
+//        spotLightChunk.addSubChunk(SHADOWED, booleanChunk);
+//        spotLightChunk.addSubChunk(SHOW_CONE, booleanChunk);
+//        spotLightChunk.addSubChunk(RECTANGULAR, booleanChunk);
+//        spotLightChunk.addSubChunk(SHADOW_MAP, booleanChunk);
+//        spotLightChunk.addSubChunk(OVERSHOOT, booleanChunk);
+//        spotLightChunk.addSubChunk(SPOT_MAP, booleanChunk);
+//        spotLightChunk.addSubChunk(SPOT_ROLL, floatChunk);
+//        spotLightChunk.addSubChunk(RAY_TRACE_BIAS, floatChunk);
         
         keyFramerChunk.addSubChunk(FRAMES_CHUNK, framesChunk);
         keyFramerChunk.addSubChunk(MESH_INFO, keyFramerInfoChunk);

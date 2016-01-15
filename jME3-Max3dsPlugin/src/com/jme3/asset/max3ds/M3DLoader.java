@@ -3,6 +3,8 @@ package com.jme3.asset.max3ds;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Set;
 
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.Animation;
@@ -14,6 +16,8 @@ import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetLoader;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.max3ds.data.*;
+import com.jme3.light.PointLight;
+import com.jme3.light.SpotLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
@@ -53,7 +57,7 @@ public class M3DLoader implements AssetLoader {
 	private Material defaultMaterial;
 
 	public M3DLoader() {
-		ChunkChopper.debug = true;
+		ChunkChopper.debug = false;
 	}
 
 	/**
@@ -83,95 +87,108 @@ public class M3DLoader implements AssetLoader {
 	 */
 	protected Node parseChunks(InputStream inputStream) {
 		ChunkChopper chopper = new ChunkChopper();
-		Node model = null;
 		try {
 			scene = chopper.loadScene(inputStream);
-			model = buildScene();
+			rootNode = buildScene();
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return model;
+		return rootNode;
 	}
 
+	private HashMap<String, Material> materials;
+	/**
+	 * Change Max 3DS data structure to JME3 data structure
+	 * @return
+	 */
 	private Node buildScene() {
-		// TODO 
-		return new Node("3DS");
+		rootNode = new Node("3DS Scene");
+		
+		generateMaterials();
+		generateGeometrys();
+		generateLights();
+		generateAnimation();
+		
+		return rootNode;
 	}
-
+	
 	/**
-	 * Loads the image to server as a texture.
-	 * 
-	 * @param textureImageName
-	 *            name of the image that is going to be set to be the texture.
+	 * Create names material maps
 	 */
-	public Texture createTexture(String textureImageName) {
-		Texture texture = null;
-		try {
-			texture = manager.loadTexture(key.getFolder() + textureImageName);
-			texture.setWrap(WrapMode.Repeat);
-		} catch (Exception ex) {
-			System.err
-					.println("Cannot load texture image "
-							+ textureImageName
-							+ ". Make sure it is in the directory with the model file. "
-							+ "If its a bmp make sure JAI is installed.");
-
-			texture = manager.loadTexture("Common/Textures/MissingTexture.png");
-			texture.setWrap(WrapMode.Clamp);
+	private void generateMaterials() {
+		materials = new HashMap<String, Material>();
+		
+		for(EditorMaterial mat:scene.materials) {
+			Material material = buildMaterial(mat);
+			materials.put(mat.name, material);
 		}
-		return texture;
+		
 	}
-
-	/**
-	 * load a default material
-	 * 
-	 * @return
-	 */
-	public Material getDefaultMaterial() {
-		if (defaultMaterial == null) {
-			defaultMaterial = new Material(manager,
-					"Common/MatDefs/Misc/Unshaded.j3md");
-			defaultMaterial.setColor("Color", ColorRGBA.Cyan);
+	
+	private void generateGeometrys() {
+		for(EditorObject obj : scene.objects) {
+			Geometry geom = buildGeometry(obj);
+			applyMaterial(geom, obj);
+			
+			rootNode.attachChild(geom);
 		}
-
-		return defaultMaterial;
 	}
-
-	/**
-	 * load a light material
-	 * 
-	 * @return
-	 */
-	public Material getLightMaterial() {
-		Material material = new Material(manager,
-				"Common/MatDefs/Light/Lighting.j3md");
-		material.setColor("Ambient", ColorRGBA.White);
-		material.setColor("Diffuse", ColorRGBA.White);
-		material.setColor("Specular", ColorRGBA.White);
-		material.setColor("GlowColor", ColorRGBA.Black);
-		material.setFloat("Shininess", 25f);
-
-		RenderState rs = material.getAdditionalRenderState();
-		rs.setAlphaTest(true);
-		rs.setAlphaFallOff(0.01f);
-
-		return material;
+	
+	private void generateLights() {
+		for(EditorLight light : scene.lights) {
+			if (light.spotinfo == null) {
+				PointLight pointLight = new PointLight();
+				pointLight.setColor(light.color);
+				pointLight.setPosition(light.position);
+				pointLight.setRadius(light.rangeEnd);
+				rootNode.addLight(pointLight);
+			} else {
+				SpotLightInfo spotinfo = light.spotinfo;
+				
+				SpotLight spotLight = new SpotLight();
+				spotLight.setColor(light.color);
+				spotLight.setPosition(light.position);
+				
+				Vector3f direction = spotinfo.target.subtract(light.position);
+				spotLight.setDirection(direction.normalize());
+				
+				spotLight.setSpotInnerAngle(spotinfo.hotSpot/180);
+				spotLight.setSpotOuterAngle(spotinfo.falloff/180);
+				
+				spotLight.setSpotRange(light.rangeEnd);
+				
+				rootNode.addLight(spotLight);
+			}
+			
+		}
+	}
+	
+	private void generateAnimation() {
+		
 	}
 
 	private Material buildMaterial(EditorMaterial mat) {
 		Material material = getLightMaterial();
 		material.setBoolean("UseMaterialColors", true);
 
+		float alpha = 1;
+		if (mat.transparency != null) {
+			alpha = 1-mat.transparency;
+		}
+		
 		if (mat.ambientColor != null) {
+			mat.ambientColor.a = alpha;
 			material.setColor("Ambient", mat.ambientColor);
 		}
 
 		if (mat.diffuseColor != null) {
+			mat.diffuseColor.a = alpha;
 			material.setColor("Diffuse", mat.diffuseColor);
 		}
 
 		if (mat.specularColor != null) {
+			mat.specularColor.a = alpha;
 			material.setColor("Specular", mat.specularColor);
 		}
 
@@ -188,12 +205,6 @@ public class M3DLoader implements AssetLoader {
 			rs.setFaceCullMode(RenderState.FaceCullMode.Off);// twoside
 		}
 
-		if (mat.transparency != null) {
-			if (mat.transparency.floatValue() > 0.01f) {
-				material.setFloat("AlphaDiscardThreshold", mat.transparency);
-			}
-		}
-
 		if (mat.shininess != null) {
 			float shine = mat.shininess.floatValue() * 128f;
 			material.setFloat("Shininess", shine);
@@ -208,7 +219,7 @@ public class M3DLoader implements AssetLoader {
 		return material;
 	}
 
-	private Geometry buildGeometery(EditorObject object) {
+	private Geometry buildGeometry(EditorObject object) {
 		Geometry geom = new Geometry(object.name);
 		Mesh mesh = new Mesh();
 		geom.setMesh(mesh);
@@ -239,7 +250,7 @@ public class M3DLoader implements AssetLoader {
 
 		return geom;
 	}
-
+	
 	/**
 	 * Generates normals for each vertex of each face that are absolutely normal
 	 * to the face.
@@ -290,6 +301,30 @@ public class M3DLoader implements AssetLoader {
 			}
 		}
 		return normals;
+	}
+	
+	private void applyMaterial(Geometry geom, EditorObject obj) {
+		// No materials
+		if (obj.matNames == null) {
+			geom.setMaterial(getDefaultMaterial());
+			return;
+		}
+		
+		// only one material
+		if (obj.matNames.size() == 1) {
+			String matName = obj.matNames.get(0);
+			Material material = materials.get(matName);
+			geom.setMaterial(material);
+		}
+		
+		// multiplier materials
+		if (obj.matNames.size() > 1) {
+			// Currently I do it like this..
+			System.out.println(obj.name + " has multiplier materials.");
+			String matName = obj.matNames.get(0);
+			Material material = materials.get(matName);
+			geom.setMaterial(material);
+		}
 	}
 
 	/**
@@ -517,5 +552,71 @@ public class M3DLoader implements AssetLoader {
 		mesh.setBuffer(Type.BoneWeight, 4, boneWeight);
 
 		mesh.generateBindPose(true);
+	}
+	
+	
+	
+	
+	
+	
+
+	/**
+	 * Loads the image to serve as a texture.
+	 * 
+	 * @param textureImageName
+	 *            name of the image that is going to be set to be the texture.
+	 */
+	private Texture createTexture(String textureImageName) {
+		Texture texture = null;
+		try {
+			texture = manager.loadTexture(key.getFolder() + textureImageName);
+			texture.setWrap(WrapMode.Repeat);
+		} catch (Exception ex) {
+			System.err
+					.println("Cannot load texture image "
+							+ textureImageName
+							+ ". Make sure it is in the directory with the model file. "
+							+ "If its a bmp make sure JAI is installed.");
+
+			texture = manager.loadTexture("Common/Textures/MissingTexture.png");
+			texture.setWrap(WrapMode.Clamp);
+		}
+		return texture;
+	}
+
+	/**
+	 * load a default material
+	 * 
+	 * @return
+	 */
+	private Material getDefaultMaterial() {
+		if (defaultMaterial == null) {
+			defaultMaterial = new Material(manager,
+					"Common/MatDefs/Misc/Unshaded.j3md");
+			defaultMaterial.setColor("Color", ColorRGBA.Cyan);
+		}
+
+		return defaultMaterial;
+	}
+
+	/**
+	 * load a light material
+	 * 
+	 * @return
+	 */
+	private Material getLightMaterial() {
+		Material material = new Material(manager,
+				"Common/MatDefs/Light/Lighting.j3md");
+		material.setColor("Ambient", ColorRGBA.White);
+		material.setColor("Diffuse", ColorRGBA.White);
+		material.setColor("Specular", ColorRGBA.White);
+		material.setColor("GlowColor", ColorRGBA.Black);
+		material.setFloat("Shininess", 25f);
+
+		RenderState rs = material.getAdditionalRenderState();
+		rs.setAlphaTest(true);
+		rs.setAlphaFallOff(0.01f);
+
+		return material;
 	}
 }

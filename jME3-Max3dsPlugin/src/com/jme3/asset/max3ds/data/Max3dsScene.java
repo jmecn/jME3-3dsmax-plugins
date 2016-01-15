@@ -1,16 +1,7 @@
 package com.jme3.asset.max3ds.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import com.jme3.asset.AssetManager;
-import com.jme3.material.Material;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
-import com.jme3.texture.Texture;
-
-@SuppressWarnings("unused")
 public class Max3dsScene {
 
 	/*======== 3DS Data structure ========*/
@@ -73,18 +64,4 @@ public class Max3dsScene {
 	public KeyFrameTrack getCurrentTrack() {
 		return currentTrack;
 	}
-	
-	
-	/*======== JME3 data structure ========*/
-	private AssetManager assetManager;// used for load textures and materials
-	private Node scene;
-	
-	public Node toJme3(AssetManager assetManager) {
-		this.assetManager = assetManager;
-		this.scene = new Node("3DS@" + Integer.toHexString(scene.hashCode()));
-		
-		
-		return scene;
-	}
-	
 }
