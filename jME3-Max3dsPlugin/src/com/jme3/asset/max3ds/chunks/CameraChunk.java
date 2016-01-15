@@ -25,6 +25,6 @@ public class CameraChunk extends Chunk
         camera.bankAngle = chopper.getFloat();
         camera.focus     = chopper.getFloat();
         
-        chopper.scene.add(camera);
+        chopper.scene.cameras.add(camera);
     }  
 }

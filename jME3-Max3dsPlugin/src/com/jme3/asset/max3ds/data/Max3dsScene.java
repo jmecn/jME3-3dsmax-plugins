@@ -49,21 +49,11 @@ public class Max3dsScene {
 	}
 	
 	EditorObject currentObject;
-	EditorCamera currentCamera;
-	EditorLight currentLight;
 	KeyFrameTrack currentTrack;
 	
 	public void add(EditorObject object) {
 		objects.add(object);
 		currentObject = object;
-	}
-	public void add(EditorCamera camera) {
-		cameras.add(camera);
-		currentCamera = camera;
-	}
-	public void add(EditorLight light) {
-		lights.add(light);
-		currentLight = light;
 	}
 	/**
      * Add an objectTrack to scene.
@@ -75,12 +65,6 @@ public class Max3dsScene {
 	}
 	public EditorObject getCurrentObject() {
 		return currentObject;
-	}
-	public EditorCamera getCurrentCamera() {
-		return currentCamera;
-	}
-	public EditorLight getCurrentLight() {
-		return currentLight;
 	}
 	/**
 	 * Gets the key framer track These should be their own objects instead of

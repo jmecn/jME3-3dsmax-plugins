@@ -3,15 +3,11 @@ package com.jme3.asset.max3ds.data;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.jme3.animation.Bone;
 import com.jme3.animation.BoneTrack;
-import com.jme3.animation.Skeleton;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Spatial;
 
 /**
  * Keyframe Track used to store data loaded by each KeyFrameInfoChunk.<br>
