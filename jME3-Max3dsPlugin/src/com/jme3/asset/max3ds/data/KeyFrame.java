@@ -1,4 +1,4 @@
-package com.jme3.asset.max3ds.anim;
+package com.jme3.asset.max3ds.data;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;

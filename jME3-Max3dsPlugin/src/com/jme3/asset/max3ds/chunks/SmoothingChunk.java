@@ -20,9 +20,6 @@
  */
 package com.jme3.asset.max3ds.chunks;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.jme3.asset.max3ds.ChunkChopper;
 import com.jme3.asset.max3ds.ChunkID;
 
@@ -43,23 +40,12 @@ public class SmoothingChunk extends Chunk
      */
     public void loadData(ChunkChopper chopper)
     {
-        int numFaces = (Integer)chopper.getNamedObject(ChunkID.FACES_DESCRIPTION);
-        int[] smoothGroups = new int[numFaces * 3];
+        int numFaces = chopper.scene.getCurrentObject().numFaces;
+        
+        int[] smoothGroups = new int[numFaces];
         for(int i=0; i < numFaces; i++)
         {
-            int groupMask = chopper.getInt();
-            smoothGroups[i*3]=groupMask;
-            smoothGroups[(i*3)+1]=groupMask;
-            smoothGroups[(i*3)+2]=groupMask;
-
-            List<Integer> list = new ArrayList<Integer>();
-            for(int j=0; j < 32; j++)
-            {
-                if(((0x1l << j) & groupMask) > 0)
-                {
-                    list.add(new Integer(j));
-                }
-            }
+            smoothGroups[i]=chopper.getInt();
         }
         chopper.pushData(chopper.getID(), smoothGroups);
     }

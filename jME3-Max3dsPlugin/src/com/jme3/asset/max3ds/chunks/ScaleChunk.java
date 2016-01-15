@@ -49,7 +49,7 @@ public class ScaleChunk extends Chunk {
 			float scaleY = chopper.getFloat();
 			Vector3f scale = new Vector3f(scaleX, scaleY, scaleZ);
 
-			chopper.getCurrentTrack().locateTrack(frameNumber).scale = scale;
+			chopper.scene.getCurrentTrack().locateTrack(frameNumber).scale = scale;
 		}
 	}
 }

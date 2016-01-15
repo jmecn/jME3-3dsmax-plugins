@@ -54,7 +54,7 @@ public class PositionChunk extends Chunk
             int  accelerationData = chopper.getUnsignedShort(); 
 
             Vector3f position = chopper.getVector3f();
-            chopper.getCurrentTrack().locateTrack(frameNumber).position = position;
+            chopper.scene.getCurrentTrack().locateTrack(frameNumber).position = position;
         }
     }
 }

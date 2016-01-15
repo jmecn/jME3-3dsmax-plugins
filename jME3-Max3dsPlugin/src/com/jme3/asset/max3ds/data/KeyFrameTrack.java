@@ -1,4 +1,4 @@
-package com.jme3.asset.max3ds.anim;
+package com.jme3.asset.max3ds.data;
 
 import java.util.List;
 import java.util.ArrayList;

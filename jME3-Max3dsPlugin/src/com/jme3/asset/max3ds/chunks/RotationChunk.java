@@ -69,7 +69,7 @@ public class RotationChunk extends Chunk
             Vector3f        vector = chopper.getVector3f(); 
 
             Quaternion        quat = new Quaternion().fromAngleAxis(angle, vector);
-            chopper.getCurrentTrack().locateTrack(frameNumber).rotation = quat;
+            chopper.scene.getCurrentTrack().locateTrack(frameNumber).rotation = quat;
             if(previousQuat != null) {
                 quat.mult(previousQuat, quat);
             }

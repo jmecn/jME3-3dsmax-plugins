@@ -38,7 +38,7 @@ public class PivotChunk extends Chunk
     public void loadData(ChunkChopper chopper)
     {
         Vector3f pivot = chopper.getVector3f();
-		chopper.getCurrentTrack().pivot = pivot;
+		chopper.scene.getCurrentTrack().pivot = pivot;
     }
 
 }
