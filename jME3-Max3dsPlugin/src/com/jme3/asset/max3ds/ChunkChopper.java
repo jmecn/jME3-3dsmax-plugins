@@ -232,8 +232,6 @@ public class ChunkChopper {
  		channel = Channels.newChannel(inputStream);
  		chunkBuffer = getByteBuffer(channel);
  		
-
- 		long begin = System.currentTimeMillis();
  		try {
  			loadSubChunks(mainChunk, 0);
  			// This part can't work right now
@@ -241,8 +239,6 @@ public class ChunkChopper {
  		} catch (CannotChopException e) {
  			e.printStackTrace();
  		}
- 		System.out.println("Finished in " + (System.currentTimeMillis() - begin) + " ms");
- 		logger.finest("FINISHED WITH THE SUBCHUNKS");
  		
  		// close channel
  		channel.close();
@@ -277,7 +273,6 @@ public class ChunkChopper {
  		// Ready
  		chunkBuffer.flip();
  		
- 		logger.finest("\n\n\n STARTING SUBCUNKS " + (mainChunkLength - 61));
         return chunkBuffer;
     }
 

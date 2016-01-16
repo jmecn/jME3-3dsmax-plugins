@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.jme3.animation.BoneTrack;
+import com.jme3.animation.SpatialTrack;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
@@ -100,6 +101,30 @@ public class KeyFrameTrack {
 		BoneTrack track = new BoneTrack(boneIndex, times, translations,
 				rotations, scales);
 
+		return track;
+	}
+	
+	public SpatialTrack toSpatialTrack(float fps) {
+		int size = tracks.size();
+
+		float[] times = new float[size];
+		Vector3f[] translations = new Vector3f[size];
+		Quaternion[] rotations = new Quaternion[size];
+		Vector3f[] scales = new Vector3f[size];
+
+		// TODO fill empty data before doing anything!
+		interpolateMissing();
+		
+		for (int i = 0; i < size; i++) {
+			KeyFrame keyframe = tracks.get(i);
+
+			times[i] = keyframe.frame / fps;
+			translations[i] = keyframe.position;
+			rotations[i] = keyframe.rotation;
+			scales[i] = keyframe.scale;
+		}
+		
+		SpatialTrack track = new SpatialTrack(times, translations, rotations, scales);
 		return track;
 	}
 

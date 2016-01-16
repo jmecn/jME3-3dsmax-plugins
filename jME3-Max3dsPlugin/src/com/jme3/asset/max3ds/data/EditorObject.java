@@ -11,20 +11,16 @@ public class EditorObject {
 	public Matrix4f coordinateSystem;
 	
 	public String name;
-	public int numFaces;
+	public int numFaces = 0;
 	public Vector3f[] vertexs;
 	public Vector2f[] texCoord;
 	public int[] indices;// faces
 	public int[] smoothGroups;
 	
-	public ArrayList<String> matNames;
-	public ArrayList<int[]> appliedFacesIndexes;
+	public ArrayList<String> matNames = new ArrayList<String>();
+	public ArrayList<int[]> appliedFacesIndexes = new ArrayList<int[]>();
 	
 	public void addFaceMaterial(String matName, int[] appliedFacesIndexes) {
-		if (this.matNames == null) {
-			this.matNames = new ArrayList<String>();
-			this.appliedFacesIndexes = new ArrayList<int[]>();
-		}
 		this.matNames.add(matName);
 		this.appliedFacesIndexes.add(appliedFacesIndexes);
 	}

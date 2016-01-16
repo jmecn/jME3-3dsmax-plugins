@@ -64,4 +64,22 @@ public class Max3dsScene {
 	public KeyFrameTrack getCurrentTrack() {
 		return currentTrack;
 	}
+	
+	public EditorObject findObject(String name) {
+		for(EditorObject obj : objects) {
+			if (obj.name.equals(name)) {
+				return obj;
+			}
+		}
+		return null;
+	}
+	
+	public KeyFrameTrack findTrack(String name) {
+		for(KeyFrameTrack track : frames) {
+			if (track.name.equals(name)) {
+				return track;
+			}
+		}
+		return null;
+	}
 }

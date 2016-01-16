@@ -118,7 +118,7 @@ public class TestLoad3DS extends SimpleApplication {
 		gm.setColor("Color", ColorRGBA.White);
 		gm.getAdditionalRenderState().setWireframe(true);
 		grid.setMaterial(gm);
-		grid.center().move(0, -0.1f, 0);
+		grid.center().move(0, 0, 0);
 
 		rootNode.attachChild(grid);
 
@@ -235,7 +235,6 @@ public class TestLoad3DS extends SimpleApplication {
 	void loadModel() {
 		if (current != null) rootNode.detachChild(current);
 		TestLoader tl = list.get(index);
-		System.out.println("=========== " + tl.name + " ==========");
 		Spatial model = tl.load();
 		rootNode.attachChild(model);
 		current = model;
