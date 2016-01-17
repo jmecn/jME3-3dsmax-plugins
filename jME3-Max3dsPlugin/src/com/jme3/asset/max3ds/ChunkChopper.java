@@ -394,6 +394,7 @@ public class ChunkChopper {
 		float x = chunkBuffer.getFloat();
 		float z = -chunkBuffer.getFloat();
 		float y = chunkBuffer.getFloat();
+		
 		return new Vector3f(x, y, z);
 	}
 
