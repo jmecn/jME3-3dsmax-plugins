@@ -71,8 +71,7 @@ public class TestLoad3DS extends SimpleApplication {
 		BitmapText txt;
 		BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
 		txt = new BitmapText(fnt, false);
-		txt.setBox(new Rectangle(0, 0, settings.getWidth(), settings
-				.getHeight()));
+		txt.setBox(new Rectangle(0, 0, settings.getWidth(), settings.getHeight()));
 		txt.setText(txtB);
 		txt.setLocalTranslation(0, txt.getHeight(), 0);
 		guiNode.attachChild(txt);
@@ -251,11 +250,11 @@ public class TestLoad3DS extends SimpleApplication {
 		current = model;
 
 		toggleWireFrame();
-
-		startAnim();
+		
+		debug();
 	}
 
-	void startAnim() {
+	void debug() {
 		current.depthFirstTraversal(new SceneGraphVisitor() {
 			@Override
 			public void visit(Spatial spatial) {
@@ -322,6 +321,9 @@ public class TestLoad3DS extends SimpleApplication {
 			vb.updateData(posBuf);
 
 			updateBound();
+			
+			if (node.getName().equals("$$$DUMMY"))
+			System.out.println(node.getName() + "@" + node.hashCode() + " -> " + pos);
 		}
 	}
 

@@ -131,8 +131,7 @@ public class TransformQuaternion implements Serializable, Savable, Cloneable {
     public TransformQuaternion combineWithParent(TransformQuaternion parent) {
         scale.multLocal(parent.scale);
         rot.multLocal(parent.rot);
-        parent
-            .rot
+        parent.rot
             .multLocal(translation)
             .multLocal(parent.scale)
             .addLocal(parent.translation);
@@ -144,12 +143,9 @@ public class TransformQuaternion implements Serializable, Savable, Cloneable {
      * @param spatial The spatial to be affected by this matrix.
      */
     public void applyToSpatial(Spatial spatial) {
-    	spatial.setLocalScale(scale);
-    	spatial.setLocalRotation(rot);
-    	spatial.setLocalTranslation(translation);
-//        spatial.getLocalScale().set(scale);
-//        spatial.getLocalRotation().set(rot);
-//        spatial.getLocalTranslation().set(translation);
+        spatial.getLocalScale().set(scale);
+        spatial.getLocalRotation().set(rot);
+        spatial.getLocalTranslation().set(translation);
     }
 
     /**

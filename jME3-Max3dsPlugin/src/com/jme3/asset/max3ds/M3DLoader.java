@@ -9,7 +9,7 @@ import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetLoader;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.max3ds.anim.SpatialTransformer;
+import com.jme3.asset.max3ds.anim.KeyframeControl;
 import com.jme3.asset.max3ds.data.EditorLight;
 import com.jme3.asset.max3ds.data.EditorMaterial;
 import com.jme3.asset.max3ds.data.EditorObject;
@@ -58,7 +58,7 @@ public class M3DLoader implements AssetLoader {
 	private Material defaultMaterial;
 
 	public M3DLoader() {
-		ChunkChopper.debug = true;
+		ChunkChopper.debug = false;
 	}
 
 	/**
@@ -101,7 +101,8 @@ public class M3DLoader implements AssetLoader {
 	private HashMap<String, Material> materials;
 	private ArrayList<Spatial> spatialNodes;
 	private ArrayList<String> spatialNames;
-	private SpatialTransformer st;
+	private HashMap<Integer, Node> nodesByID;
+	private KeyframeControl st;
 
 	/**
 	 * Change Max 3DS data structure to JME3 data structure
@@ -137,7 +138,6 @@ public class M3DLoader implements AssetLoader {
 			} else {
 				// multiple keyframes: add controller to node
 				rootNode.addControl(st);
-				st.setActive(true);
 			}
 		}
 
@@ -157,7 +157,7 @@ public class M3DLoader implements AssetLoader {
 	private void generateNodes() {
 		spatialNodes = new ArrayList<Spatial>();
 		spatialNames = new ArrayList<String>();
-		HashMap<Integer, Node> nodesByID = new HashMap<Integer, Node>();
+		nodesByID = new HashMap<Integer, Node>();
 		// build dummy nodes
 		if (scene.frames.size() > 0) {
 			for (KeyFrameTrack track : scene.frames) {
@@ -165,6 +165,7 @@ public class M3DLoader implements AssetLoader {
 
 				if (scene.findObject(name) == null) {
 					Node node = new Node(track.name);
+					System.out.println(node.getName() + "@" + node.hashCode());
 					nodesByID.put(track.ID, node);
 					spatialNodes.add(node);
 					spatialNames.add(name);
@@ -550,7 +551,8 @@ public class M3DLoader implements AssetLoader {
 				spatialCount++;
 			}
 		}
-		st = new SpatialTransformer(spatialCount);
+		st = new KeyframeControl(spatialCount);
+		st.setRepeatType(1);
 		spatialCount = 0;
 		for (int i = 0; i < spatialNodes.size(); i++) {
 			if (spatialNodes.get(i) != null) {
@@ -558,14 +560,13 @@ public class M3DLoader implements AssetLoader {
 				// the parent ID is not passed here, as that would produce wrong results
 				// because of the ST applying hierarchichal transformations, which the
 				// scene graph applies anyway
+				spatialNodes.get(i).setUserData("#DS_ID", new Integer(spatialCount));
 				st.setObject(spatialNodes.get(i), spatialCount++, -1);// getParentIndex(i));
 			}
 		}
 		for (KeyFrameTrack thisOne : scene.frames) {
-			//if ("$$$DUMMY".equals( thisOne.name )) {
-			//	continue;
-			//}
-			int indexInST = findIndex(thisOne.name);
+			Node node = nodesByID.get(thisOne.ID);
+			int indexInST = findIndex(node);
 			for (KeyFrame thisTime : thisOne.tracks) {
 				if (thisTime.rotation != null) {
 					st.setRotation(indexInST, thisTime.frame, thisTime.rotation);
@@ -578,19 +579,20 @@ public class M3DLoader implements AssetLoader {
 				}
 			}
 		}
-		st.setSpeed(30);
+		st.setSpeed(30);// 30 FPS
 	}
 
-	private int findIndex(String name) {
+	private int findIndex(Node node) {
 		int j = 0;
-		for (int i = 0; i < spatialNames.size(); i++) {
-			if (spatialNames.get(i).equals(name))
+		for(int i=0; i<spatialNodes.size(); i++) {
+			if (spatialNodes.get(i) == node) {
 				return j;
-			if (spatialNodes.get(i) != null)
+			}
+			if (spatialNodes.get(i) != null) {
 				j++;
+			}
 		}
-		throw new RuntimeException("Logic error.  Unknown keyframe name "
-				+ name);
+		throw new RuntimeException("Logic error.  Unknown keyframed node " + node);
 	}
 
 	/**

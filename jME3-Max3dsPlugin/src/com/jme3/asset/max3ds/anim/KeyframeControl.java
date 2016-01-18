@@ -14,7 +14,12 @@ import com.jme3.export.OutputCapsule;
 import com.jme3.export.Savable;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
+import com.jme3.scene.Node;
+import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.AbstractControl;
 
 /**
  * Started Date: Jul 9, 2004 <br>
@@ -30,10 +35,52 @@ import com.jme3.scene.Spatial;
  * @author Jack Lindamood
  * @author Philip Wainwright (bugfixes)
  */
-public class SpatialTransformer extends Controller {
-    private static final Logger logger = Logger.getLogger(SpatialTransformer.class.getName());
+public class KeyframeControl extends AbstractControl {
+    private static final Logger logger = Logger.getLogger(KeyframeControl.class.getName());
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * A clamped repeat type signals that the controller should look like its
+     * final state when it's done <br>
+     * Example: 0 1 5 8 9 10 10 10 10 10 10 10 10 10 10 10...
+     */
+    public static final int RT_CLAMP = 0;
+
+    /**
+     * A wrapped repeat type signals that the controller should start back at
+     * the begining when it's final state is reached <br>
+     * Example: 0 1 5 8 9 10 0 1 5 8 9 10 0 1 5 ....
+     *  
+     */
+    public static final int RT_WRAP = 1;
+
+    /**
+     * A cycled repeat type signals that the controller should cycle it's states
+     * forwards and backwards <br>
+     * Example: 0 1 5 8 9 10 9 8 5 1 0 1 5 8 9 10 9 ....
+     */
+    public static final int RT_CYCLE = 2;
+
+    /**
+     * Defines how this controller should repeat itself. This can be one of
+     * RT_CLAMP, RT_WRAP, RT_CYCLE, or an application specific repeat flag.
+     */
+    private int repeatType;
+
+    /**
+     * The controller's minimum cycle time
+     */
+    private float minTime;
+
+    /**
+     * The controller's maximum cycle time
+     */
+    private float maxTime;
+
+    /**
+     * The 'speed' of this Controller. Genericly, less than 1 is slower, more
+     * than 1 is faster, and 1 represents the base speed
+     */
+    private float speed = 1;
 
     /** Number of objects this transformer changes. */
     private int numObjects;
@@ -75,21 +122,17 @@ public class SpatialTransformer extends Controller {
 
     private final static Quaternion unSyncendRot = new Quaternion();
 
-    public SpatialTransformer() {}
+    public KeyframeControl() {}
     
-    public SpatialTransformer clone() {
-    	SpatialTransformer st = new SpatialTransformer();
+    public KeyframeControl clone() {
+    	System.out.println("control clone");
+    	KeyframeControl st = new KeyframeControl(numObjects);
     	
-    	st.numObjects = numObjects;
-    	
-        st.toChange = new Spatial[numObjects];
-        st.pivots = new TransformQuaternion[numObjects];
-        st.parentIndexes = new int[numObjects];
-        st.haveChanged = new boolean[numObjects];
-        st.keyframes = new ArrayList<PointInTime>();
+        st.repeatType = repeatType;
+        st.minTime = minTime;
+        st.maxTime = maxTime;
+        st.speed = speed;
         
-        Arrays.fill(st.parentIndexes, -1);
-        Arrays.fill(st.haveChanged, false);
         st.keyframes.addAll(keyframes);
         for (int i = 0; i < numObjects; i++) {
         	st.toChange[i] = toChange[i];
@@ -98,6 +141,25 @@ public class SpatialTransformer extends Controller {
         
     	return st;
     }
+    
+    public void setSpatial(Spatial spatial) {
+    	super.setSpatial(spatial);
+    	assert spatial instanceof Node;
+    	
+    	Node node = (Node)spatial;
+    	node.depthFirstTraversal(new SceneGraphVisitor() {
+			@Override
+			public void visit(Spatial spatial) {
+				if (spatial instanceof Node) {
+					Node child = (Node)spatial;
+					Integer index = child.getUserData("#DS_ID");
+					if (index != null) {
+						toChange[index] = child;
+					}
+				}
+			}
+    	});
+    }
     /**
      * Constructs a new SpatialTransformer that will operate on
      * <code>numObjects</code> Spatials
@@ -105,7 +167,7 @@ public class SpatialTransformer extends Controller {
      * @param numObjects
      *            The number of spatials to change
      */
-    public SpatialTransformer(int numObjects) {
+    public KeyframeControl(int numObjects) {
         this.numObjects = numObjects;
         toChange = new Spatial[numObjects];
         pivots = new TransformQuaternion[numObjects];
@@ -117,6 +179,9 @@ public class SpatialTransformer extends Controller {
         keyframes = new ArrayList<PointInTime>();
     }
 
+	@Override
+	protected void controlRender(RenderManager rm, ViewPort vp) {}
+	
     /**
      * Defined by extending classes, <code>update</code> is a signal to
      * Controller that it should update whatever object(s) it is controlling.
@@ -133,8 +198,14 @@ public class SpatialTransformer extends Controller {
         delta = endPointTime.time - beginPointTime.time;
         if (delta != 0f) delta = (curTime - beginPointTime.time) / delta;
         for (int i = 0; i < numObjects; i++) {
+        	// TODO
+        	if (toChange[i].getName().equals("$$$DUMMY"))
+        		System.out.print(toChange[i].getName() + "@" + toChange[i].hashCode() + " " + toChange[i].getLocalTranslation() + " -> ");
             updatePivot(i);
             pivots[i].applyToSpatial(toChange[i]);
+            // TODO
+            if (toChange[i].getName().equals("$$$DUMMY"))
+            	System.out.println(toChange[i].getLocalTranslation());
         }
     }
 
@@ -146,16 +217,16 @@ public class SpatialTransformer extends Controller {
      *            The index to update.
      */
     private void updatePivot(int objIndex) {
-        if (haveChanged[objIndex])
+        if (haveChanged[objIndex]) {
             return;
+        }
 
         haveChanged[objIndex] = true;
         int parentIndex = parentIndexes[objIndex];
         if (parentIndex != -1) {
             updatePivot(parentIndex);
         }
-        pivots[objIndex].interpolateTransforms(beginPointTime.look[objIndex],
-                endPointTime.look[objIndex], delta);
+        pivots[objIndex].interpolateTransforms(beginPointTime.look[objIndex], endPointTime.look[objIndex], delta);
         if (parentIndex != -1)
                 pivots[objIndex].combineWithParent(pivots[parentIndex]);
     }
@@ -174,7 +245,8 @@ public class SpatialTransformer extends Controller {
         }
 
         curTime = minTime;
-        super.setMinTime(minTime);
+        
+        this.minTime = minTime;
     }
 
     /**
@@ -189,7 +261,7 @@ public class SpatialTransformer extends Controller {
             if(maxTime < firstFrame) maxTime = firstFrame;
             if(maxTime > lastFrame) maxTime = lastFrame;
         }
-        super.setMaxTime(maxTime);
+        this.maxTime = maxTime;
     }
 
     /**
@@ -223,12 +295,12 @@ public class SpatialTransformer extends Controller {
         }
         setMinTime(newBeginTime);
         setMaxTime(newEndTime);
-        setActive(true);
+        setEnabled(true);
         if (newBeginTime <= newEndTime) { // Moving forward
             curTime = newBeginTime;
             if (newBeginTime == newEndTime) {
                 update(0);
-                setActive(false);
+                setEnabled(false);
             }
         } else { // Moving backwards
             curTime = newEndTime;
@@ -854,6 +926,10 @@ public class SpatialTransformer extends Controller {
         capsule.write(haveChanged, "haveChanged", new boolean[0]);
         capsule.write(beginPointTime, "beginPointTime", null);
         capsule.write(endPointTime, "endPointTime", null);
+        capsule.write(repeatType, "repeatType", RT_CLAMP);
+        capsule.write(minTime, "minTime", 0);
+        capsule.write(maxTime, "maxTime", 0);
+        capsule.write(speed, "speed", 1);
     }
 
     @SuppressWarnings("unchecked")
@@ -889,5 +965,67 @@ public class SpatialTransformer extends Controller {
         
         beginPointTime = (PointInTime)capsule.readSavable("beginPointTime", null);
         endPointTime = (PointInTime)capsule.readSavable("endPointTime", null);
+        
+        repeatType = capsule.readInt("repeatType", RT_CLAMP);
+        minTime = capsule.readFloat("minTime", 0);
+        maxTime = capsule.readFloat("maxTime", 0);
+        speed = capsule.readFloat("speed", 1);
     }
+    
+    /**
+     * Returns the speed of this controller. Speed is 1 by default.
+     * 
+     * @return
+     */
+    public float getSpeed() {
+        return speed;
+    }
+
+    /**
+     * Sets the speed of this controller
+     * 
+     * @param speed
+     *            The new speed
+     */
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    /**
+     * Returns the current maximum time for this controller.
+     * 
+     * @return This controller's maximum time.
+     */
+    public float getMaxTime() {
+        return maxTime;
+    }
+
+    /**
+     * Returns the current minimum time of this controller
+     * 
+     * @return This controller's minimum time
+     */
+    public float getMinTime() {
+        return minTime;
+    }
+
+    /**
+     * Returns the current repeat type of this controller.
+     * 
+     * @return The current repeat type
+     */
+    public int getRepeatType() {
+        return repeatType;
+    }
+
+    /**
+     * Sets the repeat type of this controller.
+     * 
+     * @param repeatType
+     *            The new repeat type.
+     */
+    public void setRepeatType(int repeatType) {
+        this.repeatType = repeatType;
+    }
+
 }
