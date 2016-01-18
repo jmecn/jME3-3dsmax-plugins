@@ -198,14 +198,8 @@ public class KeyframeControl extends AbstractControl {
         delta = endPointTime.time - beginPointTime.time;
         if (delta != 0f) delta = (curTime - beginPointTime.time) / delta;
         for (int i = 0; i < numObjects; i++) {
-        	// TODO
-        	if (toChange[i].getName().equals("$$$DUMMY"))
-        		System.out.print(toChange[i].getName() + "@" + toChange[i].hashCode() + " " + toChange[i].getLocalTranslation() + " -> ");
             updatePivot(i);
             pivots[i].applyToSpatial(toChange[i]);
-            // TODO
-            if (toChange[i].getName().equals("$$$DUMMY"))
-            	System.out.println(toChange[i].getLocalTranslation());
         }
     }
 

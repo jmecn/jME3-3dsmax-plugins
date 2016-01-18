@@ -251,19 +251,17 @@ public class TestLoad3DS extends SimpleApplication {
 
 		toggleWireFrame();
 		
-		debug();
-	}
-
-	void debug() {
-		current.depthFirstTraversal(new SceneGraphVisitor() {
-			@Override
-			public void visit(Spatial spatial) {
-				if (spatial instanceof Node) {
-					Node node = (Node)spatial;
-					node.attachChild(new DebugNode(node));
+		if (current != null) {
+			current.depthFirstTraversal(new SceneGraphVisitor() {
+				@Override
+				public void visit(Spatial spatial) {
+					if (spatial instanceof Node) {
+						Node node = (Node)spatial;
+						//node.attachChild(new DebugNode(node));
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	class DebugNode extends Node {
@@ -276,6 +274,7 @@ public class TestLoad3DS extends SimpleApplication {
 			BitmapFont fnt = assetManager.loadFont("Interface/Fonts/Default.fnt");
 			txt = new BitmapText(fnt, false);
 			txt.setText(node.getName());
+			txt.scale(0.1f);
 			
 	        attachChild(txt);
 	        
@@ -287,11 +286,6 @@ public class TestLoad3DS extends SimpleApplication {
 	        attachChild(geom);
 
 	        setQueueBucket(Bucket.Transparent);
-	    }
-	    @Override
-	    public void updateLogicalState(float tpf){
-	        super.updateLogicalState(tpf);
-	        point.updateGeometry();
 	    }
 	}
 	class DebugPoint extends Mesh {
@@ -310,21 +304,6 @@ public class TestLoad3DS extends SimpleApplication {
 			updateCounts();
 		}
 
-		public void updateGeometry() {
-			VertexBuffer vb = getBuffer(Type.Position);
-			FloatBuffer posBuf = getFloatBuffer(Type.Position);
-			posBuf.clear();
-
-			Vector3f pos = node.getLocalTranslation();
-			posBuf.put(pos.getX()).put(pos.getY()).put(pos.getZ());
-			posBuf.flip();
-			vb.updateData(posBuf);
-
-			updateBound();
-			
-			if (node.getName().equals("$$$DUMMY"))
-			System.out.println(node.getName() + "@" + node.hashCode() + " -> " + pos);
-		}
 	}
 
 	public static void main(String[] args) {
