@@ -51,9 +51,9 @@ public class AxisChunk extends Chunk {
 		Vector3f origin = chopper.getVector3f();
 
 		Matrix4f transform = new Matrix4f(
-				xAxis.x, xAxis.y, xAxis.z, origin.x,
-				yAxis.x, yAxis.y, yAxis.z, origin.y, 
-				-zAxis.x, -zAxis.y, -zAxis.z, origin.z,
+				xAxis.x,  xAxis.y,  xAxis.z, origin.x, 
+	            yAxis.x,  yAxis.y,  yAxis.z, origin.y,  
+	            -zAxis.x,  -zAxis.y,  -zAxis.z, origin.z,
 				0, 0, 0, 1);
 
 		chopper.pushData(chopper.getID(), transform);

@@ -30,7 +30,7 @@ public class KeyFrameTrack {
 	public Vector3f pivot;
 	public BoundingBox box;
 
-	private List<KeyFrame> tracks;
+	public List<KeyFrame> tracks;
 
 	public KeyFrameTrack() {
 		ID = 0;

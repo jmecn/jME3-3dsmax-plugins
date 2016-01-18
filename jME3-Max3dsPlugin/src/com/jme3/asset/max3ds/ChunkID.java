@@ -62,6 +62,8 @@ public interface ChunkID {
     int SELF_ILLUMINATED       = (short)0xA084;
     int RENDER_TYPE            = (short)0xA100;
     int TEXTURE                = (short)0xA200;
+    int BUMP_MAP               = (short)0xA230;
+    int SHIN_MAP               = (short)0xA33C;
     int TEXTURE_NAME           = (short)0xA300;
     int TEXTURE_TILING         = (short)0xA351;
     int TEXBLUR                = (short)0xA353;

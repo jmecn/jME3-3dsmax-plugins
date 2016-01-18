@@ -29,7 +29,6 @@ import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
 import com.jme3.scene.debug.SkeletonDebugger;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
-import com.jme3.texture.Texture;
 
 public class TestLoad3DS extends SimpleApplication {
 
@@ -281,6 +280,47 @@ public class TestLoad3DS extends SimpleApplication {
 	}
 	void initModelList() {
 		list = new ArrayList<TestLoader>();
+		list.add(new TestLoader("Sunnvfashi") {
+			Spatial load() {
+				Node model = (Node)assetManager.loadModel("Model/Mage/sunnvfashi.3DS");
+				return model;
+			}
+		});
+		list.add(new TestLoader("Woman01") {
+			Spatial load() {
+				Node model = (Node)assetManager.loadModel("Model/Li/Woman N021208.3ds");
+				model.depthFirstTraversal(new SceneGraphVisitor() {
+					@Override
+					public void visit(Spatial spatial) {
+						if (!(spatial instanceof Geometry)) return;
+						Geometry geom = (Geometry)spatial;
+						Material material = geom.getMaterial();
+						String name = material.getName();
+						switch (name) {
+						case "LPupil_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_eyes_01_l.jpg"));break;
+						case "LIris_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_eyes_01_l.jpg"));break;
+						case "REyewhite_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_eyes_01_r.jpg"));break;
+						case "RPupil_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_eyes_01_r.jpg"));break;
+						case "RIris_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_eyes_01_r.jpg"));break;
+						case "PubicHair_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/portia_texblonde1.jpg"));break;
+						case "Lips_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_head_xptex_02.jpg"));break;
+						case "SkinHip_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinTorso_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinNeck_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinHead_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinScalp_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinForearm_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinArm_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinHand_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_tex_01.jpg"));break;
+						case "SkinLeg_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_stocking_04.jpg"));break;
+						case "SkinFeet_1":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Li/li_body_stocking_04.jpg"));break;
+						}
+					}
+					
+				});
+				return model;
+			}
+		});
 		list.add(new TestLoader("X-Wing") {
 			Spatial load() {
 				return assetManager.loadModel("Model/XWing/x-wing.3DS");
@@ -322,11 +362,6 @@ public class TestLoad3DS extends SimpleApplication {
 				return assetManager.loadModel("Model/Examples/Manikin-5.3DS");
 			}
 		});
-		list.add(new TestLoader("Woman01") {
-			Spatial load() {
-				return assetManager.loadModel("Model/Examples/Woman.3ds");
-			}
-		});
 		list.add(new TestLoader("Woman02") {
 			Spatial load() {
 				return assetManager.loadModel("Model/Examples/Woman2.3ds");
@@ -352,12 +387,14 @@ public class TestLoad3DS extends SimpleApplication {
 				ostrich.depthFirstTraversal(new SceneGraphVisitor() {
 					@Override
 					public void visit(Spatial spatial) {
-						if (spatial instanceof Geometry && spatial.getName().equals("ostrich")) {
+						if (spatial instanceof Geometry) {
 							// I don't understand the one who made this model don't give it a texture
 							// so I add it my self
-							Material mat = ((Geometry)spatial).getMaterial();
-							Texture tex = assetManager.loadTexture("Model/Examples/ostrich.jpg");
-							mat.setTexture("DiffuseMap", tex);
+							Material material = ((Geometry)spatial).getMaterial();
+							String name = material.getName();
+							switch (name) {
+								case "Material":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Examples/ostrich.jpg"));break;
+							}
 						}
 					}
 				});
@@ -370,9 +407,12 @@ public class TestLoad3DS extends SimpleApplication {
 				fighter.depthFirstTraversal(new SceneGraphVisitor() {
 					@Override
 					public void visit(Spatial spatial) {
-						if (spatial instanceof Geometry && spatial.getName().equals("Box01")) {
-							Material mat = ((Geometry)spatial).getMaterial();
-							mat.setTexture("DiffuseMap", assetManager.loadTexture("Model/Resources/fighter.png"));
+						if (spatial instanceof Geometry) {
+							Material material = ((Geometry)spatial).getMaterial();
+							String name = material.getName();
+							switch (name) {
+								case "03 - Default [Bo":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Resources/fighter.png"));break;
+							}
 						}
 					}
 				});
@@ -390,9 +430,12 @@ public class TestLoad3DS extends SimpleApplication {
 				ship.depthFirstTraversal(new SceneGraphVisitor() {
 					@Override
 					public void visit(Spatial spatial) {
-						if (spatial instanceof Geometry && spatial.getName().equals("Cylinder06")) {
-							Material mat = ((Geometry)spatial).getMaterial();
-							mat.setTexture("DiffuseMap", assetManager.loadTexture("Model/Resources/ship.png"));
+						if (spatial instanceof Geometry) {
+							Material material = ((Geometry)spatial).getMaterial();
+							String name = material.getName();
+							switch (name) {
+								case "orig_orig_21 - D":material.setTexture("DiffuseMap", assetManager.loadTexture("Model/Resources/ship.png"));break;
+							}
 						}
 					}
 				});

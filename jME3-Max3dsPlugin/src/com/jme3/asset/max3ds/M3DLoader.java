@@ -5,22 +5,24 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.jme3.animation.AnimControl;
-import com.jme3.animation.Animation;
-import com.jme3.animation.Bone;
-import com.jme3.animation.Skeleton;
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetLoader;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.max3ds.data.*;
+import com.jme3.asset.max3ds.anim.SpatialTransformer;
+import com.jme3.asset.max3ds.data.EditorLight;
+import com.jme3.asset.max3ds.data.EditorMaterial;
+import com.jme3.asset.max3ds.data.EditorObject;
+import com.jme3.asset.max3ds.data.KeyFrame;
+import com.jme3.asset.max3ds.data.KeyFrameTrack;
+import com.jme3.asset.max3ds.data.Max3dsScene;
+import com.jme3.asset.max3ds.data.SpotLightInfo;
 import com.jme3.light.PointLight;
 import com.jme3.light.SpotLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix4f;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -56,7 +58,7 @@ public class M3DLoader implements AssetLoader {
 	private Material defaultMaterial;
 
 	public M3DLoader() {
-		ChunkChopper.debug = false;
+		ChunkChopper.debug = true;
 	}
 
 	/**
@@ -99,53 +101,68 @@ public class M3DLoader implements AssetLoader {
 	private HashMap<String, Material> materials;
 	private ArrayList<Spatial> spatialNodes;
 	private ArrayList<String> spatialNames;
+	private SpatialTransformer st;
+
 	/**
 	 * Change Max 3DS data structure to JME3 data structure
+	 * 
 	 * @return
 	 */
 	private Node buildScene() {
 		rootNode = new Node("3DS Scene");
-		
+
 		materials = new HashMap<String, Material>();
 		spatialNodes = new ArrayList<Spatial>();
 		spatialNames = new ArrayList<String>();
-		
+
 		generateMaterials();
 		generateNodes();
 		generateLights();
-		// generateAnimation();
-		
-		for ( Spatial spatialNode : spatialNodes ) {
-			if ( spatialNode != null ) {
+		generateAnimation();
+
+		for (Spatial spatialNode : spatialNodes) {
+			if (spatialNode != null) {
 				Spatial toAttach = spatialNode;
-				if ( toAttach.getParent() == null ) {
-					rootNode.attachChild( toAttach );
+				if (toAttach.getParent() == null) {
+					rootNode.attachChild(toAttach);
 				}
 			}
 		}
-		
+
+		if (scene.frames.size() > 0) {
+			st.interpolateMissing();
+			st.update(0);
+			if (st.keyframes.size() == 1) {
+				// one keyframe: update controller once and disregard it
+			} else {
+				// multiple keyframes: add controller to node
+				rootNode.addControl(st);
+				st.setActive(true);
+			}
+		}
+
 		return rootNode;
 	}
-	
+
 	/**
 	 * Create names material maps
 	 */
 	private void generateMaterials() {
-		for(EditorMaterial mat:scene.materials) {
+		for (EditorMaterial mat : scene.materials) {
 			Material material = buildMaterial(mat);
 			materials.put(mat.name, material);
 		}
 	}
-	
+
 	private void generateNodes() {
 		spatialNodes = new ArrayList<Spatial>();
 		spatialNames = new ArrayList<String>();
 		HashMap<Integer, Node> nodesByID = new HashMap<Integer, Node>();
 		// build dummy nodes
 		if (scene.frames.size() > 0) {
-			for(KeyFrameTrack track : scene.frames) {
+			for (KeyFrameTrack track : scene.frames) {
 				String name = track.name;
-				
+
 				if (scene.findObject(name) == null) {
 					Node node = new Node(track.name);
 					nodesByID.put(track.ID, node);
@@ -154,30 +171,30 @@ public class M3DLoader implements AssetLoader {
 				}
 			}
 		}
-		
+
 		// build meshes
-		for(EditorObject obj : scene.objects) {
+		for (EditorObject obj : scene.objects) {
 			String name = obj.name;
 			KeyFrameTrack track = scene.findTrack(name);
-			
+
 			Node node = new Node(name);
-			
+
 			Spatial spatial;
 			if (track == null) {
 				putChildMeshes(node, obj, new Vector3f());
-				spatial = usedSpatial( node );
+				spatial = usedSpatial(node);
 			} else {
 				putChildMeshes(node, obj, track.pivot);
 				spatial = node;
-                nodesByID.put( track.ID, node );
+				nodesByID.put(track.ID, node);
 			}
 			spatialNames.add(name);
 			spatialNodes.add(spatial);
 		}
-		
-        // build hierarchy
-        if (scene.frames.size() > 0) {
-        	for(KeyFrameTrack track : scene.frames) {
+
+		// build hierarchy
+		if (scene.frames.size() > 0) {
+			for (KeyFrameTrack track : scene.frames) {
 				if (track.fatherID != -1) {
 					Node node = nodesByID.get(track.ID);
 					if (node != null) {
@@ -185,29 +202,30 @@ public class M3DLoader implements AssetLoader {
 						if (parentNode != null) {
 							parentNode.attachChild(node);
 						} else {
-							throw new RuntimeException("Parent node (id=" + track.fatherID + ") not found!");
+							throw new RuntimeException("Parent node (id="
+									+ track.fatherID + ") not found!");
 						}
 					}
 				}
 			}
-        }
+		}
 	}
-	
+
 	private Spatial usedSpatial(Node myNode) {
 		Spatial spatial;
-        if (myNode.getQuantity()==1){
-            myNode.getChild(0).setName(myNode.getName());
-            spatial = myNode.getChild(0);
-            
-            myNode.detachChild( spatial );
-        } else {
-            spatial = myNode;
-        }
-        return spatial;
+		if (myNode.getQuantity() == 1) {
+			myNode.getChild(0).setName(myNode.getName());
+			spatial = myNode.getChild(0);
+
+			myNode.detachChild(spatial);
+		} else {
+			spatial = myNode;
+		}
+		return spatial;
 	}
-	
+
 	private void generateLights() {
-		for(EditorLight light : scene.lights) {
+		for (EditorLight light : scene.lights) {
 			if (light.spotinfo == null) {
 				PointLight pointLight = new PointLight();
 				pointLight.setColor(light.color);
@@ -216,34 +234,34 @@ public class M3DLoader implements AssetLoader {
 				rootNode.addLight(pointLight);
 			} else {
 				SpotLightInfo spotinfo = light.spotinfo;
-				
+
 				SpotLight spotLight = new SpotLight();
 				spotLight.setColor(light.color);
 				spotLight.setPosition(light.position);
-				
+
 				Vector3f direction = spotinfo.target.subtract(light.position);
 				spotLight.setDirection(direction.normalize());
-				
-				spotLight.setSpotInnerAngle(spotinfo.hotSpot/180);
-				spotLight.setSpotOuterAngle(spotinfo.falloff/180);
-				
+
+				spotLight.setSpotInnerAngle(spotinfo.hotSpot / 180);
+				spotLight.setSpotOuterAngle(spotinfo.falloff / 180);
+
 				spotLight.setSpotRange(light.rangeEnd);
-				
+
 				rootNode.addLight(spotLight);
 			}
-			
+
 		}
 	}
-	
+
 	private Material buildMaterial(EditorMaterial mat) {
 		Material material = getLightMaterial();
 		material.setBoolean("UseMaterialColors", true);
 
 		float alpha = 1;
 		if (mat.transparency != null) {
-			alpha = 1-mat.transparency;
+			alpha = 1 - mat.transparency;
 		}
-		
+
 		if (mat.ambientColor != null) {
 			mat.ambientColor.a = alpha;
 			material.setColor("Ambient", mat.ambientColor);
@@ -264,12 +282,15 @@ public class M3DLoader implements AssetLoader {
 			if (texture != null)
 				material.setTexture("DiffuseMap", texture);
 		}
-
-		if (mat.twoSided != null) // Just being there is equivalent to a boolean
-									// true.
+		if (mat.bumpMap != null) {
+			Texture texture = createTexture(mat.bumpMap);
+			if (texture != null)
+				material.setTexture("NormalMap", texture);
+		}
+		if (mat.twoSided != null) // Just being there is equivalent to a boolean true.
 		{
 			RenderState rs = material.getAdditionalRenderState();
-			rs.setFaceCullMode(RenderState.FaceCullMode.Off);// twoside
+			rs.setFaceCullMode(RenderState.FaceCullMode.Off);// two sided
 		}
 
 		if (mat.shininess != null) {
@@ -282,316 +303,294 @@ public class M3DLoader implements AssetLoader {
 		}
 
 		material.setName(mat.name);
-
 		return material;
 	}
 
 	/**
 	 * Build meshes<br>
-	 * As each 3ds model my have multi face materials, build several meshes for each material.
+	 * As each 3ds model my have multi face materials, build several meshes for
+	 * each material.
+	 * 
 	 * @param parentNode
 	 * @param object
 	 * @param pivotLoc
 	 */
-	private void putChildMeshes(Node parentNode, EditorObject object, Vector3f pivotLoc) {
-		if (object.numFaces == 0) return;
-		
+	private void putChildMeshes(Node parentNode, EditorObject object,
+			Vector3f pivotLoc) {
+		if (object.numFaces == 0)
+			return;
+
 		int nFaces = object.numFaces;
-		
+
 		boolean[] faceHasMaterial = new boolean[nFaces];
 		int noMaterialCount = nFaces;
-		
-		/* TODO this part works with animation
-		// recalculate vertex coordinates
-		if (object.coordinateSystem == null) {
-			object.coordinateSystem = new Matrix4f();
+
+		// this part works with animation
+		if (scene.frames.size() > 0) {
+			// recalculate vertex coordinates
+			if (object.coordinateSystem == null) {
+				object.coordinateSystem = new Matrix4f();
+			}
+			Matrix4f coordSys = new Matrix4f(object.coordinateSystem);
+			coordSys.invertLocal();
+			for (Vector3f vertex : object.vertexs) {
+				coordSys.mult(vertex, vertex);
+				vertex.subtractLocal(pivotLoc);
+			}
 		}
-		Matrix4f coordSys = object.coordinateSystem;
-		coordSys.invertLocal();
-		for(Vector3f vertex : object.vertexs) {
-			// TODO Fix me:
-			coordSys.mult(vertex, vertex);
-			vertex.subtractLocal(pivotLoc);
-		}
-		 */
-		
+
 		// calculate face normals, use it to calculate smooth groups
 		Vector3f[] faceNormals = new Vector3f[nFaces];
 		calculateFaceNormals(faceNormals, object.vertexs, object.indices);
-		
-        // Precaching
-        int[] vertexCount=new int[object.vertexs.length];
-        for (int i=0; i<nFaces; i++){
-            for (int j=0; j<3; j++){
-                vertexCount[object.indices[i*3+j]]++;
-            }
-        }
-        int[][] realNextFaces=new int[object.vertexs.length][];
-        for (int i=0;i<realNextFaces.length;i++) {
-            realNextFaces[i] = new int[vertexCount[i]];
-        }
-        int vertexIndex;
-        for (int i=0; i<nFaces; i++){
-            for (int j=0; j<3; j++){
-                vertexIndex = object.indices[i*3+j];
-                realNextFaces[vertexIndex][--vertexCount[vertexIndex]] = i;
-            }
-        }
+
+		// Precaching
+		int[] vertexCount = new int[object.vertexs.length];
+		for (int i = 0; i < nFaces; i++) {
+			for (int j = 0; j < 3; j++) {
+				vertexCount[object.indices[i * 3 + j]]++;
+			}
+		}
+		int[][] realNextFaces = new int[object.vertexs.length][];
+		for (int i = 0; i < realNextFaces.length; i++) {
+			realNextFaces[i] = new int[vertexCount[i]];
+		}
+		int vertexIndex;
+		for (int i = 0; i < nFaces; i++) {
+			for (int j = 0; j < 3; j++) {
+				vertexIndex = object.indices[i * 3 + j];
+				realNextFaces[vertexIndex][--vertexCount[vertexIndex]] = i;
+			}
+		}
 		// Precaching done
-		
 
-        ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
-        ArrayList<Vector3f> vertexes = new ArrayList<Vector3f>();
-        ArrayList<Vector2f> texCoords = new ArrayList<Vector2f>();
-        Vector3f tempNormal = new Vector3f();
-        
-        int[] indexes = new int[nFaces*3];
-        for (int i=0; i<object.matNames.size(); i++){// For every original material
-            String matName = object.matNames.get(i);
-            int[] appliedFacesIndexes = object.appliedFacesIndexes.get(i);
-            
-            if (appliedFacesIndexes.length!=0){ // If it's got something make a new trimesh for it
-            	Geometry geom = new Geometry(parentNode.getName() + "##" + i);
-            	normals.clear();
-            	vertexes.clear();
-            	texCoords.clear();
-            	
-            	int curPosition = 0;
-                for (int j=0; j<appliedFacesIndexes.length; j++){ // Look thru every face in that new TriMesh
-                    int actuallFace = appliedFacesIndexes[j];
-                    if ( !faceHasMaterial[actuallFace] ){
-                        faceHasMaterial[actuallFace]=true;
-                        noMaterialCount--;
-                    }
-                    for (int k=0; k<3; k++){//   and every vertex in that face
-                        // what faces contain this vertex index? If they do and are in the same SG, average
-                        vertexIndex = object.indices[actuallFace*3+k];
-                        tempNormal.set(faceNormals[actuallFace]);
-                        calcFacesWithVertexAndSmoothGroup(
-                        		realNextFaces[vertexIndex],
-                        		faceNormals,
-                        		object.smoothGroups,
-                        		tempNormal,
-                        		actuallFace);
-                        // Now can I just index this Vertex/tempNormal combination?
-                        normals.add(new Vector3f(tempNormal));
-                        vertexes.add(object.vertexs[vertexIndex]);
-                        if (object.texCoord != null) {
-                            texCoords.add(object.texCoord[vertexIndex]);
-                        }
-                        indexes[curPosition++] = normals.size() - 1;
-                    }
-                }
-                Vector3f[] newVerts = new Vector3f[vertexes.size()];
-                for (int indexV=0; indexV<newVerts.length; indexV++) {
-                    newVerts[indexV] = vertexes.get(indexV);
-                }
-                
-                
-                Mesh mesh = new Mesh();
-        		geom.setMesh(mesh);
-                
-        		// Vertex
-        		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(newVerts));
+		ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
+		ArrayList<Vector3f> vertexes = new ArrayList<Vector3f>();
+		ArrayList<Vector2f> texCoords = new ArrayList<Vector2f>();
+		Vector3f tempNormal = new Vector3f();
 
-        		// Vertex Normals
-        		mesh.setBuffer(Type.Normal, 3, BufferUtils.createFloatBuffer(normals.toArray(new Vector3f[] {})));
-        		
-        		// Faces
-                int[] intIndexes = new int[curPosition];
-                System.arraycopy(indexes, 0, intIndexes ,0, curPosition);
-                mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(intIndexes));
+		int[] indexes = new int[nFaces * 3];
+		for (int i = 0; i < object.matNames.size(); i++) {// For every original
+															// material
+			String matName = object.matNames.get(i);
+			int[] appliedFacesIndexes = object.appliedFacesIndexes.get(i);
 
-        		if (object.texCoord != null) {
-        			// Texture Coord
-        			mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoords.toArray(new Vector2f[] {})));
-        		}
-        		mesh.setStatic();
-        		mesh.updateBound();
-        		mesh.updateCounts();
-        		
-        		
-        		Material material = materials.get(matName);
-        		if (material == null) {
-        			geom.setMaterial(getDefaultMaterial());
-        		} else {
-        			geom.setMaterial(material);
-        		}
-        		
-        		parentNode.attachChild(geom);
-            }
-        }
-		
-        if (noMaterialCount!=0){// attach materialless parts
-            int[] noMaterialIndexes=new int[noMaterialCount*3];
-            int partCount=0;
-            for (int i=0; i<nFaces; i++){
-                if (!faceHasMaterial[i]){
-                    noMaterialIndexes[partCount++]=object.indices[i*3];
-                    noMaterialIndexes[partCount++]=object.indices[i*3+1];
-                    noMaterialIndexes[partCount++]=object.indices[i*3+2];
-                }
-            }
-            Geometry noMaterials=new Geometry(parentNode.getName()+"-1");
-            
-            Mesh mesh = new Mesh();
-            mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(object.vertexs));
-            mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(noMaterialIndexes));
-            mesh.setStatic();
-            mesh.updateCounts();
-            mesh.updateBound();
-            
-            noMaterials.setMesh(mesh);
-            noMaterials.setMaterial(getDefaultMaterial());
-            parentNode.attachChild(noMaterials);
-        }
+			if (appliedFacesIndexes.length != 0) { // If it's got something make
+													// a new trimesh for it
+				Geometry geom = new Geometry(parentNode.getName() + "##" + i);
+				normals.clear();
+				vertexes.clear();
+				texCoords.clear();
+
+				int curPosition = 0;
+				for (int j = 0; j < appliedFacesIndexes.length; j++) { // Look
+																		// thru
+																		// every
+																		// face
+																		// in
+																		// that
+																		// new
+																		// TriMesh
+					int actuallFace = appliedFacesIndexes[j];
+					if (!faceHasMaterial[actuallFace]) {
+						faceHasMaterial[actuallFace] = true;
+						noMaterialCount--;
+					}
+					for (int k = 0; k < 3; k++) {// and every vertex in that
+													// face
+						// what faces contain this vertex index? If they do and
+						// are in the same SG, average
+						vertexIndex = object.indices[actuallFace * 3 + k];
+						tempNormal.set(faceNormals[actuallFace]);
+						calcFacesWithVertexAndSmoothGroup(
+								realNextFaces[vertexIndex], faceNormals,
+								object.smoothGroups, tempNormal, actuallFace);
+						// Now can I just index this Vertex/tempNormal
+						// combination?
+						normals.add(new Vector3f(tempNormal));
+						vertexes.add(object.vertexs[vertexIndex]);
+						if (object.texCoord != null) {
+							texCoords.add(object.texCoord[vertexIndex]);
+						}
+						indexes[curPosition++] = normals.size() - 1;
+					}
+				}
+				Vector3f[] newVerts = new Vector3f[vertexes.size()];
+				for (int indexV = 0; indexV < newVerts.length; indexV++) {
+					newVerts[indexV] = vertexes.get(indexV);
+				}
+
+				Mesh mesh = new Mesh();
+				geom.setMesh(mesh);
+
+				// Vertex
+				mesh.setBuffer(Type.Position, 3,
+						BufferUtils.createFloatBuffer(newVerts));
+
+				// Vertex Normals
+				mesh.setBuffer(Type.Normal, 3, BufferUtils
+						.createFloatBuffer(normals.toArray(new Vector3f[] {})));
+
+				// Faces
+				int[] intIndexes = new int[curPosition];
+				System.arraycopy(indexes, 0, intIndexes, 0, curPosition);
+				mesh.setBuffer(Type.Index, 3,
+						BufferUtils.createIntBuffer(intIndexes));
+
+				if (object.texCoord != null) {
+					// Texture Coord
+					mesh.setBuffer(Type.TexCoord, 2, BufferUtils
+							.createFloatBuffer(texCoords
+									.toArray(new Vector2f[] {})));
+				}
+				mesh.setStatic();
+				mesh.updateBound();
+				mesh.updateCounts();
+
+				Material material = materials.get(matName);
+				if (material == null) {
+					geom.setMaterial(getDefaultMaterial());
+				} else {
+					geom.setMaterial(material);
+				}
+
+				parentNode.attachChild(geom);
+			}
+		}
+
+		if (noMaterialCount != 0) {// attach materialless parts
+			int[] noMaterialIndexes = new int[noMaterialCount * 3];
+			int partCount = 0;
+			for (int i = 0; i < nFaces; i++) {
+				if (!faceHasMaterial[i]) {
+					noMaterialIndexes[partCount++] = object.indices[i * 3];
+					noMaterialIndexes[partCount++] = object.indices[i * 3 + 1];
+					noMaterialIndexes[partCount++] = object.indices[i * 3 + 2];
+				}
+			}
+			Geometry noMaterials = new Geometry(parentNode.getName() + "-1");
+
+			Mesh mesh = new Mesh();
+			mesh.setBuffer(Type.Position, 3,
+					BufferUtils.createFloatBuffer(object.vertexs));
+			mesh.setBuffer(Type.Index, 3,
+					BufferUtils.createIntBuffer(noMaterialIndexes));
+			mesh.setStatic();
+			mesh.updateCounts();
+			mesh.updateBound();
+
+			noMaterials.setMesh(mesh);
+			noMaterials.setMaterial(getDefaultMaterial());
+			parentNode.attachChild(noMaterials);
+		}
 	}
-	
+
 	/**
 	 * Calculate face normals
+	 * 
 	 * @param faceNormals
 	 * @param vertexs
 	 * @param indices
 	 */
-	private void calculateFaceNormals(Vector3f[] faceNormals, Vector3f[] vertexs, int[] indices) {
-		for(int i=0; i<faceNormals.length; i++) {
-			int index0 = indices[i*3];
-			int index1 = indices[i*3+1];
-			int index2 = indices[i*3+2];
-			
+	private void calculateFaceNormals(Vector3f[] faceNormals,
+			Vector3f[] vertexs, int[] indices) {
+		for (int i = 0; i < faceNormals.length; i++) {
+			int index0 = indices[i * 3];
+			int index1 = indices[i * 3 + 1];
+			int index2 = indices[i * 3 + 2];
+
 			Vector3f v1 = vertexs[index1].subtract(vertexs[index0]);
 			Vector3f v2 = vertexs[index2].subtract(vertexs[index0]);
-			
+
 			faceNormals[i] = v1.cross(v2).normalize();
 		}
 	}
 
-    /**
-     * Find all face normals for faces that contain that vertex AND are in that smoothing group.
-     * @param thisVertexTable
-     * @param faceNormals
-     * @param smoothingGroups
-     * @param tempNormal
-     * @param faceIndex
-     */
-    private void calcFacesWithVertexAndSmoothGroup(int[] thisVertexTable, Vector3f[] faceNormals, int[] smoothingGroups, Vector3f tempNormal, int faceIndex) {
-    	if (smoothingGroups == null) {
-    		return;// no need to calculate smooth groups
-    	}
-        // tempNormal starts out with the face normal value
-        int smoothingGroupValue = smoothingGroups[faceIndex];
-        if (smoothingGroupValue == 0)
-            return; // 0 smoothing group values don't have smooth edges anywhere
-        for ( int arrayFace : thisVertexTable ) {
-            if ( arrayFace == faceIndex ) {
-                continue;
-            }
-            if ( ( smoothingGroups[arrayFace] & smoothingGroupValue ) != 0 ) {
-                tempNormal.addLocal( faceNormals[arrayFace] );
-            }
-        }
-        tempNormal.normalizeLocal();
-    }
-	
+	/**
+	 * Find all face normals for faces that contain that vertex AND are in that
+	 * smoothing group.
+	 * 
+	 * @param thisVertexTable
+	 * @param faceNormals
+	 * @param smoothingGroups
+	 * @param tempNormal
+	 * @param faceIndex
+	 */
+	private void calcFacesWithVertexAndSmoothGroup(int[] thisVertexTable,
+			Vector3f[] faceNormals, int[] smoothingGroups, Vector3f tempNormal,
+			int faceIndex) {
+		if (smoothingGroups == null) {
+			return;// no need to calculate smooth groups
+		}
+		// tempNormal starts out with the face normal value
+		int smoothingGroupValue = smoothingGroups[faceIndex];
+		if (smoothingGroupValue == 0)
+			return; // 0 smoothing group values don't have smooth edges anywhere
+		for (int arrayFace : thisVertexTable) {
+			if (arrayFace == faceIndex) {
+				continue;
+			}
+			if ((smoothingGroups[arrayFace] & smoothingGroupValue) != 0) {
+				tempNormal.addLocal(faceNormals[arrayFace]);
+			}
+		}
+		tempNormal.normalizeLocal();
+	}
+
 	/**
 	 * Create Animation !
 	 * 
 	 */
 	private void generateAnimation() {
-		
-		if (scene.frames.size() == 0) {
+
+		if (scene.frames.size() == 0)
 			return;
-		}
-		
-        int spatialCount=0;
-        for ( Spatial spatialNode : spatialNodes ) {
-            if ( spatialNode != null ) {
-                spatialCount++;
-            }
-        }
-        
-		/** add controls to the model */
-		AnimControl ac = createAnimControl();
-		rootNode.addControl(ac);
-
-		/** I need a new control to update spatial */
-		
-	}
-
-	/**
-	 * Create an AnimControl, it contains an Animation with 3 BoneTracks.
-	 * 
-	 * @return
-	 */
-	private AnimControl createAnimControl() {
-
-		Skeleton ske = buildSkeleton();
-
-		AnimControl animControl = new AnimControl(ske);
-
-		Animation anim = buildAnimation(ske);
-
-		animControl.addAnim(anim);
-
-		return animControl;
-	}
-
-	/**
-	 * Create a Skeleton with data of KeyFrameTracks.
-	 * 
-	 * @return
-	 */
-	private Skeleton buildSkeleton() {
-		int boneSize = scene.frames.size();
-		Bone[] bones = new Bone[boneSize];
-
-		HashMap<Integer, Integer> idToIndex = new HashMap<Integer, Integer>();
-		
-		for (int i = 0; i < scene.frames.size(); i++) {
-			KeyFrameTrack track = scene.frames.get(i);
-			bones[i] = new Bone(track.name);
-			
-			idToIndex.put(track.ID, i);
-			if (track.fatherID != -1)
-				bones[idToIndex.get(track.fatherID)].addChild(bones[idToIndex.get(track.ID)]);
-
-			Vector3f initTranslation = new Vector3f();
-			Quaternion initRotation = new Quaternion();
-			Vector3f initScale = new Vector3f();
-
-			if (track.locateTrack(0) != null) {
-				initTranslation.set(track.locateTrack(0).position);
-				initRotation.set(track.locateTrack(0).rotation);
-				initScale.set(track.locateTrack(0).scale);
+		int spatialCount = 0;
+		for (Spatial spatialNode : spatialNodes) {
+			if (spatialNode != null) {
+				spatialCount++;
 			}
-			bones[i].setBindTransforms(initTranslation, initRotation,initScale);
-
 		}
-
-		Skeleton skeleton = new Skeleton(bones);
-
-		return skeleton;
+		st = new SpatialTransformer(spatialCount);
+		spatialCount = 0;
+		for (int i = 0; i < spatialNodes.size(); i++) {
+			if (spatialNodes.get(i) != null) {
+				// hand the Spatial over to the SpatialTransformer
+				// the parent ID is not passed here, as that would produce wrong results
+				// because of the ST applying hierarchichal transformations, which the
+				// scene graph applies anyway
+				st.setObject(spatialNodes.get(i), spatialCount++, -1);// getParentIndex(i));
+			}
+		}
+		for (KeyFrameTrack thisOne : scene.frames) {
+			//if ("$$$DUMMY".equals( thisOne.name )) {
+			//	continue;
+			//}
+			int indexInST = findIndex(thisOne.name);
+			for (KeyFrame thisTime : thisOne.tracks) {
+				if (thisTime.rotation != null) {
+					st.setRotation(indexInST, thisTime.frame, thisTime.rotation);
+				}
+				if (thisTime.position != null) {
+					st.setPosition(indexInST, thisTime.frame, thisTime.position);
+				}
+				if (thisTime.scale != null) {
+					st.setScale(indexInST, thisTime.frame, thisTime.scale);
+				}
+			}
+		}
+		st.setSpeed(30);
 	}
 
-	/**
-	 * Create animation
-	 * 
-	 * @param ske
-	 * @return
-	 */
-	private Animation buildAnimation(Skeleton ske) {
-		// Calculate animation length
-		float fps = 30f;
-		float length = scene.stopFrame / fps;
-
-		Animation anim = new Animation("3DS Animation", length);
-
-		for (KeyFrameTrack track : scene.frames) {
-			int targetBoneIndex = ske.getBoneIndex(track.name);
-			anim.addTrack(track.toBoneTrack(targetBoneIndex, fps));
-			//anim.addTrack(track.toSpatialTrack(fps));
+	private int findIndex(String name) {
+		int j = 0;
+		for (int i = 0; i < spatialNames.size(); i++) {
+			if (spatialNames.get(i).equals(name))
+				return j;
+			if (spatialNodes.get(i) != null)
+				j++;
 		}
-		return anim;
+		throw new RuntimeException("Logic error.  Unknown keyframe name "
+				+ name);
 	}
 
 	/**
@@ -606,14 +605,9 @@ public class M3DLoader implements AssetLoader {
 			texture = manager.loadTexture(key.getFolder() + textureImageName);
 			texture.setWrap(WrapMode.Repeat);
 		} catch (Exception ex) {
-			System.err
-					.println("Cannot load texture image "
-							+ textureImageName
-							+ ". Make sure it is in the directory with the model file. "
-							+ "If its a bmp make sure JAI is installed.");
-
+			System.err.println("Cannot load texture image " + textureImageName + ". Make sure it is in the directory with the model file. If its a bmp make sure JAI is installed.");
 			texture = manager.loadTexture("Common/Textures/MissingTexture.png");
-			texture.setWrap(WrapMode.Clamp);
+			texture.setWrap(WrapMode.BorderClamp);
 		}
 		return texture;
 	}
@@ -625,8 +619,7 @@ public class M3DLoader implements AssetLoader {
 	 */
 	private Material getDefaultMaterial() {
 		if (defaultMaterial == null) {
-			defaultMaterial = new Material(manager,
-					"Common/MatDefs/Misc/Unshaded.j3md");
+			defaultMaterial = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
 			defaultMaterial.setColor("Color", ColorRGBA.Cyan);
 		}
 
@@ -639,8 +632,7 @@ public class M3DLoader implements AssetLoader {
 	 * @return
 	 */
 	private Material getLightMaterial() {
-		Material material = new Material(manager,
-				"Common/MatDefs/Light/Lighting.j3md");
+		Material material = new Material(manager, "Common/MatDefs/Light/Lighting.j3md");
 		material.setColor("Ambient", ColorRGBA.White);
 		material.setColor("Diffuse", ColorRGBA.White);
 		material.setColor("Specular", ColorRGBA.White);

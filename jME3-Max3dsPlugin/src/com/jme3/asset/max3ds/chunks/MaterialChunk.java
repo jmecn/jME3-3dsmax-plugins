@@ -45,6 +45,8 @@ public class MaterialChunk extends Chunk {
 		mat.diffuseColor = (ColorRGBA) chopper.popData(ChunkID.DIFFUSE_COLOR);
 		mat.specularColor = (ColorRGBA) chopper.popData(ChunkID.SPECULAR_COLOR);
 		mat.diffuseMap = (String) chopper.popData(ChunkID.TEXTURE);
+		mat.bumpMap = (String) chopper.popData(ChunkID.BUMP_MAP);
+		mat.shininessMap = (String) chopper.popData(ChunkID.SHIN_MAP);
 		mat.twoSided = (Boolean) chopper.popData(ChunkID.TWO_SIDED);
 		mat.transparency = (Float) chopper.popData(ChunkID.TRANSPARENCY);
 		mat.name = (String) chopper.popData(ChunkID.MATERIAL_NAME);

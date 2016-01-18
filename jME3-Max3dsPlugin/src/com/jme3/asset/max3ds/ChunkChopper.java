@@ -137,6 +137,8 @@ public class ChunkChopper {
         materialChunk.addSubChunk(DIFFUSE_COLOR, globalColorChunk);
         materialChunk.addSubChunk(SPECULAR_COLOR, globalColorChunk);
         materialChunk.addSubChunk(TEXTURE, textureChunk);
+        materialChunk.addSubChunk(BUMP_MAP, textureChunk);
+        materialChunk.addSubChunk(SHIN_MAP, textureChunk);
         materialChunk.addSubChunk(TWO_SIDED, booleanChunk);
         materialChunk.addSubChunk(SHININESS, percentageChunk);
         materialChunk.addSubChunk(SHININESS_STRENGTH, percentageChunk);
