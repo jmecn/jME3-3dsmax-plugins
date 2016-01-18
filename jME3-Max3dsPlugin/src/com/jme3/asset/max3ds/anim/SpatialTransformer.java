@@ -77,6 +77,27 @@ public class SpatialTransformer extends Controller {
 
     public SpatialTransformer() {}
     
+    public SpatialTransformer clone() {
+    	SpatialTransformer st = new SpatialTransformer();
+    	
+    	st.numObjects = numObjects;
+    	
+        st.toChange = new Spatial[numObjects];
+        st.pivots = new TransformQuaternion[numObjects];
+        st.parentIndexes = new int[numObjects];
+        st.haveChanged = new boolean[numObjects];
+        st.keyframes = new ArrayList<PointInTime>();
+        
+        Arrays.fill(st.parentIndexes, -1);
+        Arrays.fill(st.haveChanged, false);
+        st.keyframes.addAll(keyframes);
+        for (int i = 0; i < numObjects; i++) {
+        	st.toChange[i] = toChange[i];
+        	st.pivots[i] = pivots[i];
+        }
+        
+    	return st;
+    }
     /**
      * Constructs a new SpatialTransformer that will operate on
      * <code>numObjects</code> Spatials

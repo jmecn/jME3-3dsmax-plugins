@@ -144,9 +144,12 @@ public class TransformQuaternion implements Serializable, Savable, Cloneable {
      * @param spatial The spatial to be affected by this matrix.
      */
     public void applyToSpatial(Spatial spatial) {
-        spatial.getLocalScale().set(scale);
-        spatial.getLocalRotation().set(rot);
-        spatial.getLocalTranslation().set(translation);
+    	spatial.setLocalScale(scale);
+    	spatial.setLocalRotation(rot);
+    	spatial.setLocalTranslation(translation);
+//        spatial.getLocalScale().set(scale);
+//        spatial.getLocalRotation().set(rot);
+//        spatial.getLocalTranslation().set(translation);
     }
 
     /**
