@@ -125,7 +125,6 @@ public class KeyframeControl extends AbstractControl {
     public KeyframeControl() {}
     
     public KeyframeControl clone() {
-    	System.out.println("control clone");
     	KeyframeControl st = new KeyframeControl(numObjects);
     	
         st.repeatType = repeatType;

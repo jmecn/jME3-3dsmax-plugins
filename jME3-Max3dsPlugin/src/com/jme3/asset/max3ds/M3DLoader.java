@@ -165,7 +165,6 @@ public class M3DLoader implements AssetLoader {
 
 				if (scene.findObject(name) == null) {
 					Node node = new Node(track.name);
-					System.out.println(node.getName() + "@" + node.hashCode());
 					nodesByID.put(track.ID, node);
 					spatialNodes.add(node);
 					spatialNames.add(name);
