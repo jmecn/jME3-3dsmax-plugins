@@ -1,10 +1,7 @@
 package com.jme3.asset.max3ds.chunks;
 
 import com.jme3.asset.max3ds.ChunkChopper;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Matrix4f;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 /**
@@ -49,13 +46,13 @@ public class AxisChunk extends Chunk {
 		Vector3f zAxis = chopper.getVector3f();
 		Vector3f yAxis = chopper.getVector3f();
 		Vector3f origin = chopper.getVector3f();
-
+		
 		Matrix4f transform = new Matrix4f(
 				xAxis.x,  xAxis.y,  xAxis.z, origin.x, 
-	            yAxis.x,  yAxis.y,  yAxis.z, origin.y,  
-	            -zAxis.x,  -zAxis.y,  -zAxis.z, origin.z,
+				yAxis.x,  yAxis.y,  yAxis.z, origin.y,  
+				-zAxis.x,  -zAxis.y,  -zAxis.z, origin.z,
 				0, 0, 0, 1);
-
+		
 		chopper.pushData(chopper.getID(), transform);
 	}
 }
