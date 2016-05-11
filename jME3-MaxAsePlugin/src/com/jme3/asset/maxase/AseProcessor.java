@@ -23,8 +23,6 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Matrix3f;
-import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -67,7 +65,7 @@ public class AseProcessor implements CONSTANT {
 	private Material alphaMtl = null;// Just can't see it
 	private Material wireframeMtl = null;
 
-	public Node process(AseScene scene) {
+	public Spatial process(AseScene scene) {
 
 		nodes.clear();
 
@@ -80,6 +78,7 @@ public class AseProcessor implements CONSTANT {
 		compileAnimation(scene);
 		// bake animation
 		bake(scene);
+		
 		return rootNode;
 	}
 

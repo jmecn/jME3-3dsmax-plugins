@@ -23,6 +23,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 /**
  * Load *.ase models
@@ -56,7 +57,7 @@ public class AseLoader implements AssetLoader {
 		
 		key = info.getKey();
 		
-		Node node = null;
+		Spatial node = null;
 		reset();
 		
 		try {
@@ -69,8 +70,6 @@ public class AseLoader implements AssetLoader {
 			int index = key.getFolder().length();
 			int ext = key.getName().length() - key.getExtension().length() - 1;
 			scene.name = key.getName().substring(index, ext);
-			
-			System.out.println("\"" + scene.name + "\" Loaded.");
 			
 			// scan the file
 			scanAll();
@@ -841,7 +840,7 @@ public class AseLoader implements AssetLoader {
 			}
 		}
 	}
-	
+
 	private void scanRotationTrack(SortedMap<Float, Keyframe> keyframes) {
 		int curLevel = strLevel;
 		while (scan.hasNext()) {
@@ -873,6 +872,7 @@ public class AseLoader implements AssetLoader {
 				
 				Keyframe k = getOrMakeKeyframe(keyframes, time);
 				k.rotation = rotation;
+				
 			}
 		}
 		
