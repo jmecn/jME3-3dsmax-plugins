@@ -766,7 +766,7 @@ public class AseProcessor implements CONSTANT {
 				times[i] = time;
 				Keyframe frame = obj.keyframes.get(time);
 				translations[i] = frame.translation;
-				rotations[i] = frame.rotation;
+				rotations[i] = frame.rotation.normalizeLocal();
 				scales[i] = frame.scale;
 				
 				assert translations[i] != null;

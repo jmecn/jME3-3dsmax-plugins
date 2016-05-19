@@ -107,7 +107,7 @@ public class GeomObject implements Serializable {
 	public ArrayList<VertexAssignment> assignments;
 
 	public boolean hasAnimation() {
-		return keyframes != null && keyframes.size() > 0;
+		return keyframes != null && keyframes.size() > 1;
 	}
 
 	@Override

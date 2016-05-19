@@ -789,11 +789,11 @@ public class AseLoader implements AssetLoader {
 			StringTokenizer tok = new StringTokenizer(line);
 			cmd = tok.nextToken();
 			
-			if (cmd.equals(CONTROL_POS_TRACK)) {
+			if (cmd.equals(CONTROL_POS_TRACK) || cmd.equals("*CONTROL_POS_BEZIER")||cmd.equals("*CONTROL_POS_TCB")) {
 				scanPositionTrack(keyframes);
-			} else if (cmd.equals(CONTROL_ROT_TRACK)) {
+			} else if (cmd.equals(CONTROL_ROT_TRACK) || cmd.equals("*CONTROL_ROT_BEZIER") || cmd.equals("*CONTROL_ROT_TCB")) {
 				scanRotationTrack(keyframes);
-			} else if (cmd.equals("*CONTROL_SCL_TRACK")) {
+			} else if (cmd.equals("*CONTROL_SCL_TRACK") || cmd.equals("*CONTROL_SCALE_BEZIER") || cmd.equals("*CONTROL_SCALE_TCB")) {
 				scanScaleTrack(keyframes);
 			}
 		}
