@@ -148,21 +148,32 @@ public class M3DLoader implements AssetLoader {
 	 * Create names material maps
 	 */
 	private void generateMaterials() {
-		for (EditorMaterial mat : scene.materials) {
+		ArrayList<EditorMaterial> mats = scene.materials;
+		int len = mats.size();
+		for (int i=0; i<len; i++) {
+			EditorMaterial mat = mats.get(i);
 			Material material = buildMaterial(mat);
 			materials.put(mat.name, material);
 		}
 	}
 
+	/**
+	 * Create nodes
+	 */
 	private void generateNodes() {
 		spatialNodes = new ArrayList<Spatial>();
 		spatialNames = new ArrayList<String>();
 		nodesByID = new HashMap<Integer, Node>();
+		
+		ArrayList<KeyFrameTrack> frames = scene.frames;
+		ArrayList<EditorObject> objects = scene.objects;
 		// build dummy nodes
-		if (scene.frames.size() > 0) {
-			for (KeyFrameTrack track : scene.frames) {
+		int frameSize = frames.size();
+		KeyFrameTrack track = null;
+		if (frameSize > 0) {
+			for (int i=0; i<frameSize; i++) {
+				track = frames.get(i);
 				String name = track.name;
-
 				if (scene.findObject(name) == null) {
 					Node node = new Node(track.name);
 					nodesByID.put(track.ID, node);
@@ -173,9 +184,12 @@ public class M3DLoader implements AssetLoader {
 		}
 
 		// build meshes
-		for (EditorObject obj : scene.objects) {
+		int objectSize = objects.size();
+		EditorObject obj = null;
+		for (int i=0; i<objectSize; i++) {
+			obj = objects.get(i);
 			String name = obj.name;
-			KeyFrameTrack track = scene.findTrack(name);
+			track = scene.findTrack(name);
 
 			Node node = new Node(name);
 
@@ -193,8 +207,9 @@ public class M3DLoader implements AssetLoader {
 		}
 
 		// build hierarchy
-		if (scene.frames.size() > 0) {
-			for (KeyFrameTrack track : scene.frames) {
+		if (frameSize > 0) {
+			for (int i=0; i<frameSize; i++) {
+				track = frames.get(i);
 				if (track.fatherID != -1) {
 					Node node = nodesByID.get(track.ID);
 					if (node != null) {
@@ -202,8 +217,7 @@ public class M3DLoader implements AssetLoader {
 						if (parentNode != null) {
 							parentNode.attachChild(node);
 						} else {
-							throw new RuntimeException("Parent node (id="
-									+ track.fatherID + ") not found!");
+							throw new RuntimeException("Parent node (id=" + track.fatherID + ") not found!");
 						}
 					}
 				}
@@ -253,6 +267,11 @@ public class M3DLoader implements AssetLoader {
 		}
 	}
 
+	/**
+	 * Create material with 3ds data
+	 * @param mat
+	 * @return
+	 */
 	private Material buildMaterial(EditorMaterial mat) {
 		Material material = getLightMaterial();
 		material.setBoolean("UseMaterialColors", true);

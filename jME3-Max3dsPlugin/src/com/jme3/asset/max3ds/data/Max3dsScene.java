@@ -66,7 +66,10 @@ public class Max3dsScene {
 	}
 	
 	public EditorObject findObject(String name) {
-		for(EditorObject obj : objects) {
+		int len = objects.size();
+		EditorObject obj = null;
+		for(int i=0; i<len; i++) {
+			obj = objects.get(i);
 			if (obj.name.equals(name)) {
 				return obj;
 			}
@@ -75,7 +78,10 @@ public class Max3dsScene {
 	}
 	
 	public KeyFrameTrack findTrack(String name) {
-		for(KeyFrameTrack track : frames) {
+		int len = frames.size();
+		KeyFrameTrack track = null;
+		for(int i=0; i<len; i++) {
+			track = frames.get(i);
 			if (track.name.equals(name)) {
 				return track;
 			}
